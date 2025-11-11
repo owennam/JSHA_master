@@ -1,0 +1,171 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    /* 🎨 Toss-inspired Design System */
+
+    /* Background Colors */
+    --background: 210 20% 98%;        /* #F9FAFB - 전체 페이지 배경 */
+    --foreground: 222 47% 11%;        /* #0F172A - 메인 텍스트 */
+
+    --card: 0 0% 100%;                /* #FFFFFF - 카드 배경 */
+    --card-foreground: 222 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    /* Toss Blue - Primary Brand Color */
+    --primary: 217 91% 60%;           /* #2563EB - 주요 브랜드/버튼/링크 */
+    --primary-foreground: 0 0% 100%;  /* 버튼 내 텍스트는 흰색 */
+    --primary-light: 217 91% 70%;     /* 밝은 블루 */
+    --primary-dark: 221 83% 53%;      /* #1D4ED8 - Hover 시 진한 블루 */
+
+    /* Clean Gray - Secondary */
+    --secondary: 215 16% 47%;         /* #475569 - 보조 텍스트 */
+    --secondary-foreground: 0 0% 100%;
+
+    /* Light Blue Accent - Point Color */
+    --accent: 217 91% 95%;            /* #EBF5FF - 밝은 블루 배경 */
+    --accent-foreground: 222 47% 11%;
+
+    --muted: 210 20% 98%;             /* 부드러운 배경 */
+    --muted-foreground: 215 20% 65%;  /* #94A3B8 - 부드러운 텍스트 */
+
+    /* Status Colors */
+    --destructive: 0 84% 60%;         /* #EF4444 - 에러 */
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 142 71% 45%;           /* #10B981 - 성공 */
+    --warning: 38 92% 50%;            /* #F59E0B - 주의 */
+
+    /* Borders */
+    --border: 214 32% 91%;            /* #E2E8F0 - 밝은 구분선 */
+    --border-dark: 214 32% 84%;       /* #CBD5E1 - 진한 구분선 */
+    --input: 214 32% 91%;
+    --ring: 217 91% 60%;
+
+    --radius: 0.75rem;
+
+    /* Gradients - Toss Style */
+    --gradient-hero: linear-gradient(135deg, hsl(0 0% 100%) 0%, hsl(210 20% 98%) 100%);
+    --gradient-section: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(210 20% 98%) 100%);
+    --gradient-blue: linear-gradient(135deg, hsl(217 91% 60%) 0%, hsl(217 91% 70%) 100%);
+    --gradient-blue-light: linear-gradient(135deg, hsl(217 91% 95%) 0%, hsl(217 91% 98%) 100%);
+
+    /* Shadows - Toss Style */
+    --shadow-sm: 0 1px 2px 0 hsl(222 47% 11% / 0.05);
+    --shadow-card: 0 4px 6px -1px hsl(222 47% 11% / 0.1), 0 2px 4px -1px hsl(222 47% 11% / 0.06);
+    --shadow-elevated: 0 10px 15px -3px hsl(222 47% 11% / 0.1), 0 4px 6px -2px hsl(222 47% 11% / 0.05);
+    --shadow-blue: 0 8px 16px -4px hsl(217 91% 60% / 0.25);
+
+    /* ⚡ Toss Animation System */
+    --anim-fast: 150ms;               /* 빠른 애니메이션 (호버, 클릭) */
+    --anim-normal: 250ms;             /* 일반 애니메이션 (상태 전환) */
+    --anim-slow: 400ms;               /* 느린 애니메이션 (페이지 전환) */
+    --anim-easing: cubic-bezier(0.4, 0, 0.2, 1);  /* 부드러운 easing */
+    --anim-spring: cubic-bezier(0.34, 1.56, 0.64, 1); /* 스프링 효과 */
+
+    /* 🎯 Toss Radius System */
+    --radius-sm: 0.5rem;              /* 8px - 작은 요소 */
+    --radius-md: 0.75rem;             /* 12px - 중간 요소 */
+    --radius-lg: 1rem;                /* 16px - 큰 요소 */
+    --radius-xl: 1.25rem;             /* 20px - 매우 큰 요소 */
+    --radius-2xl: 1.5rem;             /* 24px - 섹션/카드 */
+
+    /* 💫 Toss Layered Shadows */
+    --shadow-xs: 0 0 4px 0 rgba(2, 32, 71, 0.05), 0 2px 8px 0 rgba(2, 32, 71, 0.03);
+    --shadow-hover: 0 8px 16px 0 rgba(0, 27, 55, 0.12), 0 4px 8px 0 rgba(2, 32, 71, 0.08);
+    --shadow-focus: 0 0 0 3px hsl(217 91% 60% / 0.15);
+    --shadow-glow: 0 0 20px 0 hsl(217 91% 60% / 0.3);
+  }
+
+  .dark {
+    /* Dark Mode - Toss Style */
+    --background: 222 47% 11%;        /* 다크 배경 */
+    --foreground: 210 20% 98%;
+
+    --card: 215 25% 15%;              /* 다크 카드 */
+    --card-foreground: 210 20% 98%;
+
+    --popover: 215 25% 15%;
+    --popover-foreground: 210 20% 98%;
+
+    --primary: 217 91% 65%;           /* 다크모드에서 약간 밝은 블루 */
+    --primary-foreground: 0 0% 100%;
+    --primary-light: 217 91% 75%;
+    --primary-dark: 221 83% 53%;
+
+    --secondary: 215 16% 35%;
+    --secondary-foreground: 0 0% 100%;
+
+    --accent: 217 91% 85%;
+    --accent-foreground: 222 47% 11%;
+
+    --muted: 215 25% 20%;
+    --muted-foreground: 215 20% 65%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 142 71% 45%;
+    --warning: 38 92% 50%;
+
+    --border: 215 25% 25%;
+    --border-dark: 215 25% 30%;
+    --input: 215 25% 25%;
+    --ring: 217 91% 65%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    font-size: 18px;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    line-height: 1.7;
+  }
+
+  /* 🎬 Toss-style Keyframe Animations */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+}

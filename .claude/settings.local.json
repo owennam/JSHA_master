@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:docs.tosspayments.com)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(start \"JSHA Payment Server\" cmd /k \"node server.js\")",
+      "Bash(taskkill:*)",
+      "Bash(node server.js)",
+      "Bash(npm run dev)",
+      "Bash(npm install:*)",
+      "Bash(timeout:*)",
+      "Bash(dir \"C:\\Users\\admin\\Documents\" /b)",
+      "Bash(dir \"C:\\Users\\admin\" /b /ad)",
+      "WebFetch(domain:docs.google.com)",
+      "Read(//c/Users/User/Downloads/**)",
+      "Read(//c/Users/User/OneDrive/Obsidian_Vault/**)",
+      "Bash(sed:*)",
+      "Bash(node server/server.js:*)",
+      "Bash(npm run dev:all:*)",
+      "Bash(dir \"C:\\Users\\User\\OneDrive\\바탕 화면\\jsha-learn-path\" /b)",
+      "Read(//c/Users/User/web/**)",
+      "Bash(git init:*)",
+      "Bash(git add:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
