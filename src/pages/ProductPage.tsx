@@ -289,9 +289,9 @@ const ProductPage = () => {
                     <CardHeader>
                       <CardTitle className="flex items-start justify-between gap-4">
                         <div className="flex flex-col">
-                          <span>{product.name}</span>
+                          <span className="text-black">{product.name}</span>
                           {product.type && (
-                            <span className="text-base font-normal text-muted-foreground mt-1">
+                            <span className="text-lg font-semibold text-black mt-1">
                               ({product.type})
                             </span>
                           )}
@@ -530,9 +530,9 @@ const ProductPage = () => {
           <SheetHeader>
             <SheetTitle>
               <div className="flex flex-col gap-1">
-                <span>{selectedProductData?.name}</span>
+                <span className="text-black">{selectedProductData?.name}</span>
                 {selectedProductData?.type && (
-                  <span className="text-base font-normal text-muted-foreground">
+                  <span className="text-lg font-semibold text-black">
                     ({selectedProductData.type})
                   </span>
                 )}

@@ -1,6 +1,6 @@
 import { lectureVideos, qaVideos } from "@/data/workshopVideos";
 import { Card, CardContent } from "@/components/ui/card";
-import { Calendar, User, PlayCircle, HelpCircle } from "lucide-react";
+import { Calendar, User, PlayCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export const WorkshopVideoSection = () => {
@@ -62,12 +62,9 @@ export const WorkshopVideoSection = () => {
 
         {/* Q&A 섹션 */}
         <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 mb-4">
-            <HelpCircle className="w-8 h-8 text-primary" />
-            <h2 className="text-3xl md:text-4xl font-bold">
-              Q&A with 이종성 원장님
-            </h2>
-          </div>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+            Q&A with 이종성 원장님
+          </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             JSHA와 JS 인솔에 대한 자주 묻는 질문에 이종성 원장님이 답변합니다
           </p>

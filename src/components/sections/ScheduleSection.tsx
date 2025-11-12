@@ -38,7 +38,7 @@ export const ScheduleSection = () => {
     <section id="schedule" className="py-20 bg-background">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16 animate-fade-in">
-          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
+          <h2 className="text-4xl md:text-5xl font-bold text-black mb-6">
             교육 일정
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
@@ -82,18 +82,18 @@ export const ScheduleSection = () => {
           <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
             <CardContent className="p-6">
               <div>
-                <h3 className="font-bold text-foreground mb-3">교육 시간</h3>
+                <h3 className="font-bold text-black mb-3">교육 시간</h3>
                 <div className="space-y-2 text-sm text-muted-foreground">
                   <div>
-                    <strong className="text-foreground">토요일 (1일차):</strong> 3시간
+                    <strong className="text-black">토요일 (1일차):</strong> 3시간
                     <div className="text-sm ml-4">시간: 추후 공지</div>
                   </div>
                   <div>
-                    <strong className="text-foreground">일요일 (2일차):</strong> 7시간
+                    <strong className="text-black">일요일 (2일차):</strong> 7시간
                     <div className="text-sm ml-4">시간: 추후 공지</div>
                   </div>
                   <div className="pt-2 border-t border-border">
-                    <strong className="text-foreground">총 교육 시간:</strong> 40시간 (10시간 × 4회)
+                    <strong className="text-black">총 교육 시간:</strong> 40시간 (10시간 × 4회)
                   </div>
                 </div>
               </div>
@@ -104,10 +104,10 @@ export const ScheduleSection = () => {
           <Card className="border-2 border-secondary/20 bg-gradient-to-br from-secondary/5 to-transparent">
             <CardContent className="p-6">
               <div>
-                <h3 className="font-bold text-foreground mb-3">교육 장소</h3>
+                <h3 className="font-bold text-black mb-3">교육 장소</h3>
                 <div className="space-y-2 text-sm">
                   <div>
-                    <strong className="text-foreground">대전제이에스힐링의원</strong>
+                    <strong className="text-black">대전제이에스힐링의원</strong>
                   </div>
                   <div className="text-muted-foreground">
                     대전 서구 계룡로 633 2층
@@ -128,7 +128,7 @@ export const ScheduleSection = () => {
             <div className="flex items-start gap-4">
               <AlertCircle className="h-6 w-6 text-primary flex-shrink-0 mt-0.5" />
               <div className="flex-1">
-                <h4 className="font-bold text-foreground mb-2">
+                <h4 className="font-bold text-black mb-2">
                   일정 공지 안내
                 </h4>
                 <p className="text-sm text-muted-foreground mb-3">

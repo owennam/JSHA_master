@@ -62,7 +62,7 @@ export const SelfAssessmentSection = () => {
     <section id="self-assessment" className="py-20 bg-gradient-to-br from-primary/5 to-accent/5">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12 animate-fade-in">
-          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
+          <h2 className="text-4xl md:text-5xl font-bold text-black mb-6">
             당신의 진료실은 몇 점인가요?
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
@@ -127,18 +127,18 @@ export const SelfAssessmentSection = () => {
                 <div className="mt-8 p-8 bg-gradient-to-br from-muted to-background rounded-2xl border-2 animate-fade-in">
                   <div className="flex flex-col items-center text-center space-y-4">
                     {getResult().icon}
-                    <h3 className="text-2xl font-bold text-foreground">{getResult().title}</h3>
+                    <h3 className="text-2xl font-bold text-black">{getResult().title}</h3>
                     <p className="text-lg text-muted-foreground max-w-xl">{getResult().message}</p>
 
                     <div className="mt-6 p-6 bg-primary/10 rounded-xl w-full">
                       <div className="text-sm text-muted-foreground mb-2">체크한 항목</div>
-                      <div className="text-5xl font-bold text-primary mb-2">
+                      <div className="text-5xl font-bold text-black mb-2">
                         {calculateScore()} / 6
                       </div>
                       <div className="text-sm text-muted-foreground">
                         {calculateScore() > 0 ? (
                           <>
-                            <strong className="text-foreground">
+                            <strong className="text-black">
                               {calculateScore()}개의 문제점
                             </strong>
                             이 발견되었습니다
@@ -166,7 +166,7 @@ export const SelfAssessmentSection = () => {
         {/* Additional Info */}
         <div className="mt-12 text-center max-w-2xl mx-auto">
           <p className="text-muted-foreground">
-            <strong className="text-foreground">95% 이상의 수료생</strong>이 이러한 문제점들을
+            <strong className="text-black">95% 이상의 수료생</strong>이 이러한 문제점들을
             JSHA 마스터 코스로 해결했습니다
           </p>
         </div>

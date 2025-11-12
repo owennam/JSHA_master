@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { FileText, ArrowRight, AlertCircle, MessageCircle } from "lucide-react";
+import { ArrowRight, AlertCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
   Form,
@@ -111,7 +111,7 @@ export const ApplicationSection = () => {
     <section id="application" className="py-20 bg-background">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16 animate-fade-in">
-          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
+          <h2 className="text-4xl md:text-5xl font-bold text-black mb-6">
             등록 및 문의
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
@@ -124,7 +124,7 @@ export const ApplicationSection = () => {
           <div className="bg-gradient-to-r from-orange-500/10 via-red-500/10 to-orange-500/10 border-2 border-orange-500/30 rounded-2xl p-6 shadow-lg">
             <div className="flex items-center justify-center gap-3">
               <AlertCircle className="h-6 w-6 text-orange-600 flex-shrink-0" />
-              <p className="text-lg font-bold text-foreground">
+              <p className="text-lg font-bold text-black">
                 <span className="text-orange-600">조기 등록 혜택!</span> 다음 기수에는 가격이 더 인상됩니다
               </p>
             </div>
@@ -137,7 +137,7 @@ export const ApplicationSection = () => {
             <Card key={idx} className="border-2 hover:border-primary transition-colors">
               <CardContent className="p-6 text-center">
                 <div className="text-sm text-muted-foreground mb-1">{info.label}</div>
-                <div className="text-2xl font-bold text-foreground mb-2">{info.value}</div>
+                <div className="text-2xl font-bold text-black mb-2">{info.value}</div>
                 <div className="text-sm text-muted-foreground whitespace-pre-line">{info.description}</div>
               </CardContent>
             </Card>
@@ -146,7 +146,7 @@ export const ApplicationSection = () => {
 
         {/* 신청 절차 */}
         <div className="max-w-4xl mx-auto mb-12">
-          <h3 className="text-2xl font-bold text-foreground mb-8 text-center">
+          <h3 className="text-2xl font-bold text-black mb-8 text-center">
             신청 절차
           </h3>
           <div className="grid md:grid-cols-4 gap-4">
@@ -161,7 +161,7 @@ export const ApplicationSection = () => {
                   <div className="w-10 h-10 bg-primary text-primary-foreground rounded-full flex items-center justify-center mx-auto mb-3 font-bold">
                     {item.step}
                   </div>
-                  <div className="font-semibold text-foreground mb-1">{item.title}</div>
+                  <div className="font-semibold text-black mb-1">{item.title}</div>
                   <div className="text-sm text-muted-foreground">{item.desc}</div>
                 </div>
                 {idx < 3 && (
@@ -178,8 +178,7 @@ export const ApplicationSection = () => {
         <div className="max-w-3xl mx-auto">
           {!showForm ? (
             <div className="bg-white rounded-2xl p-12 text-center shadow-elevated border-2 border-border">
-              <FileText className="h-16 w-16 text-primary mx-auto mb-6" />
-              <h3 className="text-3xl font-bold text-foreground mb-4">
+              <h3 className="text-3xl font-bold text-black mb-4">
                 지금 문의하세요
               </h3>
               <p className="text-lg text-muted-foreground mb-8 max-w-xl mx-auto">
@@ -199,7 +198,7 @@ export const ApplicationSection = () => {
           ) : (
             <Card className="shadow-lg">
               <CardContent className="p-8">
-                <h3 className="text-2xl font-bold text-foreground mb-6 text-center">
+                <h3 className="text-2xl font-bold text-black mb-6 text-center">
                   JSHA 마스터 코스 문의
                 </h3>
                 
@@ -300,7 +299,7 @@ export const ApplicationSection = () => {
 
                     <div className="bg-primary/10 p-4 rounded-lg">
                       <div className="text-sm text-muted-foreground mb-2">
-                        <strong className="text-foreground">수강료 (세션별)</strong>
+                        <strong className="text-black">수강료 (세션별)</strong>
                       </div>
                       <ul className="text-sm space-y-1">
                         <li>• 세션 1: 198만 원 (이전 워크숍 참석자 50% 할인)</li>
@@ -333,38 +332,6 @@ export const ApplicationSection = () => {
               </CardContent>
             </Card>
           )}
-        </div>
-
-        {/* 문의 정보 */}
-        <div className="mt-12 text-center">
-          <p className="text-muted-foreground mb-2">
-            궁금한 점이 있으신가요?
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center text-sm">
-            <a
-              href="mailto:jshaworkshop@gmail.com"
-              className="text-primary hover:underline font-medium"
-            >
-              jshaworkshop@gmail.com
-            </a>
-            <span className="hidden sm:inline text-muted-foreground">|</span>
-            <a
-              href="tel:010-4002-1094"
-              className="text-primary hover:underline font-medium"
-            >
-              010-4002-1094
-            </a>
-            <span className="hidden sm:inline text-muted-foreground">|</span>
-            <a
-              href="https://open.kakao.com/o/slxvcj1h"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary hover:underline font-medium inline-flex items-center gap-1"
-            >
-              <MessageCircle className="w-4 h-4" />
-              카카오톡 문의
-            </a>
-          </div>
         </div>
       </div>
     </section>

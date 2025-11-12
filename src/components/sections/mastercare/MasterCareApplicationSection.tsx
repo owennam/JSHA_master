@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { FileText, ArrowRight, MessageCircle, Phone, Mail } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -123,7 +123,7 @@ export const MasterCareApplicationSection = () => {
     <section id="mastercare-application" className="py-20 bg-background">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16 animate-fade-in">
-          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
+          <h2 className="text-4xl md:text-5xl font-bold text-black mb-6">
             Master Care 신청
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
@@ -133,7 +133,7 @@ export const MasterCareApplicationSection = () => {
 
         {/* 신청 절차 */}
         <div className="max-w-4xl mx-auto mb-12">
-          <h3 className="text-2xl font-bold text-foreground mb-8 text-center">
+          <h3 className="text-2xl font-bold text-black mb-8 text-center">
             신청 절차
           </h3>
           <div className="grid md:grid-cols-4 gap-4">
@@ -148,7 +148,7 @@ export const MasterCareApplicationSection = () => {
                   <div className="w-10 h-10 bg-primary text-primary-foreground rounded-full flex items-center justify-center mx-auto mb-3 font-bold">
                     {item.step}
                   </div>
-                  <div className="font-semibold text-foreground mb-1">{item.title}</div>
+                  <div className="font-semibold text-black mb-1">{item.title}</div>
                   <div className="text-sm text-muted-foreground">{item.desc}</div>
                 </div>
                 {idx < 3 && (
@@ -165,8 +165,7 @@ export const MasterCareApplicationSection = () => {
         <div className="max-w-3xl mx-auto">
           {!showForm ? (
             <div className="bg-white rounded-2xl p-12 text-center shadow-elevated border-2 border-border">
-              <FileText className="h-16 w-16 text-primary mx-auto mb-6" />
-              <h3 className="text-3xl font-bold text-foreground mb-4">
+              <h3 className="text-3xl font-bold text-black mb-4">
                 지금 신청하세요
               </h3>
               <p className="text-lg text-muted-foreground mb-8 max-w-xl mx-auto">
@@ -186,7 +185,7 @@ export const MasterCareApplicationSection = () => {
           ) : (
             <Card className="shadow-lg">
               <CardContent className="p-8">
-                <h3 className="text-2xl font-bold text-foreground mb-6 text-center">
+                <h3 className="text-2xl font-bold text-black mb-6 text-center">
                   Master Care 신청서
                 </h3>
 
@@ -194,7 +193,7 @@ export const MasterCareApplicationSection = () => {
                   <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                     {/* 기본 정보 */}
                     <div className="space-y-4">
-                      <h4 className="text-lg font-semibold text-foreground">기본 정보</h4>
+                      <h4 className="text-lg font-semibold text-black">기본 정보</h4>
 
                       <FormField
                         control={form.control}
@@ -241,7 +240,7 @@ export const MasterCareApplicationSection = () => {
 
                     {/* 병원 정보 */}
                     <div className="space-y-4 pt-4">
-                      <h4 className="text-lg font-semibold text-foreground">병원 정보</h4>
+                      <h4 className="text-lg font-semibold text-black">병원 정보</h4>
 
                       <FormField
                         control={form.control}
@@ -274,7 +273,7 @@ export const MasterCareApplicationSection = () => {
 
                     {/* 마스터 코스 정보 */}
                     <div className="space-y-4 pt-4">
-                      <h4 className="text-lg font-semibold text-foreground">마스터 코스 정보</h4>
+                      <h4 className="text-lg font-semibold text-black">마스터 코스 정보</h4>
 
                       <FormField
                         control={form.control}
@@ -305,7 +304,7 @@ export const MasterCareApplicationSection = () => {
 
                     {/* 패키지 선택 */}
                     <div className="space-y-4 pt-4">
-                      <h4 className="text-lg font-semibold text-foreground">패키지 선택</h4>
+                      <h4 className="text-lg font-semibold text-black">패키지 선택</h4>
 
                       <FormField
                         control={form.control}
@@ -333,7 +332,7 @@ export const MasterCareApplicationSection = () => {
 
                     {/* 컨설팅 희망 분야 */}
                     <div className="space-y-4 pt-4">
-                      <h4 className="text-lg font-semibold text-foreground">컨설팅 희망 분야</h4>
+                      <h4 className="text-lg font-semibold text-black">컨설팅 희망 분야</h4>
                       <FormDescription>최소 1개 이상 선택해주세요 (다중 선택 가능)</FormDescription>
 
                       <div className="space-y-3">
@@ -435,40 +434,6 @@ export const MasterCareApplicationSection = () => {
               </CardContent>
             </Card>
           )}
-        </div>
-
-        {/* 문의 정보 */}
-        <div className="mt-12 text-center">
-          <p className="text-muted-foreground mb-4 text-lg">
-            궁금한 점이 있으신가요? 언제든지 연락주세요
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <a
-              href="mailto:jshaworkshop@gmail.com"
-              className="inline-flex items-center gap-2 text-primary hover:underline font-medium"
-            >
-              <Mail className="w-5 h-5" />
-              jshaworkshop@gmail.com
-            </a>
-            <span className="hidden sm:inline text-muted-foreground">|</span>
-            <a
-              href="tel:010-4002-1094"
-              className="inline-flex items-center gap-2 text-primary hover:underline font-medium"
-            >
-              <Phone className="w-5 h-5" />
-              010-4002-1094
-            </a>
-            <span className="hidden sm:inline text-muted-foreground">|</span>
-            <a
-              href="https://open.kakao.com/o/slxvcj1h"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-primary hover:underline font-medium"
-            >
-              <MessageCircle className="w-5 h-5" />
-              카카오톡 문의
-            </a>
-          </div>
         </div>
       </div>
     </section>

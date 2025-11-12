@@ -4,7 +4,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { HelpCircle } from "lucide-react";
 
 export const MasterCareFAQSection = () => {
   const faqs = [
@@ -59,12 +58,9 @@ export const MasterCareFAQSection = () => {
     <section id="faq" className="py-20 bg-muted">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16 animate-fade-in">
-          <div className="flex items-center justify-center gap-3 mb-6">
-            <HelpCircle className="h-10 w-10 text-primary" />
-            <h2 className="text-4xl md:text-5xl font-bold text-foreground">
-              자주 묻는 질문
-            </h2>
-          </div>
+          <h2 className="text-4xl md:text-5xl font-bold text-black mb-6">
+            자주 묻는 질문
+          </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
             Master Care에 대해 궁금하신 점을 확인하세요
           </p>
@@ -79,7 +75,7 @@ export const MasterCareFAQSection = () => {
                 className="bg-card border-2 border-border rounded-xl px-6 hover:border-primary transition-colors"
               >
                 <AccordionTrigger className="text-left hover:no-underline py-6">
-                  <span className="font-semibold text-foreground pr-4">
+                  <span className="font-semibold text-black pr-4">
                     {faq.question}
                   </span>
                 </AccordionTrigger>

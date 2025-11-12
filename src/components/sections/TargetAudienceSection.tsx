@@ -36,7 +36,7 @@ export const TargetAudienceSection = () => {
     <section id="target-audience" className="py-20 bg-muted">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16 animate-fade-in">
-          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
+          <h2 className="text-4xl md:text-5xl font-bold text-black mb-6">
             이런 분들을 위한 과정입니다
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
@@ -66,7 +66,7 @@ export const TargetAudienceSection = () => {
         {/* 교육 과정의 가치 */}
         <div className="max-w-4xl mx-auto">
           <div className="bg-gradient-to-br from-primary/10 to-accent/10 rounded-2xl p-8 md:p-12 border-2 border-primary/20">
-            <h3 className="text-2xl md:text-3xl font-bold text-foreground mb-8 text-center">
+            <h3 className="text-2xl md:text-3xl font-bold text-black mb-8 text-center">
               JSHA Master Course 수료 후, 당신은
             </h3>
             <div className="grid md:grid-cols-2 gap-4">

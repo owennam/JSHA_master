@@ -4,7 +4,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { HelpCircle } from "lucide-react";
 
 export const FAQSection = () => {
   const faqs = [
@@ -54,14 +53,9 @@ export const FAQSection = () => {
     <section id="faq" className="py-20 bg-gradient-to-b from-background via-muted to-background">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16 animate-[fadeInUp_0.6s_ease-out_0.1s_both]">
-          <div className="flex items-center justify-center gap-3 mb-6">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center">
-              <HelpCircle className="h-6 w-6 text-primary" />
-            </div>
-            <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary to-primary-dark bg-clip-text text-transparent">
-              자주 묻는 질문
-            </h2>
-          </div>
+          <h2 className="text-4xl md:text-5xl font-bold text-black mb-6">
+            자주 묻는 질문
+          </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
             JSHA 마스터 코스에 대해 궁금하신 점을 확인하세요
           </p>
@@ -77,7 +71,7 @@ export const FAQSection = () => {
                 style={{ animationDelay: `${0.2 + idx * 0.05}s` }}
               >
                 <AccordionTrigger className="text-left hover:no-underline py-6 group">
-                  <span className="font-bold text-foreground pr-4 transition-colors duration-[250ms] group-hover:text-primary">
+                  <span className="font-bold text-black pr-4 transition-colors duration-[250ms] group-hover:text-primary">
                     {faq.question}
                   </span>
                 </AccordionTrigger>

@@ -22,7 +22,7 @@ export const DifferentiationSection = () => {
     <section className="py-20 bg-background">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16 animate-fade-in">
-          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
+          <h2 className="text-4xl md:text-5xl font-bold text-black mb-6">
             JSHA Master Course만의 차별성
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
@@ -36,7 +36,7 @@ export const DifferentiationSection = () => {
               key={idx}
               className="group relative bg-card rounded-2xl p-8 border-2 border-border hover:border-primary transition-all duration-300 hover:-translate-y-2 hover:shadow-elevated"
             >
-              <h3 className="text-xl font-bold text-foreground mb-3">
+              <h3 className="text-xl font-bold text-black mb-3">
                 {feature.title}
               </h3>
               <p className="text-muted-foreground leading-relaxed">

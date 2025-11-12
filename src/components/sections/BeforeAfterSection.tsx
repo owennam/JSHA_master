@@ -22,7 +22,7 @@ export const BeforeAfterSection = () => {
     <section className="py-20 bg-gradient-to-br from-muted to-background">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16 animate-fade-in">
-          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
+          <h2 className="text-4xl md:text-5xl font-bold text-black mb-6">
             JSHA 수료 후 달라진 진료실
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
@@ -61,7 +61,7 @@ export const BeforeAfterSection = () => {
                 <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
                   <Check className="h-6 w-6 text-primary" />
                 </div>
-                <span className="text-primary">After JSHA</span>
+                <span className="text-black">After JSHA</span>
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-6">

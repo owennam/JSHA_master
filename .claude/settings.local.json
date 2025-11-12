@@ -21,7 +21,14 @@
       "Bash(dir \"C:\\Users\\User\\OneDrive\\바탕 화면\\jsha-learn-path\" /b)",
       "Read(//c/Users/User/web/**)",
       "Bash(git init:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git config:*)",
+      "Bash(git remote add:*)",
+      "Bash(git push:*)",
+      "Bash(git remote:*)",
+      "Bash(git rm:*)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []

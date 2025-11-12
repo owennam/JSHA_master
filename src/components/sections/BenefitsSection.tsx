@@ -1,5 +1,4 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { Check } from "lucide-react";
 
 export const BenefitsSection = () => {
   const benefits = [
@@ -42,7 +41,7 @@ export const BenefitsSection = () => {
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-16 animate-[fadeInUp_0.6s_ease-out_0.1s_both]">
-          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6 bg-gradient-to-r from-primary to-primary-dark bg-clip-text text-transparent">
+          <h2 className="text-4xl md:text-5xl font-bold text-black mb-6 text-black">
             수강생 혜택
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
@@ -60,18 +59,13 @@ export const BenefitsSection = () => {
             >
               <CardContent className="p-8">
                 <div className="flex flex-col gap-4">
-                  {/* Icon and Title */}
-                  <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center group-hover:from-primary/20 group-hover:to-primary/10 transition-all duration-[250ms]">
-                      <Check className="h-5 w-5 text-primary transition-all duration-[250ms] group-hover:scale-110" />
-                    </div>
-                    <h3 className="text-xl font-bold text-foreground flex-1 transition-colors duration-[250ms] group-hover:text-primary">
-                      {benefit.title}
-                    </h3>
-                  </div>
+                  {/* Title */}
+                  <h3 className="text-xl font-bold text-black transition-colors duration-[250ms] group-hover:text-primary">
+                    {benefit.title}
+                  </h3>
 
                   {/* Description */}
-                  <p className="text-muted-foreground leading-relaxed pl-[52px] transition-colors duration-[250ms] group-hover:text-foreground/80">
+                  <p className="text-muted-foreground leading-relaxed transition-colors duration-[250ms] group-hover:text-foreground/80">
                     {benefit.description}
                   </p>
                 </div>
@@ -83,13 +77,13 @@ export const BenefitsSection = () => {
         {/* 추가 혜택 하이라이트 */}
         <div className="mt-16 max-w-5xl mx-auto animate-[fadeInUp_0.6s_ease-out_0.8s_both]">
           <div className="bg-gradient-to-br from-primary/8 via-primary/5 to-accent/8 rounded-3xl p-8 md:p-10 border-2 border-primary/20 shadow-[0_8px_16px_0_rgba(0,27,55,0.12),0_4px_8px_0_rgba(2,32,71,0.08)] backdrop-blur-sm hover:shadow-[0_12px_24px_0_rgba(0,27,55,0.15),0_6px_12px_0_rgba(2,32,71,0.1)] transition-all duration-[250ms]">
-            <h3 className="text-2xl md:text-3xl font-bold text-center mb-10 bg-gradient-to-r from-primary to-primary-dark bg-clip-text text-transparent">
+            <h3 className="text-2xl md:text-3xl font-bold text-center mb-10 text-black">
               마스터 코스 수료 후 혜택
             </h3>
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
               <div className="text-center group cursor-default">
                 <div className="text-4xl mb-3 transition-transform duration-[250ms] group-hover:scale-110">🎓</div>
-                <div className="font-bold text-foreground mb-2 text-lg transition-colors duration-[250ms] group-hover:text-primary">
+                <div className="font-bold text-black mb-2 text-lg transition-colors duration-[250ms] group-hover:text-primary">
                   JSHA 공인 라이센스
                 </div>
                 <div className="text-sm text-muted-foreground leading-relaxed">
@@ -98,7 +92,7 @@ export const BenefitsSection = () => {
               </div>
               <div className="text-center group cursor-default">
                 <div className="text-4xl mb-3 transition-transform duration-[250ms] group-hover:scale-110">⭐</div>
-                <div className="font-bold text-foreground mb-2 text-lg transition-colors duration-[250ms] group-hover:text-primary">
+                <div className="font-bold text-black mb-2 text-lg transition-colors duration-[250ms] group-hover:text-primary">
                   평생 회원 자격 부여
                 </div>
                 <div className="text-sm text-muted-foreground leading-relaxed">
@@ -107,7 +101,7 @@ export const BenefitsSection = () => {
               </div>
               <div className="text-center group cursor-default">
                 <div className="text-4xl mb-3 transition-transform duration-[250ms] group-hover:scale-110">📊</div>
-                <div className="font-bold text-foreground mb-2 text-lg transition-colors duration-[250ms] group-hover:text-primary">
+                <div className="font-bold text-black mb-2 text-lg transition-colors duration-[250ms] group-hover:text-primary">
                   평생 학습 자료
                 </div>
                 <div className="text-sm text-muted-foreground leading-relaxed">
@@ -116,7 +110,7 @@ export const BenefitsSection = () => {
               </div>
               <div className="text-center group cursor-default">
                 <div className="text-4xl mb-3 transition-transform duration-[250ms] group-hover:scale-110">🤝</div>
-                <div className="font-bold text-foreground mb-2 text-lg transition-colors duration-[250ms] group-hover:text-primary">
+                <div className="font-bold text-black mb-2 text-lg transition-colors duration-[250ms] group-hover:text-primary">
                   전문가 네트워크
                 </div>
                 <div className="text-sm text-muted-foreground leading-relaxed">

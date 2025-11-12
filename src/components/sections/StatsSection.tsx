@@ -35,12 +35,12 @@ export const StatsSection = () => {
 
       <div className="container mx-auto px-4 relative z-10">
         <div className="text-center mb-12 animate-fade-in">
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-black mb-4">
             숫자로 입증된 성과
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            2019년부터 축적된 <strong className="text-foreground">JSHA의 교육 실적</strong>과
-            <strong className="text-foreground"> 수료생들의 높은 만족도</strong>
+            2019년부터 축적된 <strong className="text-black">JSHA의 교육 실적</strong>과
+            <strong className="text-black"> 수료생들의 높은 만족도</strong>
           </p>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
@@ -50,10 +50,10 @@ export const StatsSection = () => {
                 key={index}
                 className="text-center group hover:scale-105 transition-transform duration-300"
               >
-                <div className="text-3xl md:text-4xl font-bold text-primary mb-2">
+                <div className="text-3xl md:text-4xl font-bold text-black mb-2">
                   {stat.value}
                 </div>
-                <div className="text-lg font-semibold text-foreground mb-1">
+                <div className="text-lg font-semibold text-black mb-1">
                   {stat.label}
                 </div>
                 <div className="text-sm text-muted-foreground">

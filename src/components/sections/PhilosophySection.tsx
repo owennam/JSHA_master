@@ -30,7 +30,7 @@ export const PhilosophySection = () => {
           </div>
 
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-primary to-primary-dark bg-clip-text text-transparent">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-black">
               JSHA 핵심 철학: 근본 원인을 찾아라
             </h2>
             <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
@@ -38,7 +38,7 @@ export const PhilosophySection = () => {
               <br />
               <span className="mt-2 inline-block">
                 JSHA는{" "}
-                <strong className="text-primary font-bold bg-primary/10 px-3 py-1 rounded-lg">
+                <strong className="text-black font-bold bg-primary/10 px-3 py-1 rounded-lg">
                   구조적 불균형
                 </strong>
                 에서 시작합니다.
@@ -50,10 +50,7 @@ export const PhilosophySection = () => {
             {/* Step 1 */}
             <div className="relative group flex-1 w-full animate-[fadeInUp_0.6s_ease-out_0.3s_both]">
               <div className="bg-card/80 backdrop-blur-sm rounded-2xl p-8 border-2 border-primary/20 shadow-[0_8px_16px_0_rgba(0,27,55,0.08)] hover:shadow-[0_12px_24px_0_rgba(0,27,55,0.12)] hover:border-primary/40 transition-all duration-[250ms] hover:-translate-y-1 h-full">
-                <div className="w-16 h-16 bg-gradient-to-br from-primary/20 to-primary/10 rounded-2xl flex items-center justify-center mb-6 group-hover:from-primary/30 group-hover:to-primary/20 transition-all duration-[250ms] group-hover:scale-110">
-                  <span className="text-3xl font-bold text-primary">1</span>
-                </div>
-                <h3 className="text-2xl font-bold text-foreground mb-4 group-hover:text-primary transition-colors duration-[250ms]">
+                <h3 className="text-2xl font-bold text-black mb-4 group-hover:text-primary transition-colors duration-[250ms]">
                   구조적 불균형
                 </h3>
                 <p className="text-lg text-muted-foreground leading-relaxed group-hover:text-foreground/80 transition-colors duration-[250ms]">
@@ -70,10 +67,7 @@ export const PhilosophySection = () => {
             {/* Step 2 */}
             <div className="relative group flex-1 w-full animate-[fadeInUp_0.6s_ease-out_0.4s_both]">
               <div className="bg-card/80 backdrop-blur-sm rounded-2xl p-8 border-2 border-primary/20 shadow-[0_8px_16px_0_rgba(0,27,55,0.08)] hover:shadow-[0_12px_24px_0_rgba(0,27,55,0.12)] hover:border-primary/40 transition-all duration-[250ms] hover:-translate-y-1 h-full">
-                <div className="w-16 h-16 bg-gradient-to-br from-primary/20 to-primary/10 rounded-2xl flex items-center justify-center mb-6 group-hover:from-primary/30 group-hover:to-primary/20 transition-all duration-[250ms] group-hover:scale-110">
-                  <span className="text-3xl font-bold text-primary">2</span>
-                </div>
-                <h3 className="text-2xl font-bold text-foreground mb-4 group-hover:text-primary transition-colors duration-[250ms]">
+                <h3 className="text-2xl font-bold text-black mb-4 group-hover:text-primary transition-colors duration-[250ms]">
                   보상 작용
                 </h3>
                 <p className="text-lg text-muted-foreground leading-relaxed group-hover:text-foreground/80 transition-colors duration-[250ms]">
@@ -90,10 +84,7 @@ export const PhilosophySection = () => {
             {/* Step 3 */}
             <div className="group flex-1 w-full animate-[fadeInUp_0.6s_ease-out_0.5s_both]">
               <div className="bg-card/80 backdrop-blur-sm rounded-2xl p-8 border-2 border-primary/20 shadow-[0_8px_16px_0_rgba(0,27,55,0.08)] hover:shadow-[0_12px_24px_0_rgba(0,27,55,0.12)] hover:border-primary/40 transition-all duration-[250ms] hover:-translate-y-1 h-full">
-                <div className="w-16 h-16 bg-gradient-to-br from-primary/20 to-primary/10 rounded-2xl flex items-center justify-center mb-6 group-hover:from-primary/30 group-hover:to-primary/20 transition-all duration-[250ms] group-hover:scale-110">
-                  <span className="text-3xl font-bold text-primary">3</span>
-                </div>
-                <h3 className="text-2xl font-bold text-foreground mb-4 group-hover:text-primary transition-colors duration-[250ms]">
+                <h3 className="text-2xl font-bold text-black mb-4 group-hover:text-primary transition-colors duration-[250ms]">
                   만성 통증
                 </h3>
                 <p className="text-lg text-muted-foreground leading-relaxed group-hover:text-foreground/80 transition-colors duration-[250ms]">
@@ -106,12 +97,12 @@ export const PhilosophySection = () => {
           <div className="mt-16 text-center animate-[fadeInUp_0.6s_ease-out_0.7s_both]">
             <div className="inline-block bg-gradient-to-br from-primary/10 via-primary/5 to-accent/10 border-2 border-primary/30 rounded-3xl p-8 md:p-10 max-w-2xl shadow-[0_8px_16px_0_rgba(0,27,55,0.08)] hover:shadow-[0_12px_24px_0_rgba(0,27,55,0.12)] transition-all duration-[250ms] backdrop-blur-sm">
               <p className="text-xl text-foreground leading-relaxed">
-                <strong className="text-primary font-bold bg-primary/10 px-3 py-1 rounded-lg">
+                <strong className="text-black font-bold bg-primary/10 px-3 py-1 rounded-lg">
                   JSHA Master Course
                 </strong>
                 는 이 철학을 기반으로
                 <br />
-                <strong className="bg-gradient-to-r from-primary to-primary-dark bg-clip-text text-transparent">
+                <strong className="text-black">
                   구조적 평가 → 정확한 진단 → 근본적 교정
                 </strong>
                 을 교육합니다.

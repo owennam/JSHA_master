@@ -32,7 +32,7 @@ export const InstructorSection = () => {
     <section id="instructor" className="py-20 bg-background">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16 animate-fade-in">
-          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
+          <h2 className="text-4xl md:text-5xl font-bold text-black mb-6">
             강사 소개
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
@@ -55,7 +55,7 @@ export const InstructorSection = () => {
 
               {/* 프로필 정보 */}
               <div className="flex-1 text-center md:text-left">
-                <h3 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
+                <h3 className="text-3xl md:text-4xl font-bold text-black mb-2">
                   이종성 원장
                 </h3>
                 <p className="text-xl text-primary font-semibold mb-4">
@@ -64,7 +64,7 @@ export const InstructorSection = () => {
                 <p className="text-lg text-muted-foreground leading-relaxed mb-4">
                   의학, 카이로프랙틱, 중의학, 신경과학, 정골의학을 통합한
                   <br />
-                  <strong className="text-foreground">독보적인 통증 치료 전문가</strong>
+                  <strong className="text-black">독보적인 통증 치료 전문가</strong>
                 </p>
                 <div className="inline-block bg-primary/10 border border-primary/30 rounded-lg px-6 py-3">
                   <p className="text-sm text-foreground italic">
@@ -82,7 +82,7 @@ export const InstructorSection = () => {
             {credentials.map((credential, idx) => (
               <Card key={idx} className="border-2 hover:border-primary transition-all">
                 <CardContent className="p-6 text-center">
-                  <h4 className="font-bold text-foreground mb-2 text-lg">
+                  <h4 className="font-bold text-black mb-2 text-lg">
                     {credential.title}
                   </h4>
                   <p className="text-sm text-muted-foreground">
@@ -95,7 +95,7 @@ export const InstructorSection = () => {
 
           {/* 전문 분야 */}
           <div className="bg-card rounded-2xl p-8 border-2 border-border">
-            <h4 className="text-2xl font-bold text-foreground mb-6 text-center">
+            <h4 className="text-2xl font-bold text-black mb-6 text-center">
               주요 업적 및 전문성
             </h4>
             <div className="grid md:grid-cols-2 gap-4">

@@ -1,8 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  MapPin,
-  CheckCircle2,
-} from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 
 export const MasterCareServicesSection = () => {
   const visitServices = [
@@ -59,7 +56,7 @@ export const MasterCareServicesSection = () => {
       <section className="py-20 bg-muted">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16 animate-fade-in">
-            <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
+            <h2 className="text-4xl md:text-5xl font-bold text-black mb-6">
               이런 분들께 추천합니다
             </h2>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
@@ -91,12 +88,9 @@ export const MasterCareServicesSection = () => {
       <section className="py-20 bg-background">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16 animate-fade-in">
-            <div className="flex items-center justify-center gap-3 mb-6">
-              <MapPin className="h-10 w-10 text-primary" />
-              <h2 className="text-4xl md:text-5xl font-bold text-foreground">
-                방문 컨설팅 프로그램
-              </h2>
-            </div>
+            <h2 className="text-4xl md:text-5xl font-bold text-black mb-6">
+              방문 컨설팅 프로그램
+            </h2>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
               1회 방문시 제공되는 체계적인 서비스 구성
             </p>
@@ -111,7 +105,7 @@ export const MasterCareServicesSection = () => {
                 >
                   <CardContent className="p-8">
                     <div className="text-center">
-                      <h3 className="text-lg font-bold text-foreground mb-3">
+                      <h3 className="text-lg font-bold text-black mb-3">
                         {service.title}
                       </h3>
                       <p className="text-muted-foreground leading-relaxed">
@@ -127,7 +121,7 @@ export const MasterCareServicesSection = () => {
           <div className="max-w-3xl mx-auto">
             <Card className="bg-gradient-to-br from-primary/5 to-accent/5 border-2 border-primary/20">
               <CardContent className="p-8 text-center">
-                <h3 className="text-xl font-bold text-foreground mb-3">
+                <h3 className="text-xl font-bold text-black mb-3">
                   총 5시간의 집중 컨설팅
                 </h3>
                 <p className="text-muted-foreground">
@@ -143,7 +137,7 @@ export const MasterCareServicesSection = () => {
       <section className="py-20 bg-muted">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16 animate-fade-in">
-            <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
+            <h2 className="text-4xl md:text-5xl font-bold text-black mb-6">
               온라인 지원 시스템
             </h2>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
@@ -159,7 +153,7 @@ export const MasterCareServicesSection = () => {
                   className="border-2 hover:border-primary transition-all hover:shadow-elevated hover:-translate-y-1"
                 >
                   <CardContent className="p-6 text-center">
-                    <h3 className="text-lg font-bold text-foreground mb-3">
+                    <h3 className="text-lg font-bold text-black mb-3">
                       {support.title}
                     </h3>
                     <p className="text-muted-foreground leading-relaxed">
