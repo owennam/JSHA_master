@@ -3,7 +3,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PlayCircle, Lock, CheckCircle, Video, LogOut } from "lucide-react";
+import { PlayCircle, CheckCircle, Video, LogOut } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { auth, googleProvider } from "@/lib/firebase";
 import { signInWithPopup, onAuthStateChanged, signOut } from "firebase/auth";
@@ -180,9 +180,6 @@ const RecapPage = () => {
           <div className="container mx-auto max-w-2xl">
             <Card className="border-2 border-amber-500/20 bg-amber-500/5">
               <CardHeader className="text-center">
-                <div className="w-16 h-16 bg-amber-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Lock className="w-8 h-8 text-amber-600" />
-                </div>
                 <CardTitle className="text-3xl mb-4">접근 권한 없음</CardTitle>
                 <p className="text-muted-foreground">
                   로그인한 계정 ({userEmail})은
