@@ -4,7 +4,7 @@ import { newsletters } from "@/data/newsletters";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
-import { Calendar, Mail, TrendingUp } from "lucide-react";
+import { Calendar } from "lucide-react";
 
 const NewsletterListPage = () => {
   return (
@@ -13,42 +13,29 @@ const NewsletterListPage = () => {
       
       <main className="pt-20">
         {/* Hero Section */}
-        <section className="py-20 px-4 bg-gradient-to-br from-primary/5 via-background to-secondary/5">
+        <section className="py-20 px-4 bg-gradient-to-br from-primary/7 via-background to-secondary/7">
           <div className="container mx-auto max-w-6xl">
             <div className="text-center mb-12 animate-fade-in">
-              <div className="inline-flex items-center gap-2 mb-6 px-4 py-2 bg-primary/10 rounded-full">
-                <Mail className="w-5 h-5 text-primary" />
-                <span className="text-sm font-semibold text-primary">JSHA Newsletter</span>
-              </div>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 bg-gradient-to-r from-primary via-primary-dark to-secondary bg-clip-text text-transparent">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-black">
                 통증 치료의<br /> 새로운 패러다임을 제시합니다.
               </h1>
               <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
                 JSHA의 철학과 임상 경험을 바탕으로 한<br />
-                통증 치료에 대한 새로운 관점을 공유합니다.
+                통증 치료에 대한 새로운 관점을 <br className='md:hidden' />공유합니다.
               </p>
             </div>
 
             <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
               <div className="text-center p-6 bg-card rounded-2xl border-2 border-border shadow-card hover:shadow-elevated transition-all">
-                <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <TrendingUp className="w-6 h-6 text-primary" />
-                </div>
-                <h3 className="font-semibold mb-2 text-foreground">최신 연구</h3>
+                <h3 className="font-semibold mb-2 text-black">최신 연구</h3>
                 <p className="text-sm text-muted-foreground">논문과 임상 데이터 기반의 통찰</p>
               </div>
               <div className="text-center p-6 bg-card rounded-2xl border-2 border-border shadow-card hover:shadow-elevated transition-all">
-                <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Mail className="w-6 h-6 text-primary" />
-                </div>
-                <h3 className="font-semibold mb-2 text-foreground">정기 발행</h3>
+                <h3 className="font-semibold mb-2 text-black">정기 발행</h3>
                 <p className="text-sm text-muted-foreground">매주 새로운 주제로 찾아옵니다</p>
               </div>
               <div className="text-center p-6 bg-card rounded-2xl border-2 border-border shadow-card hover:shadow-elevated transition-all">
-                <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Calendar className="w-6 h-6 text-primary" />
-                </div>
-                <h3 className="font-semibold mb-2 text-foreground">실용 정보</h3>
+                <h3 className="font-semibold mb-2 text-black">실용 정보</h3>
                 <p className="text-sm text-muted-foreground">임상에 바로 적용 가능한 내용</p>
               </div>
             </div>
@@ -116,7 +103,7 @@ const NewsletterListPage = () => {
           <div className="container mx-auto max-w-4xl text-center">
             <h2 className="text-3xl font-bold mb-6">뉴스레터 구독하기</h2>
             <p className="text-lg text-muted-foreground mb-8">
-              매주 최신 뉴스레터를 이메일로 받아보세요.
+              매주 최신 뉴스레터를 <br className='md:hidden' />이메일로 받아보세요.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto">
               <input

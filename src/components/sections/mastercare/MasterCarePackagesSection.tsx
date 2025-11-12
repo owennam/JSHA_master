@@ -79,7 +79,7 @@ export const MasterCarePackagesSection = () => {
             Master Care 패키지
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            귀하의 필요에 맞는 최적의 컨설팅 패키지를 선택하세요
+            귀하의 필요에 맞는 <br className='md:hidden' />최적의 컨설팅 패키지를 선택하세요
           </p>
         </div>
 
@@ -165,19 +165,19 @@ export const MasterCarePackagesSection = () => {
                 <div>
                   <div className="font-semibold text-black mb-2">Basic</div>
                   <div className="text-sm text-muted-foreground">
-                    병원 시스템 구축 및 임상 케이스에 대한 전문가 조언이 필요한 경우
+                    병원 시스템 구축 및 임상 케이스에 대한 <br className='md:hidden' />전문가 조언이 필요한 경우
                   </div>
                 </div>
                 <div>
                   <div className="font-semibold text-black mb-2">Standard</div>
                   <div className="text-sm text-muted-foreground">
-                    체계적인 시스템 구축과 직원 교육이 필요한 경우
+                    체계적인 시스템 구축과 <br className='md:hidden' />직원 교육이 필요한 경우
                   </div>
                 </div>
                 <div>
                   <div className="font-semibold text-black mb-2">Premium</div>
                   <div className="text-sm text-muted-foreground">
-                    병원 전체의 완전한 JSHA 시스템 구축을 원하는 경우
+                    병원 전체의 완전한 JSHA 시스템 구축을 <br className='md:hidden' />원하는 경우
                   </div>
                 </div>
               </div>

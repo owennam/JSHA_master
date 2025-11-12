@@ -37,10 +37,10 @@ export const TargetAudienceSection = () => {
       <div className="container mx-auto px-4">
         <div className="text-center mb-16 animate-fade-in">
           <h2 className="text-4xl md:text-5xl font-bold text-black mb-6">
-            이런 분들을 위한 과정입니다
+            이런 분들을 위한 <br className='md:hidden' />과정입니다
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            JSHA Master Course는 통증 치료의 본질을 추구하는 의사를 위한 프로그램입니다
+            JSHA Master Course는 통증 치료의 <br className='md:hidden' />본질을 추구하는 의사를 위한 프로그램입니다
           </p>
         </div>
 
@@ -67,7 +67,7 @@ export const TargetAudienceSection = () => {
         <div className="max-w-4xl mx-auto">
           <div className="bg-gradient-to-br from-primary/10 to-accent/10 rounded-2xl p-8 md:p-12 border-2 border-primary/20">
             <h3 className="text-2xl md:text-3xl font-bold text-black mb-8 text-center">
-              JSHA Master Course 수료 후, 당신은
+              JSHA Master Course <br className='md:hidden' />수료 후, 당신은
             </h3>
             <div className="grid md:grid-cols-2 gap-4">
               {outcomes.map((outcome, idx) => (
@@ -80,7 +80,7 @@ export const TargetAudienceSection = () => {
 
             <div className="mt-8 pt-8 border-t-2 border-primary/20 text-center">
               <p className="text-lg text-foreground font-semibold">
-                당신의 진료실이 행복해지고, 환자의 삶이 행복해집니다.
+                당신의 진료실이 행복해지고, <br className='md:hidden' />환자의 삶이 행복해집니다.
               </p>
             </div>
           </div>

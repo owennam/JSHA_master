@@ -35,6 +35,7 @@ export const HeroSection = () => {
           {/* Subtitle */}
           <p className="text-xl md:text-2xl text-white/95 max-w-3xl mx-auto leading-relaxed font-medium animate-[fadeInUp_0.6s_ease-out_0.5s_both]">
             4개월간의 체계적 교육으로{" "}
+            <br className='md:hidden' />
             <strong className="text-white font-bold bg-white/10 px-3 py-1 rounded-lg backdrop-blur-sm">
               불균형–보상–통증
             </strong>

@@ -62,7 +62,7 @@ export const MasterCareFAQSection = () => {
             자주 묻는 질문
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Master Care에 대해 궁금하신 점을 확인하세요
+            Master Care에 대해 궁금하신 점을 <br className='md:hidden' />확인하세요
           </p>
         </div>
 
@@ -92,7 +92,7 @@ export const MasterCareFAQSection = () => {
                 더 궁금하신 점이 있으신가요?
               </p>
               <p className="text-foreground font-semibold">
-                아래 신청 폼을 통해 문의하시거나 직접 연락 주시기 바랍니다.
+                아래 신청 폼을 통해 문의하시거나 <br className='md:hidden' />직접 연락 주시기 바랍니다.
               </p>
             </div>
           </div>

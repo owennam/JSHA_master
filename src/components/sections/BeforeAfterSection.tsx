@@ -23,7 +23,7 @@ export const BeforeAfterSection = () => {
       <div className="container mx-auto px-4">
         <div className="text-center mb-16 animate-fade-in">
           <h2 className="text-4xl md:text-5xl font-bold text-black mb-6">
-            JSHA 수료 후 달라진 진료실
+            JSHA 수료 후  <br className='md:hidden' />달라진 진료실
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
             실제 수료생들의 변화된 모습입니다

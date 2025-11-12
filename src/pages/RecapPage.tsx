@@ -139,14 +139,11 @@ const RecapPage = () => {
     return (
       <div className="min-h-screen bg-background">
         <Header />
-        <main className="pt-24 pb-20 px-4">
+        <main className="pt-24 pb-20 px-4 bg-gradient-to-br from-primary/7 via-background to-secondary/7 min-h-[calc(100vh-80px)]">
           <div className="container mx-auto max-w-2xl">
             <Card className="border-2 shadow-xl">
               <CardHeader className="text-center">
-                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Lock className="w-8 h-8 text-primary" />
-                </div>
-                <CardTitle className="text-3xl mb-4">수료자 전용 영상</CardTitle>
+                <CardTitle className="text-3xl mb-4 text-black">수료자 전용 영상</CardTitle>
                 <p className="text-muted-foreground">
                   JSHA 마스터 코스 수료자만 접근할 수 있습니다.
                   <br />
@@ -179,7 +176,7 @@ const RecapPage = () => {
     return (
       <div className="min-h-screen bg-background">
         <Header />
-        <main className="pt-24 pb-20 px-4">
+        <main className="pt-24 pb-20 px-4 bg-gradient-to-br from-primary/7 via-background to-secondary/7 min-h-[calc(100vh-80px)]">
           <div className="container mx-auto max-w-2xl">
             <Card className="border-2 border-amber-500/20 bg-amber-500/5">
               <CardHeader className="text-center">

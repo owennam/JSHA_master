@@ -125,7 +125,7 @@ export const ApplicationSection = () => {
             <div className="flex items-center justify-center gap-3">
               <AlertCircle className="h-6 w-6 text-orange-600 flex-shrink-0" />
               <p className="text-lg font-bold text-black">
-                <span className="text-orange-600">조기 등록 혜택!</span> 다음 기수에는 가격이 더 인상됩니다
+                <span className="text-orange-600">조기 등록 혜택!</span> <br className='md:hidden' />다음 기수에는 가격이 더 인상됩니다
               </p>
             </div>
           </div>
@@ -182,7 +182,7 @@ export const ApplicationSection = () => {
                 지금 문의하세요
               </h3>
               <p className="text-lg text-muted-foreground mb-8 max-w-xl mx-auto">
-                통증 치료의 새로운 기준, JSHA 마스터 코스가
+                통증 치료의 새로운 기준, <br className='md:hidden' />JSHA 마스터 코스가
                 <br />
                 당신의 진료에 확신을 더해드립니다.
               </p>

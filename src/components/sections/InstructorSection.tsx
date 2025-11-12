@@ -62,7 +62,7 @@ export const InstructorSection = () => {
                   제이에스힐링의원 대표원장
                 </p>
                 <p className="text-lg text-muted-foreground leading-relaxed mb-4">
-                  의학, 카이로프랙틱, 중의학, 신경과학, 정골의학을 통합한
+                  의학, 카이로프랙틱, 중의학,  <br className='md:hidden' />신경과학, 정골의학을 통합한
                   <br />
                   <strong className="text-black">독보적인 통증 치료 전문가</strong>
                 </p>

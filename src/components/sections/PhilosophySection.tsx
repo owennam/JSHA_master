@@ -10,11 +10,11 @@ export const PhilosophySection = () => {
             <h2 className="text-4xl md:text-5xl font-bold mb-10 leading-tight">
               통증이 생겼을 때,
               <br />
-              경고등만 끄는 것이 해결책일까요?
+              경고등만 끄는 것이  <br className='md:hidden' />해결책일까요?
             </h2>
             <div className="max-w-3xl mx-auto space-y-6 text-xl">
               <p className="text-foreground font-medium">
-                대부분의 통증 치료는 <strong className="font-bold">증상 완화</strong>에 집중합니다.
+                대부분의 통증 치료는 <strong className="font-bold">증상 완화</strong>에  <br className='md:hidden' />집중합니다.
               </p>
               <ul className="space-y-3 text-foreground font-medium">
                 <li>• 진통제로 통증을 억제</li>
@@ -22,22 +22,22 @@ export const PhilosophySection = () => {
                 <li>• 신경차단술로 신호 차단</li>
               </ul>
               <p className="text-foreground font-medium pt-4">
-                하지만 이는 마치 <strong className="text-destructive font-bold">자동차의 경고등만 끄는 것</strong> 과 같습니다.
+                하지만 이는 마치 <strong className="text-destructive font-bold"> <br className='md:hidden' />자동차의 경고등만 끄는 것</strong> <br className='md:hidden' /> 과 같습니다.
                 <br />
-                진짜 문제는 해결되지 않은 채, 더 심각한 손상으로 이어질 뿐입니다.
+                진짜 문제는 해결되지 않은 채,  <br className='md:hidden' />더 심각한 손상으로 이어질 뿐입니다.
               </p>
             </div>
           </div>
 
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold mb-6 text-black">
-              JSHA 핵심 철학: 근본 원인을 찾아라
+              JSHA 핵심 철학: <br className='md:hidden' /> 근본 원인을 찾아라
             </h2>
             <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              왜 통증은 자꾸 재발할까? 증상만 치료해서는 근본적인 해결이 어렵습니다.
+              왜 통증은 자꾸 재발할까?  <br className='md:hidden' />증상만 치료해서는  <br className='md:hidden' />근본적인 해결이 어렵습니다.
               <br />
               <span className="mt-2 inline-block">
-                JSHA는{" "}
+                JSHA는{" "} <br className='md:hidden' />
                 <strong className="text-black font-bold bg-primary/10 px-3 py-1 rounded-lg">
                   구조적 불균형
                 </strong>

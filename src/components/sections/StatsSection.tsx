@@ -40,7 +40,7 @@ export const StatsSection = () => {
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             2019년부터 축적된 <strong className="text-black">JSHA의 교육 실적</strong>과
-            <strong className="text-black"> 수료생들의 높은 만족도</strong>
+            <strong className="text-black">  <br className='md:hidden' />수료생들의 높은 만족도</strong>
           </p>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">

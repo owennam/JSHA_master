@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { authenticateUser, saveAuthStatus } from "@/data/authorizedUsers";
-import { ShieldCheck, AlertCircle } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 
 const AuthPage = () => {
   const [clinicName, setClinicName] = useState("");
@@ -50,15 +50,12 @@ const AuthPage = () => {
       <Header />
 
       <main className="pt-20 pb-20">
-        <section className="py-20 px-4">
+        <section className="py-20 px-4 bg-gradient-to-br from-primary/7 via-background to-secondary/7">
           <div className="container mx-auto max-w-md">
             <div className="text-center mb-8 animate-fade-in">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-4">
-                <ShieldCheck className="w-8 h-8 text-primary" />
-              </div>
-              <h1 className="text-3xl md:text-4xl font-bold mb-4">인증이 필요합니다</h1>
+              <h1 className="text-3xl md:text-4xl font-bold mb-4 text-black">인증이 필요합니다</h1>
               <p className="text-lg text-muted-foreground">
-                인솔 구매는 JSHA 인증 의료기관만 이용 가능합니다
+                인솔 구매는 JSHA 인증 의료기관만 <br className='md:hidden' />이용 가능합니다
               </p>
             </div>
 
@@ -66,7 +63,7 @@ const AuthPage = () => {
               <CardHeader>
                 <CardTitle>의료기관 인증</CardTitle>
                 <CardDescription>
-                  의료기관 이름과 원장님 성함을 입력해주세요
+                  의료기관 이름과 원장님 성함을 <br className='md:hidden' />입력해주세요
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -119,7 +116,7 @@ const AuthPage = () => {
                     <a href="mailto:jshaworkshop@gmail.com" className="text-primary hover:underline">
                       jshaworkshop@gmail.com
                     </a>
-                    로 문의해주세요
+                    <br className='md:hidden' />로 문의해주세요
                   </p>
                 </div>
               </CardContent>

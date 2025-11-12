@@ -68,7 +68,7 @@ export const ComparisonTableSection = () => {
             다른 교육과 비교하면?
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            일반 세미나와 JSHA 마스터 코스의 차별점을 확인하세요
+            일반 세미나와 JSHA 마스터 코스의  <br className='md:hidden' />차별점을 확인하세요
           </p>
         </div>
 
@@ -155,10 +155,10 @@ export const ComparisonTableSection = () => {
             <Card className="bg-gradient-to-br from-primary/10 to-accent/10 border-2 border-primary/20">
               <CardContent className="p-8">
                 <h3 className="text-2xl font-bold text-black mb-4">
-                  왜 JSHA 마스터 코스인가?
+                  왜 마스터 코스인가?
                 </h3>
                 <p className="text-lg text-muted-foreground mb-6 max-w-2xl mx-auto">
-                  일회성 세미나가 아닌 <strong className="text-black">4개월간의 체계적 교육</strong>과{" "}
+                  일회성 세미나가 아닌 <strong className="text-black">4개월간의  <br className='md:hidden' />체계적 교육</strong>과{" "}
                   <strong className="text-black">평생 지원 시스템</strong>으로 <br />
                   진정한 전문가로 성장 할 수 있습니다.
                 </p>

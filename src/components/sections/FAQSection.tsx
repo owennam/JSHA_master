@@ -57,7 +57,7 @@ export const FAQSection = () => {
             자주 묻는 질문
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-            JSHA 마스터 코스에 대해 궁금하신 점을 확인하세요
+            JSHA 마스터 코스에 대해 <br className='md:hidden' />궁금하신 점을 확인하세요
           </p>
         </div>
 
@@ -88,7 +88,7 @@ export const FAQSection = () => {
                 더 궁금하신 점이 있으신가요?
               </p>
               <p className="text-foreground font-bold text-xl">
-                아래 문의하기 섹션을 통해 연락 주시기 바랍니다.
+                아래 문의하기 섹션을 통해 <br className='md:hidden' />연락 주시기 바랍니다.
               </p>
             </div>
           </div>

@@ -22,13 +22,13 @@ export const CurriculumSection = () => {
       <div className="container mx-auto px-4">
         <div className="text-center mb-16 animate-[fadeInUp_0.6s_ease-out_0.1s_both]">
           <h2 className="text-4xl md:text-5xl font-bold mb-6 text-black">
-            JSHA 마스터 코스 커리큘럼
+            JSHA 마스터 코스  <br className='md:hidden' />커리큘럼
           </h2>
           <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto mb-4 leading-relaxed">
             4회차, 1박 2일 집중 과정으로 구성된 체계적인 교육 프로그램
           </p>
           <p className="text-lg text-black font-semibold bg-primary/10 px-4 py-2 rounded-xl inline-block">
-            총 40시간의 실전 중심 교육 (각 회차 10시간)
+            총 40시간의 실전 중심 교육  <br className='md:hidden' />(각 회차 10시간)
           </p>
         </div>
 

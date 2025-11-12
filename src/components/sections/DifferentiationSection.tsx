@@ -50,12 +50,12 @@ export const DifferentiationSection = () => {
         <div className="mt-16 max-w-4xl mx-auto">
           <div className="bg-gradient-to-br from-primary via-primary-light to-primary-dark rounded-2xl p-8 md:p-12 text-center shadow-elevated">
             <h3 className="text-2xl md:text-3xl font-bold text-primary-foreground mb-4">
-              통증 치료의 미래, JSHA와 함께
+              통증 치료의 미래,  <br className='md:hidden' />JSHA와 함께
             </h3>
             <p className="text-lg text-primary-foreground/90 max-w-2xl mx-auto leading-relaxed">
               <strong>30년의 임상 경험</strong>, <strong>과학적 근거 기반</strong>, <strong>독창적 치료 시스템</strong>, <strong>실전 중심 교육</strong>
               <br />
-              JSHA 마스터 코스는 통증 치료의 새로운 표준을 제시합니다.
+              JSHA 마스터 코스는 통증 치료의  <br className='md:hidden' />새로운 표준을 제시합니다.
             </p>
             <div className="mt-6 text-xl md:text-2xl font-bold text-primary-foreground tracking-tight">
               당신의 진료실이 행복해지고, <br />

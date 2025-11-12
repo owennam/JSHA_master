@@ -12,7 +12,7 @@ export const InstructorBlogSection = () => {
             강사 인사이트 & 후기
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            전문가들의 임상 경험과 치료 노하우를 블로그에서 확인하세요
+            전문가들의 임상 경험과 치료 노하우를 <br className='md:hidden' />블로그에서 확인하세요
           </p>
         </div>
 

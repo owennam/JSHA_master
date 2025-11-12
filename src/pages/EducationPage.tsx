@@ -12,22 +12,22 @@ const EducationPage = () => {
       
       <main className="pt-20">
         {/* Hero Section */}
-        <section className="py-20 px-4 bg-gradient-to-br from-primary/5 via-background to-secondary/5">
+        <section className="py-20 px-4 bg-gradient-to-br from-primary/7 via-background to-secondary/7">
           <div className="container mx-auto max-w-6xl">
             <div className="text-center mb-12 animate-fade-in">
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-black">
-                내 몸을 살리는 건강한 습관<br />집에서 시작하세요.
+                내 몸을 살리는 <br className='md:hidden' />건강한 습관<br />집에서 시작하세요.
               </h1>
               <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
                 의료진이 직접 제작한 교육 영상으로<br />
-                통증 예방과 건강 증진을 위한 올바른 운동법을 배워보세요.
+                통증 예방과 건강 증진을 위한 <br className='md:hidden' />올바른 운동법을 배워보세요.
               </p>
             </div>
 
             <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto mb-12">
               <div className="text-center p-6 bg-card rounded-2xl border-2 border-border shadow-card hover:shadow-elevated transition-all">
                 <h3 className="font-semibold mb-2 text-black">전문의 검증</h3>
-                <p className="text-sm text-muted-foreground">의료진이 직접 제작하고 검증한 안전한 운동법</p>
+                <p className="text-sm text-muted-foreground">의료진이 직접 제작하고 검증한 <br className='md:hidden' />안전한 운동법</p>
               </div>
               <div className="text-center p-6 bg-card rounded-2xl border-2 border-border shadow-card hover:shadow-elevated transition-all">
                 <h3 className="font-semibold mb-2 text-black">쉬운 따라하기</h3>
@@ -64,9 +64,9 @@ const EducationPage = () => {
           <div className="container mx-auto max-w-4xl text-center">
             <h2 className="text-3xl font-bold mb-6">JS Healing Art란?</h2>
             <p className="text-lg text-muted-foreground leading-relaxed">
-              JS Healing Art는 구조적 불균형을 바로잡아<br /> 근본적인 통증 치료를 추구합니다.
+              JS Healing Art는 <br className='md:hidden' />구조적 불균형을 바로잡아<br /> 근본적인 통증 치료를 추구합니다.
             <br />
-              또한 환자 교육을 통해 스스로 건강을 관리하는 힘을 기르도록 돕습니다.
+              또한 환자 교육을 통해 스스로 건강을 <br className='md:hidden' />관리하는 힘을 기르도록 돕습니다.
             </p>
           </div>
         </section>
@@ -75,7 +75,7 @@ const EducationPage = () => {
         <section className="py-20 px-4 bg-background overflow-hidden">
           <div className="container mx-auto max-w-6xl">
             <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4 text-black">JS Healing Art 인증 의료기관</h2>
+              <h2 className="text-3xl md:text-4xl font-bold mb-4 text-black">JS Healing Art <br className='md:hidden' />인증 의료기관</h2>
               <p className="text-lg text-muted-foreground">
                 JSHA 철학을 기반으로 통증을 치료하는 전국의 인증 의료기관입니다.
               </p>

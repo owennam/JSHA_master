@@ -67,11 +67,9 @@ export const MasterCareApplicationSection = () => {
   const consultingAreaOptions = [
     { id: "dtr-str-ptr", label: "DTR/STR/PTR 기법 심화" },
     { id: "xray", label: "X-ray 판독 및 진단" },
-    { id: "insole", label: "JS Insole 맞춤 제작" },
-    { id: "case-management", label: "환자 케이스 관리" },
+    { id: "case-management", label: "환자 관리" },
     { id: "staff-education", label: "직원 교육 및 표준화" },
     { id: "hospital-system", label: "병원 시스템 구축" },
-    { id: "marketing", label: "마케팅 및 환자 관리" },
     { id: "other", label: "기타" },
   ];
 
@@ -127,7 +125,7 @@ export const MasterCareApplicationSection = () => {
             Master Care 신청
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            전문가의 1:1 맞춤형 컨설팅으로 귀하의 임상을 완성하세요
+            전문가의 1:1 맞춤형 컨설팅으로 <br className='md:hidden' />귀하의 임상을 완성하세요
           </p>
         </div>
 
@@ -169,7 +167,7 @@ export const MasterCareApplicationSection = () => {
                 지금 신청하세요
               </h3>
               <p className="text-lg text-muted-foreground mb-8 max-w-xl mx-auto">
-                Master Care를 통해 JSHA 시스템을 완벽히 마스터하고
+                Master Care를 통해 <br className='md:hidden' />JSHA 시스템을 <br className='md:hidden' />완벽히 마스터하고
                 <br />
                 귀하의 병원을 통증 치료의 중심으로 만드세요
               </p>

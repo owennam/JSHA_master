@@ -10,8 +10,8 @@ export const AcademyIntroSection = () => {
           </h2>
           <div className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed space-y-4">
             <p>
-              JSHA Master Course는 <strong className="text-black">단순히 통증을 없애는 것이 아니라,<br />
-              통증의 근본 원인을 해결하는 의사를 양성</strong>하는 전문 교육 과정입니다.
+              JSHA Master Course는 <strong className="text-black"> <br className='md:hidden' />단순히 통증을 없애는 것이 아니라,<br />
+              통증의 근본 원인을 해결하는 의사를  <br className='md:hidden' />양성</strong>하는 전문 교육 과정입니다.
             </p>
             <p>
             본 과정은 30년 이상의 임상경험과 연구를 통해 탄생한 <strong className="text-black">치료시스템</strong>을 제공하며,<br /> 실제 임상에 바로 적용할 수 있는
@@ -28,16 +28,16 @@ export const AcademyIntroSection = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-lg text-muted-foreground">
-                <strong className="text-black">4개월 집중 과정:</strong> 1박 2일 × 4회 = 총 40시간
+                <strong className="text-black">4개월 집중 과정:</strong> <br className='md:hidden' />1박 2일 × 4회 = 총 40시간
               </p>
               <p className="text-lg text-muted-foreground">
-                <strong className="text-black">실전 중심:</strong> 이론 40% + 실습 60%
+                <strong className="text-black">실전 중심:</strong>  <br className='md:hidden' /> 이론 40% + 실습 60%
               </p>
               <p className="text-lg text-muted-foreground">
-                <strong className="text-black">4개 모듈:</strong> 기초 → 중급 → 심화 → 통합
+                <strong className="text-black">4개 모듈:</strong>  <br className='md:hidden' />기초 → 중급 → 심화 → 통합
               </p>
               <p className="text-lg text-muted-foreground">
-                <strong className="text-black">과학적 근거:</strong> 30년 이상의 임상 연구 기반
+                <strong className="text-black">과학적 근거:</strong>  <br className='md:hidden' />30년 이상의 임상 연구 기반
               </p>
             </CardContent>
           </Card>
@@ -49,16 +49,16 @@ export const AcademyIntroSection = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-lg text-muted-foreground">
-                <strong className="text-black">지원 자격:</strong> 통증 치료에 관심 있는 모든 의사
+                <strong className="text-black">지원 자격:</strong>  <br className='md:hidden' />통증 치료에 관심 있는 모든 의사
               </p>
               <p className="text-lg text-muted-foreground">
-                <strong className="text-black">근본 치료 추구:</strong> 증상이 아닌 원인을 해결하고자 하는 분
+                <strong className="text-black">근본 치료 추구:</strong>  <br className='md:hidden' />증상이 아닌 원인을 해결하고자 하는 분
               </p>
               <p className="text-lg text-muted-foreground">
-                <strong className="text-black">실습 중심 학습:</strong> 4개월간 집중적으로 학습할 수 있는 분
+                <strong className="text-black">실습 중심 학습:</strong>  <br className='md:hidden' />4개월간 집중적으로 학습할 수 있는 분
               </p>
               <p className="text-lg text-muted-foreground">
-                <strong className="text-black">임상 적용 의지:</strong> 배운 내용을 즉시 진료에 활용하고 싶은 분
+                <strong className="text-black">임상 적용 의지:</strong>  <br className='md:hidden' />배운 내용을 즉시 진료에 활용하고 싶은 분
               </p>
             </CardContent>
           </Card>

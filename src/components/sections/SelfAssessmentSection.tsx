@@ -63,7 +63,7 @@ export const SelfAssessmentSection = () => {
       <div className="container mx-auto px-4">
         <div className="text-center mb-12 animate-fade-in">
           <h2 className="text-4xl md:text-5xl font-bold text-black mb-6">
-            당신의 진료실은 몇 점인가요?
+            당신의 진료실은  <br className='md:hidden' /> 몇 점인가요?
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
             6가지 질문으로 현재 진료의 문제점을 진단해보세요
@@ -167,7 +167,7 @@ export const SelfAssessmentSection = () => {
         <div className="mt-12 text-center max-w-2xl mx-auto">
           <p className="text-muted-foreground">
             <strong className="text-black">95% 이상의 수료생</strong>이 이러한 문제점들을
-            JSHA 마스터 코스로 해결했습니다
+            <br className='md:hidden' />JSHA 마스터 코스로 해결했습니다
           </p>
         </div>
       </div>

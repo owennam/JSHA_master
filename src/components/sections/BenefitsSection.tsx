@@ -7,7 +7,7 @@ export const BenefitsSection = () => {
       description: "향후 워크숍 90%, 도수 워크숍 50% 할인 혜택, 평생 교육 자료 접근 권한을 제공합니다.",
     },
     {
-      title: "토요일 피지컬 시간 참석 우선권",
+      title: "피지컬 세션 참석 우선권",
       description: "Free Pass 제공! 실습 위주의 특별 세션에 우선적으로 참여할 수 있습니다.",
     },
     {
@@ -31,7 +31,7 @@ export const BenefitsSection = () => {
       description: "교육 내용을 복습할 수 있도록 다시보기 영상을 제공하여 언제든지 학습 내용을 되짚어볼 수 있습니다.",
     },
     {
-      title: "Master Care (추가 비용 발생)",
+      title: "Master Care (추가 비용)",
       description: "수료 후에도 전문가의 1:1 방문 컨설팅을 신청하여 지속적인 임상 지원과 맞춤형 코칭을 받을 수 있습니다.",
     },
   ];
@@ -45,7 +45,7 @@ export const BenefitsSection = () => {
             수강생 혜택
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-            JSHA Master Course 수강생에게 제공되는 특별한 혜택들
+            JSHA Master Course 수강생에게  <br className='md:hidden' />제공되는 특별한 혜택들
           </p>
         </div>
 

@@ -5,11 +5,11 @@ export const MasterCareServicesSection = () => {
   const visitServices = [
     {
       title: "현장 진료 참관 및 피드백",
-      description: "실제 진료 과정을 참관하고 즉각적인 피드백 제공",
+      description: "실제 진료 과정을 참관하고 피드백 제공",
     },
     {
       title: "어려운 케이스 직접 시연",
-      description: "복잡한 케이스에 대한 전문가의 직접 시연 및 설명",
+      description: "복잡한 케이스에 대한 직접 시연 및 설명",
     },
     {
       title: "병원 시스템 점검",
@@ -57,7 +57,7 @@ export const MasterCareServicesSection = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-16 animate-fade-in">
             <h2 className="text-4xl md:text-5xl font-bold text-black mb-6">
-              이런 분들께 추천합니다
+              이런 분들께 <br className='md:hidden' />추천합니다
             </h2>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
               Master Care는 마스터 코스 수료생의 성공적인 임상 적용을 위해 설계되었습니다
@@ -92,7 +92,7 @@ export const MasterCareServicesSection = () => {
               방문 컨설팅 프로그램
             </h2>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              1회 방문시 제공되는 체계적인 서비스 구성
+              1회 방문시 제공되는 <br className='md:hidden' />체계적인 서비스 구성
             </p>
           </div>
 
@@ -141,7 +141,7 @@ export const MasterCareServicesSection = () => {
               온라인 지원 시스템
             </h2>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              방문 컨설팅 외에도 지속적인 온라인 지원을 제공합니다
+              방문 컨설팅 외에도 <br className='md:hidden' />지속적인 온라인 지원을 제공합니다
             </p>
           </div>
 
