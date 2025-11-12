@@ -7,7 +7,14 @@ export default {
   theme: {
     container: {
       center: true,
-      padding: "2rem",
+      padding: {
+        DEFAULT: "1rem",    // 모바일
+        sm: "1.5rem",       // 태블릿 작은 화면
+        md: "2rem",         // 태블릿
+        lg: "2.5rem",       // 데스크톱
+        xl: "3rem",         // 큰 데스크톱
+        "2xl": "4rem",      // 매우 큰 화면
+      },
       screens: {
         "2xl": "1400px",
       },
