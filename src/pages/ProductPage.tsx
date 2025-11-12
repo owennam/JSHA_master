@@ -287,13 +287,19 @@ const ProductPage = () => {
                     }}
                   >
                     <CardHeader>
-                      <CardTitle className="flex items-center justify-between">
-                        <span>{product.name}</span>
-                        <span className="text-primary">
+                      <CardTitle className="flex items-start justify-between gap-4">
+                        <div className="flex flex-col">
+                          <span>{product.name}</span>
+                          {product.type && (
+                            <span className="text-base font-normal text-muted-foreground mt-1">
+                              ({product.type})
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-primary shrink-0">
                           {product.price.toLocaleString()}원
                         </span>
                       </CardTitle>
-                      <CardDescription>{product.description}</CardDescription>
                     </CardHeader>
                   </Card>
                 ))}
@@ -522,10 +528,16 @@ const ProductPage = () => {
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
         <SheetContent className="w-full sm:max-w-md overflow-y-auto">
           <SheetHeader>
-            <SheetTitle>{selectedProductData?.name}</SheetTitle>
-            <SheetDescription>
-              {selectedProductData?.description}
-            </SheetDescription>
+            <SheetTitle>
+              <div className="flex flex-col gap-1">
+                <span>{selectedProductData?.name}</span>
+                {selectedProductData?.type && (
+                  <span className="text-base font-normal text-muted-foreground">
+                    ({selectedProductData.type})
+                  </span>
+                )}
+              </div>
+            </SheetTitle>
           </SheetHeader>
 
           <div className="mt-6 space-y-6">
