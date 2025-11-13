@@ -13,30 +13,40 @@ const NewsletterListPage = () => {
       
       <main className="pt-20">
         {/* Hero Section */}
-        <section className="py-20 px-4 bg-gradient-to-br from-primary/45 via-primary-dark/40 to-accent/40">
-          <div className="container mx-auto max-w-6xl">
-            <div className="text-center mb-12 animate-fade-in">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-black">
-                통증 치료의<br /> 새로운 패러다임을 제시합니다.
+        <section className="relative min-h-[70vh] flex items-center justify-center overflow-hidden py-20 px-4">
+          {/* Background with gradient */}
+          <div className="absolute inset-0 z-0">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/90 via-primary-dark/85 to-accent/80" />
+            <div className="absolute inset-0 opacity-10">
+              <div className="absolute top-20 left-10 w-72 h-72 bg-white rounded-full blur-3xl" />
+              <div className="absolute bottom-20 right-10 w-96 h-96 bg-white rounded-full blur-3xl" />
+            </div>
+          </div>
+
+          {/* Content */}
+          <div className="relative z-10 container mx-auto max-w-6xl text-center">
+            <div className="space-y-8 animate-fade-in">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">
+                통증 치료의 새로운 패러다임을<br />제시합니다.
               </h1>
-              <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+              <p className="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto leading-relaxed">
                 JSHA의 철학과 임상 경험을 바탕으로 한<br />
                 통증 치료에 대한 새로운 관점을 <br className='md:hidden' />공유합니다.
               </p>
-            </div>
 
-            <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-              <div className="text-center p-6 bg-card rounded-2xl border-2 border-border shadow-card hover:shadow-elevated transition-all">
-                <h3 className="font-semibold mb-2 text-black">최신 연구</h3>
-                <p className="text-sm text-muted-foreground">논문과 임상 데이터 기반의 통찰</p>
-              </div>
-              <div className="text-center p-6 bg-card rounded-2xl border-2 border-border shadow-card hover:shadow-elevated transition-all">
-                <h3 className="font-semibold mb-2 text-black">정기 발행</h3>
-                <p className="text-sm text-muted-foreground">매주 새로운 주제로 찾아옵니다</p>
-              </div>
-              <div className="text-center p-6 bg-card rounded-2xl border-2 border-border shadow-card hover:shadow-elevated transition-all">
-                <h3 className="font-semibold mb-2 text-black">실용 정보</h3>
-                <p className="text-sm text-muted-foreground">임상에 바로 적용 가능한 내용</p>
+              <div className="pt-12 flex flex-wrap justify-center gap-12 text-white">
+                <div className="text-center">
+                  <div className="text-3xl md:text-4xl font-bold mb-2">최신 연구</div>
+                  <div className="text-base md:text-lg text-white/80">임상 데이터 기반</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl md:text-4xl font-bold mb-2">정기 발행</div>
+                  <div className="text-base md:text-lg text-white/80">매주 새로운 주제</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl md:text-4xl font-bold mb-2">실용 정보</div>
+                  <div className="text-base md:text-lg text-white/80">즉시 적용 가능</div>
+                </div>
               </div>
             </div>
           </div>
