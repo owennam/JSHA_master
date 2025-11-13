@@ -8,17 +8,46 @@ const HospitalsPage = () => {
     <div className="min-h-screen bg-background">
       <Header />
 
-      <main className="pt-24 pb-20 px-4">
+      <main className="pt-20">
         {/* Hero Section */}
-        <section className="py-12 bg-gradient-to-br from-primary/7 via-background to-secondary/7">
-          <div className="container mx-auto max-w-7xl">
-            <div className="text-center mb-12 animate-fade-in">
-            <h1 className="text-4xl md:text-5xl font-bold text-black mb-4">
-              JSHA <br className='md:hidden' />치료 병원 찾기
-            </h1>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              전국의 JSHA 치료가 가능한 병원을 확인하고 가까운 병원을 찾아보세요
-            </p>
+        <section className="relative min-h-[70vh] flex items-center justify-center overflow-hidden py-20 px-4">
+          {/* Background with image and gradient overlay */}
+          <div className="absolute inset-0 z-0">
+            <img
+              src="/images/jsha_master_course.jpg"
+              alt="JSHA Hospitals"
+              className="w-full h-full object-cover blur-sm scale-105 transition-transform duration-[10s]"
+            />
+            {/* Toss-style layered gradient */}
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/90 via-primary-dark/85 to-accent/80" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
+          </div>
+
+          {/* Content */}
+          <div className="relative z-10 container mx-auto max-w-6xl text-center">
+            <div className="space-y-8 animate-fade-in">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">
+                JSHA 치료 병원 찾기
+              </h1>
+              <p className="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto leading-relaxed">
+                전국의 JSHA 치료가 가능한 병원을 확인하고<br />
+                가까운 병원을 찾아보세요
+              </p>
+
+              <div className="pt-12 flex flex-wrap justify-center gap-12 text-white">
+                <div className="text-center">
+                  <div className="text-3xl md:text-4xl font-bold mb-2">전국 네트워크</div>
+                  <div className="text-base md:text-lg text-white/80">인증 의료기관</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl md:text-4xl font-bold mb-2">전문 치료</div>
+                  <div className="text-base md:text-lg text-white/80">검증된 기술</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl md:text-4xl font-bold mb-2">예약 가능</div>
+                  <div className="text-base md:text-lg text-white/80">빠른 상담</div>
+                </div>
+              </div>
             </div>
           </div>
         </section>
