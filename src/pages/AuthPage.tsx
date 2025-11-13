@@ -55,7 +55,7 @@ const AuthPage = () => {
             <div className="text-center mb-8 animate-fade-in">
               <h1 className="text-3xl md:text-4xl font-bold mb-4 text-black">인증이 필요합니다</h1>
               <p className="text-lg text-muted-foreground">
-                인솔 구매는 JSHA 인증 의료기관만 <br className='md:hidden' />이용 가능합니다
+                인솔 구매는 JSHA 인증 의료기관만 <br />이용 가능합니다
               </p>
             </div>
 
