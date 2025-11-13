@@ -12,7 +12,7 @@ const EducationPage = () => {
       
       <main className="pt-20">
         {/* Hero Section */}
-        <section className="py-20 px-4 bg-gradient-to-br from-primary/7 via-background to-secondary/7">
+        <section className="py-20 px-4 bg-gradient-to-br from-primary/45 via-primary-dark/40 to-accent/40">
           <div className="container mx-auto max-w-6xl">
             <div className="text-center mb-12 animate-fade-in">
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-black">

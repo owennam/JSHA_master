@@ -26,7 +26,7 @@ const HospitalsPage = () => {
         <div className="container mx-auto max-w-7xl px-4">
           {/* Info Cards */}
           <div className="grid md:grid-cols-3 gap-6 mb-8">
-            <Card className="border-2 border-primary/30 bg-primary/10 shadow-card hover:shadow-elevated transition-all">
+            <Card className="border-2 border-border bg-card shadow-card hover:shadow-elevated transition-all">
               <CardContent className="pt-6">
                 <h3 className="font-semibold mb-1 text-black">지도에서 찾기</h3>
                 <p className="text-sm text-muted-foreground">
@@ -35,7 +35,7 @@ const HospitalsPage = () => {
               </CardContent>
             </Card>
 
-            <Card className="border-2 border-primary/30 bg-primary/10 shadow-card hover:shadow-elevated transition-all">
+            <Card className="border-2 border-border bg-card shadow-card hover:shadow-elevated transition-all">
               <CardContent className="pt-6">
                 <h3 className="font-semibold mb-1 text-black">사전 예약 필수</h3>
                 <p className="text-sm text-muted-foreground">
@@ -44,7 +44,7 @@ const HospitalsPage = () => {
               </CardContent>
             </Card>
 
-            <Card className="border-2 border-primary/30 bg-primary/10 shadow-card hover:shadow-elevated transition-all">
+            <Card className="border-2 border-border bg-card shadow-card hover:shadow-elevated transition-all">
               <CardContent className="pt-6">
                 <h3 className="font-semibold mb-1 text-black">진료 시간 확인</h3>
                 <p className="text-sm text-muted-foreground">
@@ -64,7 +64,7 @@ const HospitalsPage = () => {
             <CardContent className="p-0">
               <div className="w-full h-[600px] md:h-[700px]">
                 <iframe
-                  src="https://www.google.com/maps/d/embed?mid=1jvzm37-simvIE6QS4tQvlcQTfKywjGo&ehbc=2E312F"
+                  src="https://www.google.com/maps/d/embed?mid=1InZHLwdQiOsDT6bsRGQc8onqVq6Ch00"
                   width="100%"
                   height="100%"
                   style={{ border: 0 }}
