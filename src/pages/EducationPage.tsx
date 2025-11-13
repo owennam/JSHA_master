@@ -12,30 +12,40 @@ const EducationPage = () => {
       
       <main className="pt-20">
         {/* Hero Section */}
-        <section className="py-20 px-4 bg-gradient-to-br from-primary/45 via-primary-dark/40 to-accent/40">
-          <div className="container mx-auto max-w-6xl">
-            <div className="text-center mb-12 animate-fade-in">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-black">
-                내 몸을 살리는 <br className='md:hidden' />건강한 습관<br />집에서 시작하세요.
+        <section className="relative min-h-[70vh] flex items-center justify-center overflow-hidden py-20 px-4">
+          {/* Background with gradient */}
+          <div className="absolute inset-0 z-0">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/90 via-primary-dark/85 to-accent/80" />
+            <div className="absolute inset-0 opacity-10">
+              <div className="absolute top-20 left-10 w-72 h-72 bg-white rounded-full blur-3xl" />
+              <div className="absolute bottom-20 right-10 w-96 h-96 bg-white rounded-full blur-3xl" />
+            </div>
+          </div>
+
+          {/* Content */}
+          <div className="relative z-10 container mx-auto max-w-6xl text-center">
+            <div className="space-y-8 animate-fade-in">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">
+                내 몸을 살리는 건강한 습관<br />집에서 시작하세요.
               </h1>
-              <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+              <p className="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto leading-relaxed">
                 의료진이 직접 제작한 교육 영상으로<br />
                 통증 예방과 건강 증진을 위한 <br className='md:hidden' />올바른 운동법을 배워보세요.
               </p>
-            </div>
 
-            <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto mb-12">
-              <div className="text-center p-6 bg-card rounded-2xl border-2 border-border shadow-card hover:shadow-elevated transition-all">
-                <h3 className="font-semibold mb-2 text-black">전문의 검증</h3>
-                <p className="text-sm text-muted-foreground">의료진이 직접 제작하고 검증한 <br className='md:hidden' />안전한 운동법</p>
-              </div>
-              <div className="text-center p-6 bg-card rounded-2xl border-2 border-border shadow-card hover:shadow-elevated transition-all">
-                <h3 className="font-semibold mb-2 text-black">쉬운 따라하기</h3>
-                <p className="text-sm text-muted-foreground">누구나 쉽게 따라할 수 있는 단계별 설명</p>
-              </div>
-              <div className="text-center p-6 bg-card rounded-2xl border-2 border-border shadow-card hover:shadow-elevated transition-all">
-                <h3 className="font-semibold mb-2 text-black">실생활 적용</h3>
-                <p className="text-sm text-muted-foreground">일상에서 바로 실천 가능한 실용적 운동</p>
+              <div className="pt-12 flex flex-wrap justify-center gap-12 text-white">
+                <div className="text-center">
+                  <div className="text-3xl md:text-4xl font-bold mb-2">전문의 검증</div>
+                  <div className="text-base md:text-lg text-white/80">안전한 운동법</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl md:text-4xl font-bold mb-2">쉬운 따라하기</div>
+                  <div className="text-base md:text-lg text-white/80">단계별 설명</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl md:text-4xl font-bold mb-2">실생활 적용</div>
+                  <div className="text-base md:text-lg text-white/80">실용적 운동</div>
+                </div>
               </div>
             </div>
           </div>
