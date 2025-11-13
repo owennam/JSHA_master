@@ -14,13 +14,16 @@ const NewsletterListPage = () => {
       <main className="pt-20">
         {/* Hero Section */}
         <section className="relative min-h-[70vh] flex items-center justify-center overflow-hidden py-20 px-4">
-          {/* Background with gradient */}
+          {/* Background with image and gradient overlay */}
           <div className="absolute inset-0 z-0">
+            <img
+              src="/images/newsletter_hero.png"
+              alt="Newsletter"
+              className="w-full h-full object-cover blur-sm scale-105 transition-transform duration-[10s]"
+            />
+            {/* Toss-style layered gradient */}
             <div className="absolute inset-0 bg-gradient-to-br from-primary/90 via-primary-dark/85 to-accent/80" />
-            <div className="absolute inset-0 opacity-10">
-              <div className="absolute top-20 left-10 w-72 h-72 bg-white rounded-full blur-3xl" />
-              <div className="absolute bottom-20 right-10 w-96 h-96 bg-white rounded-full blur-3xl" />
-            </div>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
           </div>
 
           {/* Content */}
