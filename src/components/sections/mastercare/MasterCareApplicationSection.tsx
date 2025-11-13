@@ -286,11 +286,11 @@ export const MasterCareApplicationSection = () => {
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
-                                <SelectItem value="2024-1">2024년 1기</SelectItem>
-                                <SelectItem value="2024-2">2024년 2기</SelectItem>
-                                <SelectItem value="2025-1">2025년 1기</SelectItem>
-                                <SelectItem value="2025-2">2025년 2기</SelectItem>
                                 <SelectItem value="2026-1">2026년 1기</SelectItem>
+                                <SelectItem value="2026-2">2026년 2기</SelectItem>
+                                <SelectItem value="2027-1">2027년 1기</SelectItem>
+                                <SelectItem value="2027-2">2027년 2기</SelectItem>
+                                <SelectItem value="2028-1">2028년 1기</SelectItem>
                                 <SelectItem value="other">기타</SelectItem>
                               </SelectContent>
                             </Select>
@@ -317,9 +317,9 @@ export const MasterCareApplicationSection = () => {
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
-                                <SelectItem value="basic">Basic Package - 1회 방문 (150만원)</SelectItem>
-                                <SelectItem value="standard">Standard Package - 3회 방문 (400만원) [인기]</SelectItem>
-                                <SelectItem value="premium">Premium Package - 6회 방문 (700만원) [VIP]</SelectItem>
+                                <SelectItem value="basic">Basic Package - 1회 방문 (100만원)</SelectItem>
+                                <SelectItem value="standard">Standard Package - 2회 방문 (400만원) [인기]</SelectItem>
+                                <SelectItem value="premium">Premium Package - 3회 방문 (600만원) [VIP]</SelectItem>
                               </SelectContent>
                             </Select>
                             <FormMessage />
