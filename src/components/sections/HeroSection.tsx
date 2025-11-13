@@ -13,7 +13,7 @@ export const HeroSection = () => {
         <img
           src="/images/jsha_master_course.jpg"
           alt="JSHA Master Course"
-          className="w-full h-full object-cover blur-sm scale-105 transition-transform duration-[10000ms]"
+          className="w-full h-full object-cover blur-sm scale-105 transition-transform duration-[10s]"
         />
         {/* Toss-style layered gradient */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary/90 via-primary-dark/85 to-primary/90" />
