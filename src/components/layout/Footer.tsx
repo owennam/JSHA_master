@@ -52,7 +52,7 @@ export const Footer = () => {
               <strong className="text-primary-foreground">대전제이에스힐링의원</strong>
               <br />
               <br />
-              JSHA Master Course는 대전제이에스힐링의원이 주관하는 공식 교육 프로그램입니다.
+              JSHA Master Course는 대전제이에스힐링의원이 <br />주관하는 공식 교육 프로그램입니다.
             </p>
           </div>
         </div>
