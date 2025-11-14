@@ -27,26 +27,26 @@ const EducationPage = () => {
           {/* Content */}
           <div className="relative z-10 container mx-auto max-w-6xl text-center">
             <div className="space-y-8 animate-fade-in">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
                 내 몸을 살리는 건강한 습관<br />집에서 시작하세요.
               </h1>
-              <p className="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto leading-relaxed">
+              <p className="text-xl md:text-2xl text-gray-900 max-w-3xl mx-auto leading-relaxed">
                 의료진이 직접 제작한 교육 영상으로<br />
                 통증 예방과 건강 증진을 위한 <br className='md:hidden' />올바른 운동법을 배워보세요.
               </p>
 
-              <div className="pt-12 flex flex-wrap justify-center gap-12 text-white">
-                <div className="text-center">
-                  <div className="text-3xl md:text-4xl font-bold mb-2">전문의 검증</div>
-                  <div className="text-base md:text-lg text-white/80">안전한 운동법</div>
+              <div className="pt-12 flex flex-wrap justify-center gap-12 text-gray-900">
+                <div className="text-center group cursor-default">
+                  <div className="text-3xl md:text-4xl font-bold mb-2 transition-all duration-[250ms] group-hover:scale-110 group-hover:text-primary">전문의 검증</div>
+                  <div className="text-base md:text-lg text-gray-700 transition-all duration-[250ms] group-hover:text-gray-900">안전한 운동법</div>
                 </div>
-                <div className="text-center">
-                  <div className="text-3xl md:text-4xl font-bold mb-2">쉬운 따라하기</div>
-                  <div className="text-base md:text-lg text-white/80">단계별 설명</div>
+                <div className="text-center group cursor-default">
+                  <div className="text-3xl md:text-4xl font-bold mb-2 transition-all duration-[250ms] group-hover:scale-110 group-hover:text-primary">쉬운 따라하기</div>
+                  <div className="text-base md:text-lg text-gray-700 transition-all duration-[250ms] group-hover:text-gray-900">단계별 설명</div>
                 </div>
-                <div className="text-center">
-                  <div className="text-3xl md:text-4xl font-bold mb-2">실생활 적용</div>
-                  <div className="text-base md:text-lg text-white/80">실용적 운동</div>
+                <div className="text-center group cursor-default">
+                  <div className="text-3xl md:text-4xl font-bold mb-2 transition-all duration-[250ms] group-hover:scale-110 group-hover:text-primary">실생활 적용</div>
+                  <div className="text-base md:text-lg text-gray-700 transition-all duration-[250ms] group-hover:text-gray-900">실용적 운동</div>
                 </div>
               </div>
             </div>

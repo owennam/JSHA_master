@@ -16,72 +16,42 @@ const HospitalsPage = () => {
             <img
               src="/images/jsha_master_course.jpg"
               alt="JSHA Hospitals"
-              className="w-full h-full object-cover blur-sm scale-105 transition-transform duration-[10s]"
+              className="w-full h-full object-cover blur-md scale-105 transition-transform duration-[10s] opacity-40"
             />
             {/* Blue to white gradient (bottom to top) */}
-            <div className="absolute inset-0 bg-gradient-to-t from-primary/85 via-primary/40 to-white" />
+            <div className="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/50 to-white/95" />
           </div>
 
           {/* Content */}
           <div className="relative z-10 container mx-auto max-w-6xl text-center">
             <div className="space-y-8 animate-fade-in">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
                 JSHA 치료 병원 찾기
               </h1>
-              <p className="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto leading-relaxed">
+              <p className="text-xl md:text-2xl text-gray-900 max-w-3xl mx-auto leading-relaxed">
                 전국의 JSHA 치료가 가능한 병원을 확인하고<br />
                 가까운 병원을 찾아보세요
               </p>
 
-              <div className="pt-12 flex flex-wrap justify-center gap-12 text-white">
-                <div className="text-center">
-                  <div className="text-3xl md:text-4xl font-bold mb-2">전국 네트워크</div>
-                  <div className="text-base md:text-lg text-white/80">인증 의료기관</div>
+              <div className="pt-12 flex flex-wrap justify-center gap-12 text-gray-900">
+                <div className="text-center group cursor-default">
+                  <div className="text-3xl md:text-4xl font-bold mb-2 transition-all duration-[250ms] group-hover:scale-110 group-hover:text-primary">전국 네트워크</div>
+                  <div className="text-base md:text-lg text-gray-700 transition-all duration-[250ms] group-hover:text-gray-900">인증 의료기관</div>
                 </div>
-                <div className="text-center">
-                  <div className="text-3xl md:text-4xl font-bold mb-2">전문 치료</div>
-                  <div className="text-base md:text-lg text-white/80">검증된 기술</div>
+                <div className="text-center group cursor-default">
+                  <div className="text-3xl md:text-4xl font-bold mb-2 transition-all duration-[250ms] group-hover:scale-110 group-hover:text-primary">전문 치료</div>
+                  <div className="text-base md:text-lg text-gray-700 transition-all duration-[250ms] group-hover:text-gray-900">검증된 기술</div>
                 </div>
-                <div className="text-center">
-                  <div className="text-3xl md:text-4xl font-bold mb-2">예약 가능</div>
-                  <div className="text-base md:text-lg text-white/80">빠른 상담</div>
+                <div className="text-center group cursor-default">
+                  <div className="text-3xl md:text-4xl font-bold mb-2 transition-all duration-[250ms] group-hover:scale-110 group-hover:text-primary">예약 가능</div>
+                  <div className="text-base md:text-lg text-gray-700 transition-all duration-[250ms] group-hover:text-gray-900">빠른 상담</div>
                 </div>
               </div>
             </div>
           </div>
         </section>
 
-        <div className="container mx-auto max-w-7xl px-4">
-          {/* Info Cards */}
-          <div className="grid md:grid-cols-3 gap-6 mb-8">
-            <Card className="border-2 border-border bg-card shadow-card hover:shadow-elevated transition-all">
-              <CardContent className="pt-6">
-                <h3 className="font-semibold mb-1 text-black">지도에서 찾기</h3>
-                <p className="text-sm text-muted-foreground">
-                  마커를 클릭하면 병원 정보를 확인할 수 있습니다
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-2 border-border bg-card shadow-card hover:shadow-elevated transition-all">
-              <CardContent className="pt-6">
-                <h3 className="font-semibold mb-1 text-black">사전 예약 필수</h3>
-                <p className="text-sm text-muted-foreground">
-                  방문 전 반드시 병원에 연락하여 예약하세요
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-2 border-border bg-card shadow-card hover:shadow-elevated transition-all">
-              <CardContent className="pt-6">
-                <h3 className="font-semibold mb-1 text-black">진료 시간 확인</h3>
-                <p className="text-sm text-muted-foreground">
-                  각 병원의 진료 시간을 미리 확인하세요
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-
+        <div className="container mx-auto max-w-7xl px-4 py-12">
           {/* Google Maps Embed */}
           <Card className="overflow-hidden shadow-2xl">
             <CardHeader className="bg-muted/50">

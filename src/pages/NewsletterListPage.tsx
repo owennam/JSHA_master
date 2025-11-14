@@ -28,26 +28,26 @@ const NewsletterListPage = () => {
           {/* Content */}
           <div className="relative z-10 container mx-auto max-w-6xl text-center">
             <div className="space-y-8 animate-fade-in">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
                 통증 치료의 새로운 패러다임을<br />제시합니다.
               </h1>
-              <p className="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto leading-relaxed">
+              <p className="text-xl md:text-2xl text-gray-900 max-w-3xl mx-auto leading-relaxed">
                 JSHA의 철학과 임상 경험을 바탕으로 한<br />
                 통증 치료에 대한 새로운 관점을 <br className='md:hidden' />공유합니다.
               </p>
 
-              <div className="pt-12 flex flex-wrap justify-center gap-12 text-white">
-                <div className="text-center">
-                  <div className="text-3xl md:text-4xl font-bold mb-2">최신 연구</div>
-                  <div className="text-base md:text-lg text-white/80">임상 데이터 기반</div>
+              <div className="pt-12 flex flex-wrap justify-center gap-12 text-gray-900">
+                <div className="text-center group cursor-default">
+                  <div className="text-3xl md:text-4xl font-bold mb-2 transition-all duration-[250ms] group-hover:scale-110 group-hover:text-primary">최신 연구</div>
+                  <div className="text-base md:text-lg text-gray-700 transition-all duration-[250ms] group-hover:text-gray-900">임상 데이터 기반</div>
                 </div>
-                <div className="text-center">
-                  <div className="text-3xl md:text-4xl font-bold mb-2">정기 발행</div>
-                  <div className="text-base md:text-lg text-white/80">매주 새로운 주제</div>
+                <div className="text-center group cursor-default">
+                  <div className="text-3xl md:text-4xl font-bold mb-2 transition-all duration-[250ms] group-hover:scale-110 group-hover:text-primary">정기 발행</div>
+                  <div className="text-base md:text-lg text-gray-700 transition-all duration-[250ms] group-hover:text-gray-900">매주 새로운 주제</div>
                 </div>
-                <div className="text-center">
-                  <div className="text-3xl md:text-4xl font-bold mb-2">실용 정보</div>
-                  <div className="text-base md:text-lg text-white/80">즉시 적용 가능</div>
+                <div className="text-center group cursor-default">
+                  <div className="text-3xl md:text-4xl font-bold mb-2 transition-all duration-[250ms] group-hover:scale-110 group-hover:text-primary">실용 정보</div>
+                  <div className="text-base md:text-lg text-gray-700 transition-all duration-[250ms] group-hover:text-gray-900">즉시 적용 가능</div>
                 </div>
               </div>
             </div>

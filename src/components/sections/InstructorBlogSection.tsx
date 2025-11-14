@@ -23,13 +23,7 @@ export const InstructorBlogSection = () => {
               className="hover:shadow-lg transition-all duration-300 group cursor-pointer border-2 hover:border-primary/50"
               onClick={() => window.open(blog.blogUrl, '_blank')}
             >
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-end">
-                  <ExternalLink className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                </div>
-              </CardHeader>
-
-              <CardContent>
+              <CardContent className="pt-6">
                 <h3 className="text-xl font-bold mb-1 group-hover:text-primary transition-colors">
                   {blog.instructorName}
                 </h3>
