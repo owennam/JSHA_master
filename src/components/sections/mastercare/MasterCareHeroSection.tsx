@@ -26,13 +26,13 @@ export const MasterCareHeroSection = () => {
             <span className="text-primary font-semibold">JSHA Master Course 수료생 전용</span>
           </div>
 
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight" style={{ textShadow: '0 2px 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(255, 255, 255, 0.5)' }}>
             JSHA Master Care
             <br />
             <span className="text-gray-900 text-3xl md:text-4xl lg:text-5xl">수료 후에도 계속되는 성장</span>
           </h1>
 
-          <p className="text-xl md:text-2xl text-gray-900 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-xl md:text-2xl text-gray-900 max-w-3xl mx-auto leading-relaxed" style={{ textShadow: '0 2px 8px rgba(255, 255, 255, 0.7), 0 0 15px rgba(255, 255, 255, 0.4)' }}>
             전문가가 직접 방문하여 제공하는 <strong className="text-primary bg-white/90 px-4 py-2 rounded-lg shadow-sm"><br className='md:hidden' />1:1 맞춤형 임상 컨설팅</strong>
             <br />
             배운 것을 실제 임상에 완벽히 적용하는 과정을 함께합니다
@@ -56,7 +56,7 @@ export const MasterCareHeroSection = () => {
             </Button>
           </div>
 
-          <div className="pt-12 pb-16 flex flex-wrap justify-center gap-12 text-gray-900">
+          <div className="pt-12 pb-16 flex flex-wrap justify-center gap-12 text-gray-900" style={{ textShadow: '0 2px 8px rgba(255, 255, 255, 0.7), 0 0 15px rgba(255, 255, 255, 0.4)' }}>
             <div className="text-center group cursor-default">
               <div className="text-3xl md:text-4xl font-bold mb-2 transition-all duration-[250ms] group-hover:scale-110 group-hover:text-primary">1:1</div>
               <div className="text-base md:text-lg text-gray-700 transition-all duration-[250ms] group-hover:text-gray-900">맞춤형 컨설팅</div>

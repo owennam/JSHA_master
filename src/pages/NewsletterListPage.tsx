@@ -28,15 +28,15 @@ const NewsletterListPage = () => {
           {/* Content */}
           <div className="relative z-10 container mx-auto max-w-6xl text-center">
             <div className="space-y-8 animate-fade-in">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight" style={{ textShadow: '0 2px 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(255, 255, 255, 0.5)' }}>
                 통증 치료의 새로운 패러다임을<br />제시합니다.
               </h1>
-              <p className="text-xl md:text-2xl text-gray-900 max-w-3xl mx-auto leading-relaxed">
+              <p className="text-xl md:text-2xl text-gray-900 max-w-3xl mx-auto leading-relaxed" style={{ textShadow: '0 2px 8px rgba(255, 255, 255, 0.7), 0 0 15px rgba(255, 255, 255, 0.4)' }}>
                 JSHA의 철학과 임상 경험을 바탕으로 한<br />
                 통증 치료에 대한 새로운 관점을 <br className='md:hidden' />공유합니다.
               </p>
 
-              <div className="pt-12 flex flex-wrap justify-center gap-12 text-gray-900">
+              <div className="pt-12 flex flex-wrap justify-center gap-12 text-gray-900" style={{ textShadow: '0 2px 8px rgba(255, 255, 255, 0.7), 0 0 15px rgba(255, 255, 255, 0.4)' }}>
                 <div className="text-center group cursor-default">
                   <div className="text-3xl md:text-4xl font-bold mb-2 transition-all duration-[250ms] group-hover:scale-110 group-hover:text-primary">최신 연구</div>
                   <div className="text-base md:text-lg text-gray-700 transition-all duration-[250ms] group-hover:text-gray-900">임상 데이터 기반</div>
