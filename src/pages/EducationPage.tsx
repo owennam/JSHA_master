@@ -20,9 +20,8 @@ const EducationPage = () => {
               alt="Patient Education"
               className="w-full h-full object-cover blur-sm scale-105 transition-transform duration-[10s]"
             />
-            {/* Toss-style layered gradient */}
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/90 via-primary-dark/85 to-accent/80" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
+            {/* Blue to white gradient (bottom to top) */}
+            <div className="absolute inset-0 bg-gradient-to-t from-primary/85 via-primary/40 to-white" />
           </div>
 
           {/* Content */}
