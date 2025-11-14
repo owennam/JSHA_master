@@ -16,10 +16,10 @@ const HospitalsPage = () => {
             <img
               src="/images/jsha_master_course.jpg"
               alt="JSHA Hospitals"
-              className="w-full h-full object-cover blur-md scale-105 transition-transform duration-[10s] opacity-40"
+              className="w-full h-full object-cover blur-sm scale-105 transition-transform duration-[10s]"
             />
             {/* Blue to white gradient (bottom to top) */}
-            <div className="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/50 to-white/95" />
+            <div className="absolute inset-0 bg-gradient-to-t from-primary/85 via-primary/40 to-white" />
           </div>
 
           {/* Content */}
