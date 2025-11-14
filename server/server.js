@@ -12,13 +12,17 @@ const TOSS_SECRET_KEY = config.tossSecretKey;
 
 // CORS 설정 - 여러 클라이언트 URL 허용
 const allowedOrigins = [
+  // 프로덕션 URL
+  process.env.FRONTEND_URL,
+  'https://jsha-master.vercel.app',
+  // 로컬 개발 환경
   `http://localhost:${CLIENT_PORT}`,
   'http://localhost:8080',
   'http://localhost:8081',
   'http://localhost:8082',
   'http://localhost:8083',
   'http://localhost:5173'
-];
+].filter(Boolean); // undefined 값 제거
 
 app.use(cors({
   origin: function(origin, callback) {
