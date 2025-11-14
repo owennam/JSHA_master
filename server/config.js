@@ -36,5 +36,9 @@ export const config = {
 console.log('Config loaded:', {
   googleSheetsId: config.googleSheetsId,
   googleSheetName: config.googleSheetName,
-  tossSecretKey: config.tossSecretKey ? '✓' : '✗'
+  tossSecretKey: config.tossSecretKey ? '✓' : '✗',
+  resendApiKey: config.resendApiKey ? '✓ (Resend configured)' : '✗ (Resend NOT configured)',
+  oauthClientId: config.oauthClientId ? '✓ (OAuth2 configured)' : '✗',
+  emailUser: config.emailUser || 'Not set',
+  adminEmail: config.adminEmail || 'Not set'
 });
