@@ -44,5 +44,14 @@ export const instructorBlogs: InstructorBlog[] = [
     blogUrl: 'https://blog.naver.com/jshahub',
     description: 'JSHA 통증 치료 시스템의 임상 적용과 치료 경험',
     featured: true
+  },
+  {
+    id: 'shin-hyo-sang',
+    instructorName: '신효상 원장',
+    clinic: '닥터베어풋신효상마취통증의학과의원',
+    position: '원장',
+    blogUrl: 'https://blog.naver.com/doctorbarefoot/223609252149',
+    description: '호흡과 맨발을 통한 근본적인 통증 치료',
+    featured: true
   }
 ];

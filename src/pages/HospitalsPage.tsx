@@ -76,7 +76,7 @@ const HospitalsPage = () => {
           </Card>
 
           {/* Additional Information */}
-          <Card className="mt-8 border-amber-500/20 bg-amber-500/5">
+          <Card className="mt-8 bg-white">
             <CardContent className="pt-6">
               <div className="space-y-3">
                 <h3 className="font-semibold text-lg text-black">이용 안내</h3>
