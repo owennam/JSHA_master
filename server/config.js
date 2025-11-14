@@ -15,14 +15,9 @@ export const config = {
   tossSecretKey: process.env.TOSS_SECRET_KEY,
   googleSheetsId: process.env.GOOGLE_SHEETS_ID,
   googleSheetName: process.env.GOOGLE_SHEET_NAME,
-  emailService: process.env.EMAIL_SERVICE || 'gmail',
-  emailUser: process.env.EMAIL_USER,
-  // OAuth2 설정 (권장)
-  oauthClientId: process.env.OAUTH_CLIENT_ID,
-  oauthClientSecret: process.env.OAUTH_CLIENT_SECRET,
-  oauthRefreshToken: process.env.OAUTH_REFRESH_TOKEN,
-  // 레거시 앱 비밀번호 방식 (OAuth2가 없을 경우 대체)
-  emailPassword: process.env.EMAIL_PASSWORD,
+  // Resend 이메일 설정 (클라우드 친화적, 권장)
+  resendApiKey: process.env.RESEND_API_KEY,
+  resendFromEmail: process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev',
   adminEmail: process.env.ADMIN_EMAIL,
   // SOLAPI SMS 설정
   solapiApiKey: process.env.SOLAPI_API_KEY,
