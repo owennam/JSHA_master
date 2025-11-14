@@ -36,17 +36,25 @@ class EmailService {
           },
         });
       } else {
-        throw new Error('Email authentication not configured. Please set up OAuth2 or app password in .env file.');
+        console.warn('⚠️  Email service not configured (emails will be skipped)');
+        return; // 에러를 throw하지 않고 그냥 return
       }
 
-      // 연결 확인
-      await this.transporter.verify();
+      // 연결 확인 (타임아웃 5초로 제한)
+      await Promise.race([
+        this.transporter.verify(),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Verification timeout')), 5000)
+        )
+      ]);
       this.initialized = true;
       console.log('✅ Email service initialized successfully');
     } catch (error) {
       console.error('❌ Failed to initialize email service:', error.message);
       console.error('💡 Tip: Check server/OAUTH2_SETUP.md for OAuth2 setup guide');
-      throw error;
+      // 에러를 throw하지 않고 로그만 남김 (이메일 없이도 신청 접수 가능)
+      this.initialized = false;
+      this.transporter = null;
     }
   }
 
@@ -108,6 +116,12 @@ class EmailService {
   async sendOrderConfirmationToCustomer(orderData) {
     if (!this.initialized) {
       await this.initialize();
+    }
+
+    // 초기화 실패 시 이메일 발송 스킵
+    if (!this.initialized || !this.transporter) {
+      console.warn('⚠️  Email service not initialized, skipping order confirmation email');
+      return { success: false, error: 'Email service not configured' };
     }
 
     const { customerEmail, customerName, orderId, orderName, totalAmount, cartItems, approvedAt, postalCode, address, addressDetail } = orderData;
@@ -197,6 +211,12 @@ class EmailService {
   async sendOrderNotificationToAdmin(orderData) {
     if (!this.initialized) {
       await this.initialize();
+    }
+
+    // 초기화 실패 시 이메일 발송 스킵
+    if (!this.initialized || !this.transporter) {
+      console.warn('⚠️  Email service not initialized, skipping order admin notification');
+      return { success: false, error: 'Email service not configured' };
     }
 
     if (!config.adminEmail) {
@@ -330,6 +350,12 @@ class EmailService {
       await this.initialize();
     }
 
+    // 초기화 실패 시 이메일 발송 스킵
+    if (!this.initialized || !this.transporter) {
+      console.warn('⚠️  Email service not initialized, skipping application confirmation email');
+      return { success: false, error: 'Email service not configured' };
+    }
+
     const { name, email, phone } = applicationData;
 
     const htmlContent = `
@@ -426,6 +452,12 @@ class EmailService {
   async sendApplicationNotificationToAdmin(applicationData) {
     if (!this.initialized) {
       await this.initialize();
+    }
+
+    // 초기화 실패 시 이메일 발송 스킵
+    if (!this.initialized || !this.transporter) {
+      console.warn('⚠️  Email service not initialized, skipping application admin notification');
+      return { success: false, error: 'Email service not configured' };
     }
 
     if (!config.adminEmail) {
@@ -538,6 +570,12 @@ class EmailService {
   async sendMasterCareConfirmationToApplicant(mastercareData) {
     if (!this.initialized) {
       await this.initialize();
+    }
+
+    // 초기화 실패 시 이메일 발송 스킵
+    if (!this.initialized || !this.transporter) {
+      console.warn('⚠️  Email service not initialized, skipping Master Care confirmation email');
+      return { success: false, error: 'Email service not configured' };
     }
 
     const {
@@ -680,6 +718,12 @@ class EmailService {
   async sendMasterCareNotificationToAdmin(mastercareData) {
     if (!this.initialized) {
       await this.initialize();
+    }
+
+    // 초기화 실패 시 이메일 발송 스킵
+    if (!this.initialized || !this.transporter) {
+      console.warn('⚠️  Email service not initialized, skipping Master Care admin notification');
+      return { success: false, error: 'Email service not configured' };
     }
 
     if (!config.adminEmail) {
