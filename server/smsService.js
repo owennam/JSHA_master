@@ -30,7 +30,8 @@ class SMSService {
   }
 
   /**
-   * 전화번호를 국제 형식으로 변환 (010-1234-5678 -> +821012345678)
+   * 전화번호를 SOLAPI 형식으로 변환 (010-1234-5678 -> 01012345678)
+   * SOLAPI는 + 기호 없이 숫자만 허용
    */
   formatPhoneNumber(phone) {
     if (!phone) return null;
@@ -38,17 +39,23 @@ class SMSService {
     // 숫자만 추출
     const numbers = phone.replace(/[^0-9]/g, '');
 
-    // 010으로 시작하는 경우 +82로 변환
-    if (numbers.startsWith('010')) {
-      return '+82' + numbers.substring(1);
-    }
-
-    // 이미 +82로 시작하는 경우
+    // 82로 시작하는 경우 (국제 형식) -> 010으로 변환
     if (numbers.startsWith('82')) {
-      return '+' + numbers;
+      return '0' + numbers.substring(2);
     }
 
-    return '+82' + numbers;
+    // 010으로 시작하는 경우 그대로 반환
+    if (numbers.startsWith('010')) {
+      return numbers;
+    }
+
+    // 10으로 시작하는 경우 (앞에 0이 없는 경우) -> 0 추가
+    if (numbers.startsWith('10')) {
+      return '0' + numbers;
+    }
+
+    // 기타 경우 그대로 반환
+    return numbers;
   }
 
   /**
