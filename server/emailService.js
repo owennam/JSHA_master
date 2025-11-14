@@ -1,9 +1,12 @@
 import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 import { config } from './config.js';
 
 class EmailService {
   constructor() {
     this.transporter = null;
+    this.resend = null;
+    this.useResend = false;
     this.initialized = false;
   }
 
@@ -11,7 +14,17 @@ class EmailService {
     if (this.initialized) return;
 
     try {
-      // OAuth2를 사용하는 경우와 앱 비밀번호를 사용하는 경우 구분
+      // Resend API 우선 사용 (권장 - Render 호환)
+      if (config.resendApiKey) {
+        console.log('🔐 Initializing email service with Resend...');
+        this.resend = new Resend(config.resendApiKey);
+        this.useResend = true;
+        this.initialized = true;
+        console.log('✅ Email service initialized successfully with Resend');
+        return;
+      }
+
+      // OAuth2를 사용하는 경우와 앱 비밀번호를 사용하는 경우 구분 (Nodemailer - Render에서 작동 안 함)
       if (config.oauthClientId && config.oauthClientSecret && config.oauthRefreshToken) {
         // OAuth2 방식 (권장)
         console.log('🔐 Initializing email service with OAuth2...');
@@ -55,6 +68,31 @@ class EmailService {
       // 에러를 throw하지 않고 로그만 남김 (이메일 없이도 신청 접수 가능)
       this.initialized = false;
       this.transporter = null;
+    }
+  }
+
+  /**
+   * 이메일 발송 헬퍼 메서드 (Resend 또는 Nodemailer 사용)
+   */
+  async sendEmail({ from, to, subject, html }) {
+    try {
+      if (this.useResend) {
+        // Resend API 사용
+        const result = await this.resend.emails.send({
+          from,
+          to,
+          subject,
+          html,
+        });
+        return { success: true, messageId: result.id };
+      } else {
+        // Nodemailer 사용
+        const mailOptions = { from, to, subject, html };
+        const info = await this.transporter.sendMail(mailOptions);
+        return { success: true, messageId: info.messageId };
+      }
+    } catch (error) {
+      throw error;
     }
   }
 
@@ -119,7 +157,7 @@ class EmailService {
     }
 
     // 초기화 실패 시 이메일 발송 스킵
-    if (!this.initialized || !this.transporter) {
+    if (!this.initialized || (!this.useResend && !this.transporter)) {
       console.warn('⚠️  Email service not initialized, skipping order confirmation email');
       return { success: false, error: 'Email service not configured' };
     }
@@ -188,17 +226,15 @@ class EmailService {
       </html>
     `;
 
-    const mailOptions = {
-      from: `"JSHA Academy" <${config.emailUser}>`,
-      to: customerEmail,
-      subject: `[JSHA] 주문이 완료되었습니다 (주문번호: ${orderId})`,
-      html: htmlContent,
-    };
-
     try {
-      const info = await this.transporter.sendMail(mailOptions);
+      const result = await this.sendEmail({
+        from: `JSHA Academy <${config.emailUser}>`,
+        to: customerEmail,
+        subject: `[JSHA] 주문이 완료되었습니다 (주문번호: ${orderId})`,
+        html: htmlContent,
+      });
       console.log('✅ Order confirmation email sent to customer:', customerEmail);
-      return { success: true, messageId: info.messageId };
+      return result;
     } catch (error) {
       console.error('❌ Failed to send email to customer:', error);
       throw error;
@@ -214,7 +250,7 @@ class EmailService {
     }
 
     // 초기화 실패 시 이메일 발송 스킵
-    if (!this.initialized || !this.transporter) {
+    if (!this.initialized || (!this.useResend && !this.transporter)) {
       console.warn('⚠️  Email service not initialized, skipping order admin notification');
       return { success: false, error: 'Email service not configured' };
     }
@@ -297,17 +333,15 @@ class EmailService {
       </html>
     `;
 
-    const mailOptions = {
-      from: `"JSHA 주문 시스템" <${config.emailUser}>`,
-      to: config.adminEmail,
-      subject: `[JSHA 관리자] 새 주문 접수 - ${customerName} (${orderId})`,
-      html: htmlContent,
-    };
-
     try {
-      const info = await this.transporter.sendMail(mailOptions);
+      const result = await this.sendEmail({
+        from: `JSHA 주문 시스템 <${config.emailUser}>`,
+        to: config.adminEmail,
+        subject: `[JSHA 관리자] 새 주문 접수 - ${customerName} (${orderId})`,
+        html: htmlContent,
+      });
       console.log('✅ Order notification email sent to admin:', config.adminEmail);
-      return { success: true, messageId: info.messageId };
+      return result;
     } catch (error) {
       console.error('❌ Failed to send email to admin:', error);
       throw error;
@@ -351,7 +385,7 @@ class EmailService {
     }
 
     // 초기화 실패 시 이메일 발송 스킵
-    if (!this.initialized || !this.transporter) {
+    if (!this.initialized || (!this.useResend && !this.transporter)) {
       console.warn('⚠️  Email service not initialized, skipping application confirmation email');
       return { success: false, error: 'Email service not configured' };
     }
@@ -429,17 +463,15 @@ class EmailService {
       </html>
     `;
 
-    const mailOptions = {
-      from: `"JSHA Academy" <${config.emailUser}>`,
-      to: email,
-      subject: `[JSHA 마스터 코스] 신청이 접수되었습니다 - ${name}님`,
-      html: htmlContent,
-    };
-
     try {
-      const info = await this.transporter.sendMail(mailOptions);
+      const result = await this.sendEmail({
+        from: `JSHA Academy <${config.emailUser}>`,
+        to: email,
+        subject: `[JSHA 마스터 코스] 신청이 접수되었습니다 - ${name}님`,
+        html: htmlContent,
+      });
       console.log('✅ Application confirmation email sent to applicant:', email);
-      return { success: true, messageId: info.messageId };
+      return result;
     } catch (error) {
       console.error('❌ Failed to send email to applicant:', error);
       throw error;
@@ -455,7 +487,7 @@ class EmailService {
     }
 
     // 초기화 실패 시 이메일 발송 스킵
-    if (!this.initialized || !this.transporter) {
+    if (!this.initialized || (!this.useResend && !this.transporter)) {
       console.warn('⚠️  Email service not initialized, skipping application admin notification');
       return { success: false, error: 'Email service not configured' };
     }
@@ -519,17 +551,15 @@ class EmailService {
       </html>
     `;
 
-    const mailOptions = {
-      from: `"JSHA 신청 시스템" <${config.emailUser}>`,
-      to: config.adminEmail,
-      subject: `[JSHA 관리자] 새 마스터 코스 신청 - ${name}`,
-      html: htmlContent,
-    };
-
     try {
-      const info = await this.transporter.sendMail(mailOptions);
+      const result = await this.sendEmail({
+        from: `JSHA 신청 시스템 <${config.emailUser}>`,
+        to: config.adminEmail,
+        subject: `[JSHA 관리자] 새 마스터 코스 신청 - ${name}`,
+        html: htmlContent,
+      });
       console.log('✅ Application notification email sent to admin:', config.adminEmail);
-      return { success: true, messageId: info.messageId };
+      return result;
     } catch (error) {
       console.error('❌ Failed to send email to admin:', error);
       throw error;
@@ -573,7 +603,7 @@ class EmailService {
     }
 
     // 초기화 실패 시 이메일 발송 스킵
-    if (!this.initialized || !this.transporter) {
+    if (!this.initialized || (!this.useResend && !this.transporter)) {
       console.warn('⚠️  Email service not initialized, skipping Master Care confirmation email');
       return { success: false, error: 'Email service not configured' };
     }
@@ -695,17 +725,15 @@ class EmailService {
       </html>
     `;
 
-    const mailOptions = {
-      from: `"JSHA Master Care" <${config.emailUser}>`,
-      to: email,
-      subject: `[JSHA Master Care] 신청이 접수되었습니다 - ${name}님`,
-      html: htmlContent,
-    };
-
     try {
-      const info = await this.transporter.sendMail(mailOptions);
+      const result = await this.sendEmail({
+        from: `JSHA Master Care <${config.emailUser}>`,
+        to: email,
+        subject: `[JSHA Master Care] 신청이 접수되었습니다 - ${name}님`,
+        html: htmlContent,
+      });
       console.log('✅ Master Care confirmation email sent to applicant:', email);
-      return { success: true, messageId: info.messageId };
+      return result;
     } catch (error) {
       console.error('❌ Failed to send Master Care email to applicant:', error);
       throw error;
@@ -721,7 +749,7 @@ class EmailService {
     }
 
     // 초기화 실패 시 이메일 발송 스킵
-    if (!this.initialized || !this.transporter) {
+    if (!this.initialized || (!this.useResend && !this.transporter)) {
       console.warn('⚠️  Email service not initialized, skipping Master Care admin notification');
       return { success: false, error: 'Email service not configured' };
     }
@@ -848,17 +876,15 @@ class EmailService {
       </html>
     `;
 
-    const mailOptions = {
-      from: `"JSHA Master Care" <${config.emailUser}>`,
-      to: config.adminEmail,
-      subject: `[JSHA Master Care] 새로운 신청 - ${name} (${packageNames[packageType]})`,
-      html: htmlContent,
-    };
-
     try {
-      const info = await this.transporter.sendMail(mailOptions);
+      const result = await this.sendEmail({
+        from: `JSHA Master Care <${config.emailUser}>`,
+        to: config.adminEmail,
+        subject: `[JSHA Master Care] 새로운 신청 - ${name} (${packageNames[packageType]})`,
+        html: htmlContent,
+      });
       console.log('✅ Master Care notification email sent to admin:', config.adminEmail);
-      return { success: true, messageId: info.messageId };
+      return result;
     } catch (error) {
       console.error('❌ Failed to send Master Care email to admin:', error);
       throw error;

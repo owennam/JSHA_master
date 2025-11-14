@@ -17,7 +17,9 @@ export const config = {
   googleSheetName: process.env.GOOGLE_SHEET_NAME,
   emailService: process.env.EMAIL_SERVICE || 'gmail',
   emailUser: process.env.EMAIL_USER,
-  // OAuth2 설정 (권장)
+  // Resend API (권장 - Render 호환)
+  resendApiKey: process.env.RESEND_API_KEY,
+  // OAuth2 설정 (Gmail용 - Render에서 포트 제한으로 작동 안 함)
   oauthClientId: process.env.OAUTH_CLIENT_ID,
   oauthClientSecret: process.env.OAUTH_CLIENT_SECRET,
   oauthRefreshToken: process.env.OAUTH_REFRESH_TOKEN,
