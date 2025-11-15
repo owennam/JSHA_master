@@ -61,7 +61,7 @@ export const ApplicationSection = () => {
     {
       label: "교육 시간",
       value: "1박 2일",
-      description: "총 40시간 (4회)",
+      description: "총 40시간 (8회)",
     },
     {
       label: "수강료",
