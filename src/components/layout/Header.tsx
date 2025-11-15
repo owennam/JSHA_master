@@ -64,12 +64,9 @@ export const Header = () => {
     setIsMobileMenuOpen(false);
   };
 
-  // UrgencyBanner는 홈페이지에만 있으므로, 홈페이지에서만 top-[52px] 사용
-  const isHomePage = location.pathname === "/";
-
   return (
     <header
-      className={`fixed ${isHomePage ? 'top-[52px]' : 'top-0'} left-0 right-0 z-50 transition-all duration-300 ${
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         isScrolled
           ? "bg-white/95 backdrop-blur-md shadow-card"
           : "bg-transparent"
@@ -86,17 +83,13 @@ export const Header = () => {
                 window.scrollTo({ top: 0, behavior: "smooth" });
               }
             }}
-            className="transition-all hover:scale-105 -ml-2 flex items-center gap-3"
+            className="transition-all hover:scale-110 -ml-2"
           >
             <img
               src="/images/JSHA_logo.webp"
               alt="JSHA Academy Logo"
-              className="h-12 w-auto"
+              className="h-14 w-auto"
             />
-            <div className="flex flex-col items-start">
-              <span className="text-xl font-bold text-black leading-tight">JSHA</span>
-              <span className="text-xs font-medium text-black/70 leading-tight">Master Course</span>
-            </div>
           </button>
 
           {/* Desktop Navigation */}
