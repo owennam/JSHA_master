@@ -11,7 +11,7 @@ export const Footer = () => {
             <img
               src="/images/JSHA_logo.png"
               alt="JSHA"
-              className="h-24 md:h-28 w-auto mb-4"
+              className="h-28 md:h-32 w-auto mb-4"
             />
             <p className="text-primary-foreground/80 leading-relaxed text-sm">
               통증 치료의 새로운 기준,

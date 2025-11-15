@@ -88,7 +88,7 @@ export const Header = () => {
             <img
               src="/images/JSHA_logo.png"
               alt="JSHA"
-              className="h-16 md:h-20 w-auto"
+              className="h-20 md:h-24 w-auto"
             />
             <span className="text-xl md:text-2xl font-bold text-black">
               JS Master Course
