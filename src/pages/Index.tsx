@@ -1,7 +1,6 @@
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { KakaoFloatingButton } from "@/components/layout/KakaoFloatingButton";
-import { UrgencyBanner } from "@/components/layout/UrgencyBanner";
 import { HeroSection } from "@/components/sections/HeroSection";
 import { StatsSection } from "@/components/sections/StatsSection";
 import { PhilosophySection } from "@/components/sections/PhilosophySection";
@@ -23,11 +22,6 @@ import { ApplicationSection } from "@/components/sections/ApplicationSection";
 const Index = () => {
   return (
     <div className="min-h-screen bg-background">
-      <UrgencyBanner
-        deadline={new Date("2026-02-01")}
-        remainingSeats={3}
-        cohortName="2026년 1기"
-      />
       <Header />
       <main>
         <HeroSection />

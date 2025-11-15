@@ -23,7 +23,7 @@ export const HeroSection = () => {
       <div className="relative z-10 container mx-auto px-4 text-center">
         <div className="max-w-4xl mx-auto space-y-8">
           {/* Main Heading with staggered animation */}
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight animate-[fadeInUp_0.6s_ease-out_0.1s_both]" style={{ textShadow: '0 2px 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(255, 255, 255, 0.5)' }}>
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight animate-[fadeInUp_0.6s_ease-out_0.1s_both]">
             환자가 다시 돌아오지 않는 이유,
             <br />
             <span className="inline-block text-gray-900 text-3xl md:text-4xl lg:text-5xl mt-2 animate-[fadeInUp_0.6s_ease-out_0.3s_both]">
@@ -32,10 +32,10 @@ export const HeroSection = () => {
           </h1>
 
           {/* Subtitle */}
-          <p className="text-xl md:text-2xl text-gray-900 max-w-3xl mx-auto leading-relaxed font-medium animate-[fadeInUp_0.6s_ease-out_0.5s_both]" style={{ textShadow: '0 2px 8px rgba(255, 255, 255, 0.7), 0 0 15px rgba(255, 255, 255, 0.4)' }}>
-            4개월간의 체계적 교육으로{" "}
+          <p className="text-xl md:text-2xl text-gray-900 max-w-3xl mx-auto leading-relaxed font-medium animate-[fadeInUp_0.6s_ease-out_0.5s_both]">
+            5개월간의 체계적 교육으로{" "}
             <br className='md:hidden' />
-            <strong className="text-primary font-bold bg-white/90 px-4 py-2 rounded-lg shadow-sm">
+            <strong className="text-primary font-bold bg-white/90 px-2 py-1 rounded-md shadow-sm text-base md:text-xl">
               불균형–보상–통증
             </strong>
             의 본질을 꿰뚫다
@@ -62,10 +62,10 @@ export const HeroSection = () => {
           </div>
 
           {/* Stats with enhanced design */}
-          <div className="pt-12 flex flex-wrap justify-center gap-12 text-gray-900 animate-[fadeInUp_0.6s_ease-out_0.9s_both]" style={{ textShadow: '0 2px 8px rgba(255, 255, 255, 0.7), 0 0 15px rgba(255, 255, 255, 0.4)' }}>
+          <div className="pt-12 flex flex-wrap justify-center gap-12 text-gray-900 animate-[fadeInUp_0.6s_ease-out_0.9s_both]">
             <div className="text-center group cursor-default">
               <div className="text-4xl md:text-5xl font-bold mb-2 transition-all duration-[250ms] group-hover:scale-110 group-hover:text-primary">
-                4개월
+                5개월
               </div>
               <div className="text-base md:text-lg text-gray-700 transition-all duration-[250ms] group-hover:text-gray-900">
                 집중 교육 과정
@@ -73,7 +73,7 @@ export const HeroSection = () => {
             </div>
             <div className="text-center group cursor-default">
               <div className="text-4xl md:text-5xl font-bold mb-2 transition-all duration-[250ms] group-hover:scale-110 group-hover:text-primary">
-                4회차
+                8회차
               </div>
               <div className="text-base md:text-lg text-gray-700 transition-all duration-[250ms] group-hover:text-gray-900">
                 1박 2일 실습
