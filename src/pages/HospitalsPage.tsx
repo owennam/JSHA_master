@@ -26,7 +26,7 @@ const HospitalsPage = () => {
           <div className="relative z-10 container mx-auto max-w-6xl text-center">
             <div className="space-y-8 animate-fade-in">
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
-                JSHA 치료 병원 찾기
+                JSHA <br className='md:hidden' />치료 병원 찾기
               </h1>
               <p className="text-xl md:text-2xl text-gray-900 max-w-3xl mx-auto leading-relaxed">
                 전국의 JSHA 치료가 가능한 병원을 확인하고<br />
