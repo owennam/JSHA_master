@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowRight, AlertCircle } from "lucide-react";
+import { ArrowRight, AlertCircle, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
   Form,
@@ -36,6 +36,7 @@ type ApplicationFormData = z.infer<typeof applicationSchema>;
 export const ApplicationSection = () => {
   const { toast } = useToast();
   const [showForm, setShowForm] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<ApplicationFormData>({
     resolver: zodResolver(applicationSchema),
@@ -71,6 +72,7 @@ export const ApplicationSection = () => {
   ];
 
   const onSubmit = async (data: ApplicationFormData) => {
+    setIsSubmitting(true);
     try {
       const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:3001';
 
@@ -102,6 +104,8 @@ export const ApplicationSection = () => {
         description: error.message || "다시 시도해주세요.",
         variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -313,14 +317,23 @@ export const ApplicationSection = () => {
                         variant="outline"
                         className="flex-1"
                         onClick={() => setShowForm(false)}
+                        disabled={isSubmitting}
                       >
                         취소
                       </Button>
                       <Button
                         type="submit"
                         className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90"
+                        disabled={isSubmitting}
                       >
-                        신청하기
+                        {isSubmitting ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            처리 중...
+                          </>
+                        ) : (
+                          "신청하기"
+                        )}
                       </Button>
                     </div>
 

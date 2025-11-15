@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -46,6 +46,7 @@ type MasterCareFormData = z.infer<typeof masterCareSchema>;
 export const MasterCareApplicationSection = () => {
   const { toast } = useToast();
   const [showForm, setShowForm] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [consultingAreas, setConsultingAreas] = useState<string[]>([]);
 
   const form = useForm<MasterCareFormData>({
@@ -82,6 +83,7 @@ export const MasterCareApplicationSection = () => {
   };
 
   const onSubmit = async (data: MasterCareFormData) => {
+    setIsSubmitting(true);
     try {
       const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:3001';
 
@@ -114,6 +116,8 @@ export const MasterCareApplicationSection = () => {
         description: error.message || "다시 시도해주세요.",
         variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -413,14 +417,23 @@ export const MasterCareApplicationSection = () => {
                           form.reset();
                           setConsultingAreas([]);
                         }}
+                        disabled={isSubmitting}
                       >
                         취소
                       </Button>
                       <Button
                         type="submit"
                         className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90"
+                        disabled={isSubmitting}
                       >
-                        신청하기
+                        {isSubmitting ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            처리 중...
+                          </>
+                        ) : (
+                          "신청하기"
+                        )}
                       </Button>
                     </div>
 
