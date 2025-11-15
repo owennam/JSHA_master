@@ -33,7 +33,7 @@ export const MasterCareHeroSection = () => {
           </h1>
 
           <p className="text-xl md:text-2xl text-gray-900 max-w-3xl mx-auto leading-relaxed">
-            전문가가 직접 방문하여 제공하는<br className='md:hidden' /> <strong className="text-primary bg-white/90 px-4 py-2 rounded-lg shadow-sm">1:1 맞춤형 임상 컨설팅</strong>
+            <strong>전문가가 직접 방문하여 제공하는</strong><br className='md:hidden' /> <strong className="text-primary bg-white/90 px-4 py-2 rounded-lg shadow-sm">1:1 맞춤형 임상 컨설팅</strong>
             <br />
             배운 것을 실제 임상에 완벽히 적용하는 과정을 함께합니다
           </p>
