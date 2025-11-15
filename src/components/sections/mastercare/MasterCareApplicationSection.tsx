@@ -232,7 +232,7 @@ export const MasterCareApplicationSection = () => {
                           <FormItem>
                             <FormLabel>전화번호</FormLabel>
                             <FormControl>
-                              <Input type="tel" placeholder="010-1234-5678" {...field} />
+                              <Input type="tel" placeholder="01012345678" {...field} />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
