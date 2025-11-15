@@ -16,6 +16,27 @@ class GoogleSheetsService {
     this.initialized = false;
   }
 
+  /**
+   * 전화번호를 하이픈 포함 형식으로 변환 (010-1234-5678)
+   * @param {string} phone - 전화번호 (숫자만 또는 하이픈 포함)
+   * @returns {string} 하이픈 포함 전화번호
+   */
+  formatPhoneWithHyphens(phone) {
+    if (!phone) return '';
+
+    // 숫자만 추출
+    const numbers = phone.replace(/[^0-9]/g, '');
+
+    // 010-1234-5678 형식으로 변환
+    if (numbers.length === 11) {
+      return `${numbers.substring(0, 3)}-${numbers.substring(3, 7)}-${numbers.substring(7, 11)}`;
+    } else if (numbers.length === 10) {
+      return `${numbers.substring(0, 3)}-${numbers.substring(3, 6)}-${numbers.substring(6, 10)}`;
+    }
+
+    return phone; // 형식이 맞지 않으면 원본 반환
+  }
+
   async initialize() {
     if (this.initialized) return;
 
@@ -107,7 +128,7 @@ class GoogleSheetsService {
         paymentMethodDetail,              // 결제 수단 상세
         customerInfo.customerName || '',  // 구매자 이름
         customerInfo.customerEmail || '', // 구매자 이메일
-        customerInfo.customerPhone || '', // 구매자 전화번호
+        this.formatPhoneWithHyphens(customerInfo.customerPhone || ''), // 구매자 전화번호 (하이픈 포함)
         fullAddress,                      // 배송 주소
         status,                           // 결제 상태
         approvedAt,                       // 승인 시각
@@ -163,7 +184,7 @@ class GoogleSheetsService {
         now,    // 신청 시각
         name,   // 이름
         email,  // 이메일
-        phone,  // 전화번호
+        this.formatPhoneWithHyphens(phone),  // 전화번호 (하이픈 포함)
         '대기', // 상태 (초기값)
         '',     // 메모 (빈 칸)
       ];
@@ -244,7 +265,7 @@ class GoogleSheetsService {
         now,                                          // 신청 시각
         name,                                         // 이름
         email,                                        // 이메일
-        phone,                                        // 전화번호
+        this.formatPhoneWithHyphens(phone),           // 전화번호 (하이픈 포함)
         hospital,                                     // 병원명
         hospitalAddress || '',                        // 병원 주소
         masterCourseCompleted || '',                  // 수료 기수

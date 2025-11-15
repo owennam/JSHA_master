@@ -143,7 +143,7 @@ class EmailService {
 
           <div style="margin-top: 30px; text-align: center; color: #6b7280; font-size: 14px;">
             <p>이 이메일은 발신 전용입니다. 문의사항은 고객센터로 연락 주시기 바랍니다.</p>
-            <p style="margin: 10px 0;">© 2024 JSHA Academy. All rights reserved.</p>
+            <p style="margin: 10px 0;">© 2025 JSHA Master Course. All rights reserved.</p>
           </div>
         </div>
       </body>
@@ -249,7 +249,7 @@ class EmailService {
 
           <div style="margin-top: 30px; text-align: center; color: #6b7280; font-size: 14px;">
             <p>이 이메일은 자동으로 발송되었습니다.</p>
-            <p style="margin: 10px 0;">© 2024 JSHA Academy. All rights reserved.</p>
+            <p style="margin: 10px 0;">© 2025 JSHA Master Course. All rights reserved.</p>
           </div>
         </div>
       </body>
@@ -378,7 +378,7 @@ class EmailService {
             <p style="margin: 10px 0;">
               📧 contact@jsha.kr | 📞 010-4002-1094
             </p>
-            <p style="margin: 10px 0;">© 2024 JSHA Academy. All rights reserved.</p>
+            <p style="margin: 10px 0;">© 2025 JSHA Master Course. All rights reserved.</p>
           </div>
         </div>
       </body>
@@ -465,7 +465,7 @@ class EmailService {
 
           <div style="margin-top: 30px; text-align: center; color: #6b7280; font-size: 14px;">
             <p>이 이메일은 자동으로 발송되었습니다.</p>
-            <p style="margin: 10px 0;">© 2024 JSHA Academy. All rights reserved.</p>
+            <p style="margin: 10px 0;">© 2025 JSHA Master Course. All rights reserved.</p>
           </div>
         </div>
       </body>
@@ -638,7 +638,7 @@ class EmailService {
             <p style="margin: 10px 0;">
               📧 jshaworkshop@gmail.com | 📞 010-4002-1094
             </p>
-            <p style="margin: 10px 0;">© 2024 JSHA Academy. All rights reserved.</p>
+            <p style="margin: 10px 0;">© 2025 JSHA Master Course. All rights reserved.</p>
           </div>
         </div>
       </body>
