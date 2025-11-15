@@ -88,7 +88,7 @@ export const Header = () => {
             <img
               src="/images/JSHA_logo.png"
               alt="JSHA"
-              className="h-14 md:h-16 w-auto"
+              className="h-16 md:h-20 w-auto"
             />
           </button>
 
