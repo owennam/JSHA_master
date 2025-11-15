@@ -83,13 +83,9 @@ export const Header = () => {
                 window.scrollTo({ top: 0, behavior: "smooth" });
               }
             }}
-            className="transition-all hover:scale-110 -ml-2"
+            className="text-2xl font-bold text-black transition-all hover:scale-105 px-4 py-2 rounded-xl -ml-4"
           >
-            <img
-              src="/images/JSHA_logo.png"
-              alt="JSHA Academy Logo"
-              className="h-14 w-auto"
-            />
+            JSHA <span className="text-black font-extrabold">Master Course</span>
           </button>
 
           {/* Desktop Navigation */}
