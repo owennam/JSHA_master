@@ -257,6 +257,22 @@ class GoogleSheetsService {
         flexible: '유연하게 조율 가능'
       };
 
+      // 컨설팅 분야 라벨 변환
+      const consultingAreaLabels = {
+        'dtr-str-ptr': 'DTR-STR-PTR 기법 심화',
+        'xray': 'X-ray 판독 및 진단',
+        'emg-nerve': '근전도/신경전도 검사',
+        'kinesiology': '운동학/기능해부학',
+        'exercise-rehab': '운동 처방 및 재활',
+        'marketing': '마케팅 및 환자 관리',
+        'insurance': '보험 청구 및 행정'
+      };
+
+      // Transform consultingAreas from IDs to labels
+      const consultingAreasDisplay = consultingAreas
+        ? consultingAreas.split(',').map(id => consultingAreaLabels[id.trim()] || id.trim()).join(', ')
+        : '';
+
       // 현재 시각 (한국 시간)
       const now = new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' });
 
@@ -270,7 +286,7 @@ class GoogleSheetsService {
         hospitalAddress || '',                        // 병원 주소
         masterCourseCompleted || '',                  // 수료 기수
         packageNames[packageType] || packageType,     // 패키지
-        consultingAreas || '',                        // 컨설팅 희망 분야
+        consultingAreasDisplay || '',                 // 컨설팅 희망 분야
         startDateNames[preferredStartDate] || preferredStartDate, // 희망 시작 시기
         additionalNotes || '',                        // 추가 문의사항
         '대기',                                       // 상태 (초기값)

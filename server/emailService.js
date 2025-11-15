@@ -554,6 +554,21 @@ class EmailService {
       flexible: '유연하게 조율 가능'
     };
 
+    const consultingAreaLabels = {
+      'dtr-str-ptr': 'DTR-STR-PTR 기법 심화',
+      'xray': 'X-ray 판독 및 진단',
+      'emg-nerve': '근전도/신경전도 검사',
+      'kinesiology': '운동학/기능해부학',
+      'exercise-rehab': '운동 처방 및 재활',
+      'marketing': '마케팅 및 환자 관리',
+      'insurance': '보험 청구 및 행정'
+    };
+
+    // Transform consultingAreas from IDs to labels
+    const consultingAreasDisplay = consultingAreas
+      ? consultingAreas.split(',').map(id => consultingAreaLabels[id.trim()] || id.trim()).join(', ')
+      : '';
+
     const htmlContent = `
       <!DOCTYPE html>
       <html>
@@ -601,10 +616,10 @@ class EmailService {
             </table>
           </div>
 
-          ${consultingAreas ? `
+          ${consultingAreasDisplay ? `
           <div style="background-color: #eff6ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <h3 style="margin-top: 0; color: #1e40af; font-size: 18px;">컨설팅 희망 분야</h3>
-            <p style="margin: 0; color: #1e40af;">${consultingAreas}</p>
+            <p style="margin: 0; color: #1e40af;">${consultingAreasDisplay}</p>
           </div>
           ` : ''}
 
@@ -704,6 +719,21 @@ class EmailService {
       flexible: '유연하게 조율 가능'
     };
 
+    const consultingAreaLabels = {
+      'dtr-str-ptr': 'DTR-STR-PTR 기법 심화',
+      'xray': 'X-ray 판독 및 진단',
+      'emg-nerve': '근전도/신경전도 검사',
+      'kinesiology': '운동학/기능해부학',
+      'exercise-rehab': '운동 처방 및 재활',
+      'marketing': '마케팅 및 환자 관리',
+      'insurance': '보험 청구 및 행정'
+    };
+
+    // Transform consultingAreas from IDs to labels
+    const consultingAreasDisplay = consultingAreas
+      ? consultingAreas.split(',').map(id => consultingAreaLabels[id.trim()] || id.trim()).join(', ')
+      : '';
+
     const htmlContent = `
       <!DOCTYPE html>
       <html>
@@ -766,10 +796,10 @@ class EmailService {
             </table>
           </div>
 
-          ${consultingAreas ? `
+          ${consultingAreasDisplay ? `
           <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <h3 style="margin-top: 0; color: #1f2937; font-size: 18px;">컨설팅 희망 분야</h3>
-            <p style="margin: 0; color: #4b5563;">${consultingAreas}</p>
+            <p style="margin: 0; color: #4b5563;">${consultingAreasDisplay}</p>
           </div>
           ` : ''}
 
