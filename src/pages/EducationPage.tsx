@@ -28,10 +28,10 @@ const EducationPage = () => {
           <div className="relative z-10 container mx-auto max-w-6xl text-center">
             <div className="space-y-8 animate-fade-in">
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
-                내 몸을 살리는 건강한 습관<br />집에서 시작하세요.
+                내 몸을 살리는 <br className='md:hidden' />건강한 습관<br />집에서 시작하세요.
               </h1>
               <p className="text-xl md:text-2xl text-gray-900 max-w-3xl mx-auto leading-relaxed">
-                의료진이 직접 제작한 교육 영상으로<br />
+                의료진이 직접 제작한 <br className='md:hidden' />교육 영상으로<br />
                 통증 예방과 건강 증진을 위한 <br className='md:hidden' />올바른 운동법을 배워보세요.
               </p>
 
