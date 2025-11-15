@@ -6,7 +6,7 @@ export const ComparisonTableSection = () => {
     {
       category: "교육 기간",
       general: "1-2일",
-      jsha: "5개월 (40시간)",
+      jsha: "5개월 (40시간+참관)",
       highlight: true,
     },
     {
