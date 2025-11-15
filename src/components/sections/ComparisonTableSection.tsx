@@ -6,7 +6,7 @@ export const ComparisonTableSection = () => {
     {
       category: "교육 기간",
       general: "1-2일",
-      jsha: "4개월 (40시간)",
+      jsha: "5개월 (40시간)",
       highlight: true,
     },
     {
@@ -24,7 +24,7 @@ export const ComparisonTableSection = () => {
     {
       category: "커리큘럼",
       general: "일회성 강의",
-      jsha: "4회차 체계적 프로그램",
+      jsha: "8회차 체계적 프로그램",
       highlight: false,
     },
     {
@@ -158,7 +158,7 @@ export const ComparisonTableSection = () => {
                   왜 마스터 코스인가?
                 </h3>
                 <p className="text-lg text-muted-foreground mb-6 max-w-2xl mx-auto">
-                  일회성 세미나가 아닌 <strong className="text-black">4개월간의  <br className='md:hidden' />체계적 교육</strong>과{" "}
+                  일회성 세미나가 아닌 <strong className="text-black">5개월간의  <br className='md:hidden' />체계적 교육</strong>과{" "}
                   <strong className="text-black">평생 지원 시스템</strong>으로 <br />
                   진정한 전문가로 성장 할 수 있습니다.
                 </p>
