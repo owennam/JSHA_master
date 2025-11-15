@@ -32,7 +32,7 @@ const NewsletterListPage = () => {
                 통증 치료의 새로운 패러다임을<br />제시합니다.
               </h1>
               <p className="text-xl md:text-2xl text-gray-900 max-w-3xl mx-auto leading-relaxed">
-                JSHA의 철학과 임상 경험을 바탕으로 한<br />
+                JSHA의 철학과 <br className='md:hidden' />임상 경험을 바탕으로 한<br />
                 통증 치료에 대한 새로운 관점을 <br className='md:hidden' />공유합니다.
               </p>
 
