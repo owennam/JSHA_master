@@ -24,7 +24,7 @@ export const HeroSection = () => {
         <div className="max-w-4xl mx-auto space-y-8">
           {/* Main Heading with staggered animation */}
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight animate-[fadeInUp_0.6s_ease-out_0.1s_both]">
-            환자가 다시 오지 않는 이유,
+            환자가 다시 오지 않는 <br className='md:hidden' />이유,
             <br />
             <span className="inline-block text-gray-900 text-3xl md:text-4xl lg:text-5xl mt-2 animate-[fadeInUp_0.6s_ease-out_0.3s_both]">
               통증만 잡고 <br className='md:hidden' /> 원인은 놓쳤기 때문입니다
