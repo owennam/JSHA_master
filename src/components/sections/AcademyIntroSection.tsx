@@ -55,7 +55,7 @@ export const AcademyIntroSection = () => {
                 <strong className="text-black">근본 치료 추구:</strong>  <br className='md:hidden' />증상이 아닌 원인을 해결하고자 하는 분
               </p>
               <p className="text-lg text-muted-foreground">
-                <strong className="text-black">실습 중심 학습:</strong>  <br className='md:hidden' />4개월간 집중적으로 학습할 수 있는 분
+                <strong className="text-black">실습 중심 학습:</strong>  <br className='md:hidden' />5개월간 집중적으로 학습할 수 있는 분
               </p>
               <p className="text-lg text-muted-foreground">
                 <strong className="text-black">임상 적용 의지:</strong>  <br className='md:hidden' />배운 내용을 즉시 진료에 활용하고 싶은 분
