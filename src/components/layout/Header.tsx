@@ -83,13 +83,16 @@ export const Header = () => {
                 window.scrollTo({ top: 0, behavior: "smooth" });
               }
             }}
-            className="transition-all hover:scale-105 -ml-4"
+            className="transition-all hover:scale-105 -ml-4 flex items-center gap-3"
           >
             <img
               src="/images/JSHA_logo.png"
               alt="JSHA"
               className="h-16 md:h-20 w-auto"
             />
+            <span className="text-xl md:text-2xl font-bold text-black">
+              JS Master Course
+            </span>
           </button>
 
           {/* Desktop Navigation */}
