@@ -8,7 +8,11 @@ export const Footer = () => {
         <div className="grid md:grid-cols-3 gap-8 mb-8">
           {/* 아카데미 정보 */}
           <div>
-            <h3 className="text-2xl font-bold mb-4">JSHA Master Course</h3>
+            <img
+              src="/images/JSHA_logo.png"
+              alt="JSHA"
+              className="h-20 md:h-24 w-auto mb-4"
+            />
             <p className="text-primary-foreground/80 leading-relaxed text-sm">
               통증 치료의 새로운 기준,
               <br />
