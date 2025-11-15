@@ -7,7 +7,7 @@ export const HeroSection = () => {
   };
 
   return (
-    <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden pt-24 md:pt-32 lg:pt-[132px]">
+    <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden pt-20 md:pt-24 lg:pt-28">
       {/* Background with image and enhanced gradient overlay */}
       <div className="absolute inset-0 z-0">
         <img
@@ -62,28 +62,28 @@ export const HeroSection = () => {
           </div>
 
           {/* Stats with enhanced design */}
-          <div className="pt-12 flex flex-wrap justify-center gap-12 text-gray-900 animate-[fadeInUp_0.6s_ease-out_0.9s_both]">
+          <div className="pt-12 flex flex-wrap justify-center gap-12 text-white animate-[fadeInUp_0.6s_ease-out_0.9s_both]">
             <div className="text-center group cursor-default">
-              <div className="text-4xl md:text-5xl font-bold mb-2 transition-all duration-[250ms] group-hover:scale-110 group-hover:text-primary">
+              <div className="text-4xl md:text-5xl font-bold mb-2 transition-all duration-[250ms] group-hover:scale-110 group-hover:text-yellow-300">
                 5개월
               </div>
-              <div className="text-base md:text-lg text-gray-700 transition-all duration-[250ms] group-hover:text-gray-900">
+              <div className="text-base md:text-lg text-white/90 transition-all duration-[250ms] group-hover:text-white">
                 집중 교육 과정
               </div>
             </div>
             <div className="text-center group cursor-default">
-              <div className="text-4xl md:text-5xl font-bold mb-2 transition-all duration-[250ms] group-hover:scale-110 group-hover:text-primary">
+              <div className="text-4xl md:text-5xl font-bold mb-2 transition-all duration-[250ms] group-hover:scale-110 group-hover:text-yellow-300">
                 8회차
               </div>
-              <div className="text-base md:text-lg text-gray-700 transition-all duration-[250ms] group-hover:text-gray-900">
+              <div className="text-base md:text-lg text-white/90 transition-all duration-[250ms] group-hover:text-white">
                 1박 2일 실습
               </div>
             </div>
             <div className="text-center group cursor-default">
-              <div className="text-4xl md:text-5xl font-bold mb-2 transition-all duration-[250ms] group-hover:scale-110 group-hover:text-primary">
+              <div className="text-4xl md:text-5xl font-bold mb-2 transition-all duration-[250ms] group-hover:scale-110 group-hover:text-yellow-300">
                 40시간
               </div>
-              <div className="text-base md:text-lg text-gray-700 transition-all duration-[250ms] group-hover:text-gray-900">
+              <div className="text-base md:text-lg text-white/90 transition-all duration-[250ms] group-hover:text-white">
                 실전 중심 교육
               </div>
             </div>
