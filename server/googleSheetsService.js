@@ -244,7 +244,7 @@ class GoogleSheetsService {
 
       // 패키지명 변환
       const packageNames = {
-        basic: 'Basic Package (150만원)',
+        basic: 'Basic Package (100만원)',
         standard: 'Standard Package (400만원)',
         premium: 'Premium Package (700만원)'
       };

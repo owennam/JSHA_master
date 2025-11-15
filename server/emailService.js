@@ -542,7 +542,7 @@ class EmailService {
     } = mastercareData;
 
     const packageNames = {
-      basic: 'Basic Package (150만원)',
+      basic: 'Basic Package (100만원)',
       standard: 'Standard Package (400만원)',
       premium: 'Premium Package (700만원)'
     };
@@ -621,7 +621,7 @@ class EmailService {
           <div style="background-color: #fef3c7; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f59e0b;">
             <h3 style="margin-top: 0; color: #92400e; font-size: 18px;">💼 Master Care 패키지 안내</h3>
             <p style="margin: 0; color: #78350f;">
-              <strong>Basic:</strong> 1회 방문 (150만원)<br>
+              <strong>Basic:</strong> 1회 방문 (100만원)<br>
               <strong>Standard:</strong> 3회 방문 (400만원)<br>
               <strong>Premium:</strong> 6회 방문 (700만원) + VIP 혜택<br><br>
               <strong>서비스 내용:</strong><br>
@@ -692,7 +692,7 @@ class EmailService {
     } = mastercareData;
 
     const packageNames = {
-      basic: 'Basic Package (150만원)',
+      basic: 'Basic Package (100만원)',
       standard: 'Standard Package (400만원)',
       premium: 'Premium Package (700만원)'
     };
