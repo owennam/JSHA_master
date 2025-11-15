@@ -23,16 +23,16 @@ export const MasterCareHeroSection = () => {
         <div className="max-w-5xl mx-auto space-y-8 animate-fade-in">
           {/* Badge */}
           <div className="inline-flex items-center gap-2 bg-white/90 backdrop-blur-sm px-6 py-3 rounded-full border border-gray-200 shadow-sm">
-            <span className="text-primary font-semibold">JSHA Master Course 수료생 전용</span>
+            <span className="text-primary font-bold">JSHA Master Course 수료생 전용</span>
           </div>
 
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
             JSHA Master Care
             <br />
-            <span className="text-gray-900 text-3xl md:text-4xl lg:text-5xl">수료 후에도 계속되는 성장</span>
+            <span className="text-gray-900 text-3xl md:text-4xl lg:text-5xl font-bold">수료 후에도 계속되는 성장</span>
           </h1>
 
-          <p className="text-xl md:text-2xl text-gray-900 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-xl md:text-2xl text-gray-900 max-w-3xl mx-auto leading-relaxed font-bold">
             <strong>전문가가 직접 방문하여 제공하는</strong><br className='md:hidden' /> <strong className="text-primary bg-white/90 px-4 py-2 rounded-lg shadow-sm">1:1 맞춤형 임상 컨설팅</strong>
             <br />
             배운 것을 실제 임상에 완벽히 적용하는 과정을 함께합니다
@@ -59,15 +59,15 @@ export const MasterCareHeroSection = () => {
           <div className="pt-12 pb-16 flex flex-wrap justify-center gap-12 text-white">
             <div className="text-center group cursor-default">
               <div className="text-3xl md:text-4xl font-bold mb-2 transition-all duration-[250ms] group-hover:scale-110 group-hover:text-yellow-300">1:1</div>
-              <div className="text-base md:text-lg text-white/90 transition-all duration-[250ms] group-hover:text-white">맞춤형 컨설팅</div>
+              <div className="text-base md:text-lg text-white/90 font-bold transition-all duration-[250ms] group-hover:text-white">맞춤형 컨설팅</div>
             </div>
             <div className="text-center group cursor-default">
               <div className="text-3xl md:text-4xl font-bold mb-2 transition-all duration-[250ms] group-hover:scale-110 group-hover:text-yellow-300">현장</div>
-              <div className="text-base md:text-lg text-white/90 transition-all duration-[250ms] group-hover:text-white">직접 방문 지원</div>
+              <div className="text-base md:text-lg text-white/90 font-bold transition-all duration-[250ms] group-hover:text-white">직접 방문 지원</div>
             </div>
             <div className="text-center group cursor-default">
               <div className="text-3xl md:text-4xl font-bold mb-2 transition-all duration-[250ms] group-hover:scale-110 group-hover:text-yellow-300">전문가</div>
-              <div className="text-base md:text-lg text-white/90 transition-all duration-[250ms] group-hover:text-white">체계적 코칭</div>
+              <div className="text-base md:text-lg text-white/90 font-bold transition-all duration-[250ms] group-hover:text-white">체계적 코칭</div>
             </div>
           </div>
         </div>

@@ -30,7 +30,7 @@ const EducationPage = () => {
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
                 내 몸을 살리는 <br className='md:hidden' />건강한 습관<br />집에서 시작하세요.
               </h1>
-              <p className="text-xl md:text-2xl text-gray-900 max-w-3xl mx-auto leading-relaxed">
+              <p className="text-xl md:text-2xl text-gray-900 max-w-3xl mx-auto leading-relaxed font-bold">
                 의료진이 직접 제작한 <br className='md:hidden' />교육 영상으로<br />
                 통증 예방과 건강 증진을 위한 <br className='md:hidden' />올바른 운동법을 배워보세요.
               </p>
@@ -38,15 +38,15 @@ const EducationPage = () => {
               <div className="pt-12 flex flex-wrap justify-center gap-12 text-white">
                 <div className="text-center group cursor-default">
                   <div className="text-3xl md:text-4xl font-bold mb-2 transition-all duration-[250ms] group-hover:scale-110 group-hover:text-yellow-300">전문의 검증</div>
-                  <div className="text-base md:text-lg text-white/90 transition-all duration-[250ms] group-hover:text-white">안전한 운동법</div>
+                  <div className="text-base md:text-lg text-white/90 font-bold transition-all duration-[250ms] group-hover:text-white">안전한 운동법</div>
                 </div>
                 <div className="text-center group cursor-default">
                   <div className="text-3xl md:text-4xl font-bold mb-2 transition-all duration-[250ms] group-hover:scale-110 group-hover:text-yellow-300">쉬운 따라하기</div>
-                  <div className="text-base md:text-lg text-white/90 transition-all duration-[250ms] group-hover:text-white">단계별 설명</div>
+                  <div className="text-base md:text-lg text-white/90 font-bold transition-all duration-[250ms] group-hover:text-white">단계별 설명</div>
                 </div>
                 <div className="text-center group cursor-default">
                   <div className="text-3xl md:text-4xl font-bold mb-2 transition-all duration-[250ms] group-hover:scale-110 group-hover:text-yellow-300">실생활 적용</div>
-                  <div className="text-base md:text-lg text-white/90 transition-all duration-[250ms] group-hover:text-white">실용적 운동</div>
+                  <div className="text-base md:text-lg text-white/90 font-bold transition-all duration-[250ms] group-hover:text-white">실용적 운동</div>
                 </div>
               </div>
             </div>

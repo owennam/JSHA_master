@@ -31,7 +31,7 @@ const NewsletterListPage = () => {
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
                 통증 치료의 새로운 패러다임을<br />제시합니다.
               </h1>
-              <p className="text-xl md:text-2xl text-gray-900 max-w-3xl mx-auto leading-relaxed">
+              <p className="text-xl md:text-2xl text-gray-900 max-w-3xl mx-auto leading-relaxed font-bold">
                 JSHA의 철학과 <br className='md:hidden' />임상 경험을 바탕으로 한<br />
                 통증 치료에 대한 새로운 관점을 <br className='md:hidden' />공유합니다.
               </p>
@@ -39,15 +39,15 @@ const NewsletterListPage = () => {
               <div className="pt-12 flex flex-wrap justify-center gap-12 text-white">
                 <div className="text-center group cursor-default">
                   <div className="text-3xl md:text-4xl font-bold mb-2 transition-all duration-[250ms] group-hover:scale-110 group-hover:text-yellow-300">최신 연구</div>
-                  <div className="text-base md:text-lg text-white/90 transition-all duration-[250ms] group-hover:text-white">임상 데이터 기반</div>
+                  <div className="text-base md:text-lg text-white/90 font-bold transition-all duration-[250ms] group-hover:text-white">임상 데이터 기반</div>
                 </div>
                 <div className="text-center group cursor-default">
                   <div className="text-3xl md:text-4xl font-bold mb-2 transition-all duration-[250ms] group-hover:scale-110 group-hover:text-yellow-300">정기 발행</div>
-                  <div className="text-base md:text-lg text-white/90 transition-all duration-[250ms] group-hover:text-white">매주 새로운 주제</div>
+                  <div className="text-base md:text-lg text-white/90 font-bold transition-all duration-[250ms] group-hover:text-white">매주 새로운 주제</div>
                 </div>
                 <div className="text-center group cursor-default">
                   <div className="text-3xl md:text-4xl font-bold mb-2 transition-all duration-[250ms] group-hover:scale-110 group-hover:text-yellow-300">실용 정보</div>
-                  <div className="text-base md:text-lg text-white/90 transition-all duration-[250ms] group-hover:text-white">즉시 적용 가능</div>
+                  <div className="text-base md:text-lg text-white/90 font-bold transition-all duration-[250ms] group-hover:text-white">즉시 적용 가능</div>
                 </div>
               </div>
             </div>

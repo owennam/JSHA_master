@@ -32,7 +32,7 @@ export const HeroSection = () => {
           </h1>
 
           {/* Subtitle */}
-          <p className="text-xl md:text-2xl text-gray-900 max-w-3xl mx-auto leading-relaxed font-medium animate-[fadeInUp_0.6s_ease-out_0.5s_both]">
+          <p className="text-xl md:text-2xl text-gray-900 max-w-3xl mx-auto leading-relaxed font-bold animate-[fadeInUp_0.6s_ease-out_0.5s_both]">
             5개월간의 체계적 교육으로{" "}
             <br className='md:hidden' />
             <strong className="text-primary font-bold bg-white/90 px-2 py-1 rounded-md shadow-sm text-base md:text-xl">
@@ -67,7 +67,7 @@ export const HeroSection = () => {
               <div className="text-4xl md:text-5xl font-bold mb-2 transition-all duration-[250ms] group-hover:scale-110 group-hover:text-yellow-300">
                 5개월
               </div>
-              <div className="text-base md:text-lg text-white/90 transition-all duration-[250ms] group-hover:text-white">
+              <div className="text-base md:text-lg text-white/90 font-bold transition-all duration-[250ms] group-hover:text-white">
                 집중 교육 과정
               </div>
             </div>
@@ -75,7 +75,7 @@ export const HeroSection = () => {
               <div className="text-4xl md:text-5xl font-bold mb-2 transition-all duration-[250ms] group-hover:scale-110 group-hover:text-yellow-300">
                 8회차
               </div>
-              <div className="text-base md:text-lg text-white/90 transition-all duration-[250ms] group-hover:text-white">
+              <div className="text-base md:text-lg text-white/90 font-bold transition-all duration-[250ms] group-hover:text-white">
                 1박 2일 실습
               </div>
             </div>
@@ -83,7 +83,7 @@ export const HeroSection = () => {
               <div className="text-4xl md:text-5xl font-bold mb-2 transition-all duration-[250ms] group-hover:scale-110 group-hover:text-yellow-300">
                 40시간
               </div>
-              <div className="text-base md:text-lg text-white/90 transition-all duration-[250ms] group-hover:text-white">
+              <div className="text-base md:text-lg text-white/90 font-bold transition-all duration-[250ms] group-hover:text-white">
                 실전 중심 교육
               </div>
             </div>
