@@ -245,7 +245,7 @@ export const ApplicationSection = () => {
                           <FormControl>
                             <Input
                               type="tel"
-                              placeholder="010-1234-5678"
+                              placeholder="01012345678"
                               {...field}
                             />
                           </FormControl>
