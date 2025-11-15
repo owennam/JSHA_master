@@ -137,8 +137,9 @@ class GoogleSheetsService {
         cartItemsText,                    // 주문 상품 상세
       ];
 
-      // 시트에 데이터 추가
-      const appendRange = `${this.sheetName}!A:O`; // A열부터 O열까지
+      // 시트에 데이터 추가 (인솔결제정보 시트)
+      const paymentSheetName = '인솔결제정보';
+      const appendRange = `${paymentSheetName}!A:O`; // A열부터 O열까지
       const response = await this.sheets.spreadsheets.values.append({
         spreadsheetId: this.spreadsheetId,
         range: appendRange,
@@ -325,7 +326,7 @@ class GoogleSheetsService {
   }
 
   /**
-   * 구글 시트에 헤더 행이 있는지 확인하고, 없으면 추가
+   * 구글 시트에 헤더 행이 있는지 확인하고, 없으면 추가 (인솔결제정보 시트)
    */
   async ensureHeaders() {
     if (!this.initialized) {
@@ -336,13 +337,11 @@ class GoogleSheetsService {
       throw new Error('GOOGLE_SHEETS_ID is not set in environment variables');
     }
 
-    if (!this.sheetName) {
-      throw new Error('GOOGLE_SHEET_NAME is not set in environment variables');
-    }
-
     try {
+      const paymentSheetName = '인솔결제정보';
+
       // 첫 번째 행 읽기 (한글 시트명은 작은따옴표로 감싸기)
-      const range = `'${this.sheetName}'!A1:N1`;
+      const range = `'${paymentSheetName}'!A1:O1`;
       const response = await this.sheets.spreadsheets.values.get({
         spreadsheetId: this.spreadsheetId,
         range: range,
@@ -358,6 +357,7 @@ class GoogleSheetsService {
         '구매자 이름',
         '구매자 이메일',
         '구매자 전화번호',
+        '배송 주소',
         '결제 상태',
         '승인 시각',
         '결제 키',
@@ -367,7 +367,7 @@ class GoogleSheetsService {
 
       // 헤더가 없거나 비어있으면 추가
       if (!response.data.values || response.data.values.length === 0) {
-        const updateRange = `'${this.sheetName}'!A1:N1`;
+        const updateRange = `'${paymentSheetName}'!A1:O1`;
         await this.sheets.spreadsheets.values.update({
           spreadsheetId: this.spreadsheetId,
           range: updateRange,
@@ -376,7 +376,7 @@ class GoogleSheetsService {
             values: [headers],
           },
         });
-        console.log('✅ Headers added to Google Sheet');
+        console.log('✅ Headers added to Google Sheet (인솔결제정보)');
       }
     } catch (error) {
       console.error('❌ Failed to ensure headers:', error);

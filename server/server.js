@@ -473,8 +473,11 @@ app.listen(PORT, async () => {
   // 구글 시트 초기화 (헤더는 수동으로 추가)
   try {
     await googleSheetsService.initialize();
-    console.log('📊 Google Sheets ready (headers should be manually added)');
-    console.log('   Please ensure sheet "결제정보" exists with headers in row 1');
+    console.log('📊 Google Sheets ready');
+    console.log('   Payment sheet: "인솔결제정보"');
+    console.log('   Application sheet: "마스터코스신청자"');
+    console.log('   Master Care sheet: "Master_care"');
+    console.log('   Graduate sheet: "수료자명단"');
   } catch (error) {
     console.error('⚠️  Google Sheets initialization failed:', error.message);
     console.error('   Payment will work but data won\'t be saved to sheets');
