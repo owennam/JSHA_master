@@ -31,7 +31,7 @@ export const AcademyIntroSection = () => {
                 <strong className="text-black">5개월 집중 과정:</strong> <br className='md:hidden' />1박 2일 × 4회 = 총 40시간 + 참관
               </p>
               <p className="text-lg text-muted-foreground">
-                <strong className="text-black">실전 중심:</strong>  <br className='md:hidden' /> 이론 40% + 실습 60% + 참관관
+                <strong className="text-black">실전 중심:</strong>  <br className='md:hidden' /> 이론 40% + 실습 60% + 참관
               </p>
               <p className="text-lg text-muted-foreground">
                 <strong className="text-black">4개 세션 + 참관:</strong>  <br className='md:hidden' />기초 → 중급 → 심화 → 통합 → 참관
