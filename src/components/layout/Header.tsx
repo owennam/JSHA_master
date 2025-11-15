@@ -86,7 +86,7 @@ export const Header = () => {
             className="transition-all hover:scale-110 -ml-2"
           >
             <img
-              src="/images/JSHA_logo.webp"
+              src="/images/JSHA_logo.png"
               alt="JSHA Academy Logo"
               className="h-14 w-auto"
             />

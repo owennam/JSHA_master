@@ -10,7 +10,7 @@ export const Footer = () => {
           <div>
             <div className="mb-4">
               <img
-                src="/images/JSHA_logo.webp"
+                src="/images/JSHA_logo.png"
                 alt="JSHA Academy Logo"
                 className="h-20 w-auto"
               />
