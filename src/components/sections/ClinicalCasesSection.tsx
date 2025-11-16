@@ -63,14 +63,6 @@ export const ClinicalCasesSection = () => {
                 현장에서 <br className='md:hidden' />직접 겪은 생생한 치료 노하우를 공유합니다
               </p>
 
-              <div className="flex flex-col sm:flex-row gap-3 justify-center items-center mb-6">
-                <span className="text-sm text-muted-foreground">실제 X-ray 사례</span>
-                <div className="hidden sm:block w-1 h-1 rounded-full bg-muted-foreground/30"></div>
-                <span className="text-sm text-muted-foreground">원장님 후기</span>
-                <div className="hidden sm:block w-1 h-1 rounded-full bg-muted-foreground/30"></div>
-                <span className="text-sm text-muted-foreground">치료 노하우 공유</span>
-              </div>
-
               <Button
                 size="lg"
                 className="text-lg px-8 py-6 shadow-lg hover:shadow-xl transition-all"
