@@ -67,7 +67,7 @@ export const ApplicationSection = () => {
     {
       label: "수강료",
       value: "세션별 상이",
-      description: "1회차 197만원\n전회차 등록 1100만원\n(이전 워크숍 참석자 50% 할인)",
+      description: "1회차 198만원\n전회차 등록 1100만원\n(이전 워크숍 참석자 50% 할인)",
     },
   ];
 
