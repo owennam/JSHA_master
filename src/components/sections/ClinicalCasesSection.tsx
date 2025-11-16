@@ -76,7 +76,7 @@ export const ClinicalCasesSection = () => {
                 className="text-lg px-8 py-6 shadow-lg hover:shadow-xl transition-all"
                 onClick={() => window.open(bandUrl, '_blank')}
               >
-                실제 사례 커뮤니티 참여하기
+                네이버 밴드 참여하기
               </Button>
             </CardContent>
           </Card>
