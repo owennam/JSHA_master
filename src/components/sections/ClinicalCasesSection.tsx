@@ -22,7 +22,7 @@ export const ClinicalCasesSection = () => {
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            실제 임상에서 검증된 JSHA 테크닉
+            실제 임상에서 검증된 JSHA
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-2">
             이론이 아닌, X-ray로 증명된 실제 사례
@@ -56,11 +56,11 @@ export const ClinicalCasesSection = () => {
           <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10">
             <CardContent className="pt-8 pb-8 text-center">
               <h3 className="text-2xl font-bold mb-3">
-                전문가 커뮤니티에서 실제 사례를 확인하세요
+                전문가 커뮤니티에서 <br className='md:hidden' />실제 사례를 확인하세요
               </h3>
               <p className="text-muted-foreground mb-6">
-                같은 고민을 했던 원장님들의 치료 전후 X-ray 사례와 <br className="hidden md:block" />
-                현장에서 직접 겪은 생생한 치료 노하우를 공유합니다
+                같은 고민을 했던 원장님들의 <br className='md:hidden' />치료 전후 X-ray 사례와 <br className="hidden md:block" />
+                현장에서 <br className='md:hidden' />직접 겪은 생생한 치료 노하우를 공유합니다
               </p>
 
               <div className="flex flex-col sm:flex-row gap-3 justify-center items-center mb-6">
