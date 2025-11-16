@@ -14,6 +14,7 @@ import { DifferentiationSection } from "@/components/sections/DifferentiationSec
 import { ComparisonTableSection } from "@/components/sections/ComparisonTableSection";
 import { BenefitsSection } from "@/components/sections/BenefitsSection";
 import { InstructorBlogSection } from "@/components/sections/InstructorBlogSection";
+import { ClinicalCasesSection } from "@/components/sections/ClinicalCasesSection";
 import { TargetAudienceSection } from "@/components/sections/TargetAudienceSection";
 import { ScheduleSection } from "@/components/sections/ScheduleSection";
 import { FAQSection } from "@/components/sections/FAQSection";
@@ -28,6 +29,7 @@ const Index = () => {
         <StatsSection />
         <SelfAssessmentSection />
         <PhilosophySection />
+        <ClinicalCasesSection />
         <AcademyIntroSection />
         <InstructorSection />
         <WorkshopVideoSection />
