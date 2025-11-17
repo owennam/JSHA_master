@@ -20,6 +20,22 @@ export const AcademyIntroSection = () => {
           </div>
         </div>
 
+        {/* 워크샵 현장 이미지 */}
+        <div className="mb-16 max-w-5xl mx-auto">
+          <div className="relative rounded-2xl overflow-hidden shadow-2xl group">
+            <img
+              src="/images/workshop.jpg"
+              alt="JSHA 워크샵 교육 현장"
+              className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="absolute bottom-0 left-0 right-0 p-6 text-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+              <p className="text-lg font-semibold">실제 JSHA 워크샵 교육 현장</p>
+              <p className="text-sm text-white/90">전문 의료진들과 함께하는 체계적인 실습 중심 교육</p>
+            </div>
+          </div>
+        </div>
+
         <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto mb-16">
           {/* 프로그램 특징 */}
           <Card className="border-2 hover:border-primary transition-colors shadow-card hover:shadow-elevated">
