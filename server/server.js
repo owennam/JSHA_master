@@ -208,7 +208,7 @@ app.post('/confirm-payment', async (req, res) => {
 
 // 마스터 코스 신청서 제출 엔드포인트
 app.post('/submit-application', async (req, res) => {
-  const { name, email, phone } = req.body;
+  const { name, email, phone, hospital, workType } = req.body;
 
   // 요청 파라미터 검증
   if (!name || !email || !phone) {
@@ -220,12 +220,14 @@ app.post('/submit-application', async (req, res) => {
   }
 
   try {
-    console.log('신청서 접수:', { name, email, phone });
+    console.log('신청서 접수:', { name, email, phone, hospital, workType });
 
     const applicationData = {
       name,
       email,
       phone,
+      hospital,
+      workType,
     };
 
     // 구글 시트에 신청 정보 저장

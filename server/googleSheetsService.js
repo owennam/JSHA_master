@@ -167,7 +167,7 @@ class GoogleSheetsService {
 
   /**
    * 마스터 코스 신청 정보를 구글 시트에 저장
-   * @param {Object} applicationData - 신청자 정보 (이름, 이메일, 전화번호)
+   * @param {Object} applicationData - 신청자 정보 (이름, 이메일, 전화번호, 근무병원, 근무형태)
    */
   async saveApplicationInfo(applicationData) {
     if (!this.initialized) {
@@ -175,7 +175,7 @@ class GoogleSheetsService {
     }
 
     try {
-      const { name, email, phone } = applicationData;
+      const { name, email, phone, hospital, workType } = applicationData;
 
       // 현재 시각 (한국 시간)
       const now = new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' });
@@ -186,13 +186,15 @@ class GoogleSheetsService {
         name,   // 이름
         email,  // 이메일
         this.formatPhoneWithHyphens(phone),  // 전화번호 (하이픈 포함)
+        hospital || '',   // 근무병원
+        workType || '',   // 근무형태
         '대기', // 상태 (초기값)
         '',     // 메모 (빈 칸)
       ];
 
       // 신청자 시트에 데이터 추가
       const applicationSheetName = '마스터코스신청자';
-      const appendRange = `${applicationSheetName}!A:F`; // A열부터 F열까지
+      const appendRange = `${applicationSheetName}!A:H`; // A열부터 H열까지
       const response = await this.sheets.spreadsheets.values.append({
         spreadsheetId: this.spreadsheetId,
         range: appendRange,
