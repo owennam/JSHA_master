@@ -31,7 +31,6 @@ export const AcademyIntroSection = () => {
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             <div className="absolute bottom-0 left-0 right-0 p-6 text-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
               <p className="text-lg font-semibold">실제 JSHA 워크샵 교육 현장</p>
-              <p className="text-sm text-white/90">전문 의료진들과 함께하는 체계적인 실습 중심 교육</p>
             </div>
           </div>
         </div>
