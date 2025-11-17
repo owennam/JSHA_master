@@ -70,6 +70,10 @@ export const ClinicalCasesSection = () => {
               >
                 네이버 밴드 참여하기
               </Button>
+
+              <p className="text-sm text-muted-foreground mt-4">
+                * 밴드에 가입하셔야 임상 사례를 확인하실 수 있습니다
+              </p>
             </CardContent>
           </Card>
         </div>
