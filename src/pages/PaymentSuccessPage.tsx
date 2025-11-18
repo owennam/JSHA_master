@@ -5,6 +5,7 @@ import { Footer } from "@/components/layout/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, Loader2 } from "lucide-react";
+import { logCustomEvent } from "@/lib/firebase";
 
 const SERVER_URL = import.meta.env.VITE_SERVER_URL;
 
@@ -73,6 +74,28 @@ const PaymentSuccessPage = () => {
 				console.log("결제 승인 성공:", result.data);
 				setPaymentInfo(result.data);
 				setIsConfirming(false);
+
+				// Google Analytics 구매 이벤트 로깅
+				try {
+					let items = [];
+					if (cartItems) {
+						const parsedItems = JSON.parse(cartItems);
+						items = parsedItems.map((item: any) => ({
+							item_id: item.id,
+							item_name: item.name,
+							price: item.price,
+							quantity: item.quantity,
+						}));
+					}
+
+					logCustomEvent.purchaseComplete(
+						result.data.orderId,
+						result.data.totalAmount,
+						items
+					);
+				} catch (analyticsError) {
+					console.warn("Analytics 이벤트 로깅 실패:", analyticsError);
+				}
 			} catch (err: any) {
 				console.error("결제 승인 오류:", err);
 				setError(err.message || "결제 승인 중 오류가 발생했습니다.");
@@ -81,7 +104,7 @@ const PaymentSuccessPage = () => {
 		};
 
 		confirmPayment();
-	}, [paymentKey, orderId, amount]);
+	}, [paymentKey, orderId, amount, cartItems]);
 
 	if (isConfirming) {
 		return (
