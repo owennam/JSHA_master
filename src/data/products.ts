@@ -102,7 +102,7 @@ export const products: Product[] = [
   },
   {
     id: "kuronta",
-    name: "쿠론타",
+    name: "쿠룬타",
     type: "",
     price: 132000,
     description: "",
