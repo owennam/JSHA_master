@@ -1,9 +1,11 @@
+import { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { ScrollToTop } from "@/components/layout/ScrollToTop";
+import { logPageView } from "@/lib/firebase";
 import Index from "./pages/Index";
 import EducationPage from "./pages/EducationPage";
 import VideoDetailPage from "./pages/VideoDetailPage";
@@ -24,12 +26,25 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+// Analytics 페이지뷰 추적 컴포넌트
+const AnalyticsTracker = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    // 페이지 변경 시 자동으로 페이지뷰 로깅
+    logPageView(location.pathname, document.title);
+  }, [location]);
+
+  return null;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <AnalyticsTracker />
         <ScrollToTop />
         <Routes>
           <Route path="/" element={<Index />} />
