@@ -196,7 +196,7 @@ export function HospitalMap({ appsScriptUrl }: HospitalMapProps) {
                                 <p className="text-sm text-gray-600">{hospital.address}</p>
                                 {hospital.status === 'ON' && (
                                     <div className="inline-block px-2 py-1 bg-red-100 text-red-700 text-xs rounded-full font-semibold">
-                                        운영 중
+                                        회송 가능 의료기관
                                     </div>
                                 )}
                             </div>
@@ -213,11 +213,11 @@ export function HospitalMap({ appsScriptUrl }: HospitalMapProps) {
                 <div className="space-y-1 text-xs">
                     <div className="flex items-center gap-2">
                         <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                        <span>운영 중: {hospitalData.redCount}개</span>
+                        <span>회송 가능: {hospitalData.redCount}개</span>
                     </div>
                     <div className="flex items-center gap-2">
                         <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                        <span>기타: {hospitalData.blueCount}개</span>
+                        <span>진료 가능: {hospitalData.blueCount}개</span>
                     </div>
                     <div className="pt-1 border-t mt-2">
                         <span className="font-semibold">총 {hospitalData.totalCount}개</span>
