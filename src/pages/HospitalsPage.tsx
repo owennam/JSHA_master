@@ -1,6 +1,7 @@
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { HospitalMap } from "@/components/map/HospitalMap";
 import { MapPin, Phone } from "lucide-react";
 
 const HospitalsPage = () => {
@@ -52,7 +53,7 @@ const HospitalsPage = () => {
         </section>
 
         <div className="container mx-auto max-w-7xl px-4 py-12">
-          {/* Google Maps Embed */}
+          {/* Dynamic Hospital Map */}
           <Card className="overflow-hidden shadow-2xl">
             <CardHeader className="bg-muted/50">
               <CardTitle className="text-black">
@@ -60,18 +61,7 @@ const HospitalsPage = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
-              <div className="w-full h-[600px] md:h-[700px]">
-                <iframe
-                  src="https://www.google.com/maps/d/embed?mid=1InZHLwdQiOsDT6bsRGQc8onqVq6Ch00"
-                  width="100%"
-                  height="100%"
-                  style={{ border: 0 }}
-                  allowFullScreen
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                  title="JSHA 치료 가능 병원 지도"
-                />
-              </div>
+              <HospitalMap />
             </CardContent>
           </Card>
 
@@ -80,32 +70,32 @@ const HospitalsPage = () => {
             <CardContent className="pt-6">
               <div className="space-y-3">
                 <h3 className="font-semibold text-lg text-black">이용 안내</h3>
-                  <ul className="space-y-2 text-sm text-muted-foreground">
-                    <li className="flex items-start gap-2">
-                      <span className="text-amber-600 mt-1">•</span>
-                      <span>
-                        지도에 표시된 병원은 JSHA 워크숍을 수료하고 JSHA 치료를 시행하는 의료기관입니다
-                      </span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-amber-600 mt-1">•</span>
-                      <span>
-                        방문 전 반드시 해당 병원에 전화하여 JSHA 치료 가능 여부와 예약을 확인하세요
-                      </span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-amber-600 mt-1">•</span>
-                      <span>
-                        병원별로 제공하는 JSHA 치료 범위와 방식이 다를 수 있으니 자세한 사항은 직접 문의해주세요
-                      </span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-amber-600 mt-1">•</span>
-                      <span>
-                        지도 정보가 최신이 아닐 수 있으니 방문 전 확인이 필요합니다
-                      </span>
-                    </li>
-                  </ul>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  <li className="flex items-start gap-2">
+                    <span className="text-amber-600 mt-1">•</span>
+                    <span>
+                      지도에 표시된 병원은 JSHA 워크숍을 수료하고 JSHA 치료를 시행하는 의료기관입니다
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-amber-600 mt-1">•</span>
+                    <span>
+                      방문 전 반드시 해당 병원에 전화하여 JSHA 치료 가능 여부와 예약을 확인하세요
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-amber-600 mt-1">•</span>
+                    <span>
+                      병원별로 제공하는 JSHA 치료 범위와 방식이 다를 수 있으니 자세한 사항은 직접 문의해주세요
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-amber-600 mt-1">•</span>
+                    <span>
+                      지도 정보가 최신이 아닐 수 있으니 방문 전 확인이 필요합니다
+                    </span>
+                  </li>
+                </ul>
               </div>
             </CardContent>
           </Card>

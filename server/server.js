@@ -5,6 +5,9 @@ import googleSheetsService from './googleSheetsService.js';
 import emailService from './emailService.js';
 import smsService from './smsService.js';
 
+import cookieParser from 'cookie-parser';
+import adminRoutes from './routes/adminRoutes.js';
+
 const app = express();
 const PORT = config.serverPort;
 const CLIENT_PORT = config.clientPort;
@@ -24,7 +27,7 @@ const allowedOrigins = [
 ];
 
 app.use(cors({
-  origin: function(origin, callback) {
+  origin: function (origin, callback) {
     // origin이 없는 경우(예: 모바일 앱, Postman) 또는 허용된 origin인 경우
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
@@ -38,6 +41,10 @@ app.use(cors({
 }));
 
 app.use(express.json());
+app.use(cookieParser());
+
+// Admin Routes
+app.use('/api/admin', adminRoutes);
 
 // 서버 상태 확인 엔드포인트
 app.get('/health', (req, res) => {

@@ -14,47 +14,67 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
-// Firebase 초기화
-const app = initializeApp(firebaseConfig);
+// Firebase 초기화 (안전하게 처리)
+let app: ReturnType<typeof initializeApp> | null = null;
+let auth: ReturnType<typeof getAuth> | null = null;
+let googleProvider: GoogleAuthProvider | null = null;
 
-// Authentication 초기화
-export const auth = getAuth(app);
+try {
+  // Firebase 설정이 있는 경우에만 초기화
+  if (firebaseConfig.apiKey && firebaseConfig.projectId) {
+    app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    googleProvider = new GoogleAuthProvider();
+    googleProvider.setCustomParameters({
+      prompt: 'select_account'
+    });
+    console.log('✅ Firebase initialized');
+  } else {
+    console.warn('⚠️ Firebase not configured (missing environment variables)');
+  }
+} catch (error) {
+  console.error('❌ Firebase initialization failed:', error);
+}
 
-// Google 로그인 Provider
-export const googleProvider = new GoogleAuthProvider();
-
-// 로그인 시 항상 계정 선택 팝업 표시
-googleProvider.setCustomParameters({
-  prompt: 'select_account'
-});
+export { auth, googleProvider };
 
 // Analytics 초기화 (브라우저 환경에서만)
 let analytics: ReturnType<typeof getAnalytics> | null = null;
 
 // Analytics 지원 여부 확인 후 초기화
-isSupported().then(supported => {
-  if (supported) {
-    analytics = getAnalytics(app);
-    console.log('✅ Firebase Analytics initialized');
-  }
-}).catch(err => {
-  console.warn('⚠️ Firebase Analytics not supported:', err);
-});
+if (app) {
+  isSupported().then(supported => {
+    if (supported && app) {
+      analytics = getAnalytics(app);
+      console.log('✅ Firebase Analytics initialized');
+    }
+  }).catch(err => {
+    console.warn('⚠️ Firebase Analytics not supported:', err);
+  });
+}
 
 // Analytics 이벤트 로깅 헬퍼 함수
 export const logAnalyticsEvent = (eventName: string, eventParams?: Record<string, any>) => {
   if (analytics) {
-    logEvent(analytics, eventName, eventParams);
+    try {
+      logEvent(analytics, eventName, eventParams);
+    } catch (error) {
+      console.warn('Analytics event failed:', error);
+    }
   }
 };
 
 // 페이지뷰 추적
 export const logPageView = (pageName: string, pageTitle?: string) => {
-  logAnalyticsEvent('page_view', {
-    page_title: pageTitle || pageName,
-    page_location: window.location.href,
-    page_path: window.location.pathname,
-  });
+  try {
+    logAnalyticsEvent('page_view', {
+      page_title: pageTitle || pageName,
+      page_location: window.location.href,
+      page_path: window.location.pathname,
+    });
+  } catch (error) {
+    // 조용히 실패 (Firebase 없어도 앱은 정상 작동)
+  }
 };
 
 // 커스텀 이벤트 추적

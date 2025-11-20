@@ -24,6 +24,9 @@ export const config = {
   solapiApiSecret: process.env.SOLAPI_API_SECRET,
   solapiFromNumber: process.env.SOLAPI_FROM_NUMBER,
   adminPhone: process.env.ADMIN_PHONE,
+  // Admin Auth
+  jwtSecret: process.env.JWT_SECRET || 'jsha-master-secret-key-change-this',
+  adminPassword: process.env.ADMIN_PASSWORD || 'admin1234',
 };
 
 console.log('Config loaded:', {

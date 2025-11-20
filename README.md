@@ -62,41 +62,24 @@ This project is built with:
 
 ## Email Service Setup
 
-This project uses Gmail OAuth2 for sending emails. To set up the email service:
-
-### Quick Start
+This project uses [Resend](https://resend.com) for sending emails. To set up the email service:
 
 1. Copy `.env.example` to `.env`:
    ```bash
    cp .env.example .env
    ```
 
-2. Follow the detailed OAuth2 setup guide:
-   ```bash
-   # See server/OAUTH2_SETUP.md for complete instructions
-   ```
+2. Get your API Key from [Resend API Keys](https://resend.com/api-keys)
 
-3. Update your `.env` file with OAuth2 credentials:
+3. Update your `.env` file with Resend credentials:
    ```env
-   OAUTH_CLIENT_ID=your_client_id_here
-   OAUTH_CLIENT_SECRET=your_client_secret_here
-   OAUTH_REFRESH_TOKEN=your_refresh_token_here
-   EMAIL_USER=your_email@gmail.com
+   # Resend Email Service
+   RESEND_API_KEY=re_123456789
+   RESEND_FROM_EMAIL=onboarding@resend.dev
    ADMIN_EMAIL=admin_email@example.com
    ```
 
-### Legacy App Password Method
-
-If you prefer using app passwords (not recommended):
-
-1. Enable 2-Step Verification in your Google Account
-2. Generate an app password: [Google App Passwords](https://myaccount.google.com/apppasswords)
-3. Add to `.env`:
-   ```env
-   EMAIL_PASSWORD=your_16_digit_app_password
-   ```
-
-**Note:** OAuth2 is the recommended and more secure method. See `server/OAUTH2_SETUP.md` for detailed setup instructions.
+**Note:** You can use `onboarding@resend.dev` for testing without verifying a domain. For production, you should verify your own domain in Resend dashboard.
 
 ## How can I deploy this project?
 

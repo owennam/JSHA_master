@@ -436,6 +436,83 @@ class GoogleSheetsService {
       throw error;
     }
   }
+  /**
+   * 시트의 모든 데이터 가져오기 (헤더 제외)
+   * @param {string} sheetName - 시트 이름
+   * @returns {Promise<Array>} - 데이터 행 배열
+   */
+  async getAllRows(sheetName) {
+    if (!this.initialized) {
+      await this.initialize();
+    }
+
+    try {
+      const range = `'${sheetName}'!A2:Z`; // 2행부터 가져옴 (헤더 제외)
+      const response = await this.sheets.spreadsheets.values.get({
+        spreadsheetId: this.spreadsheetId,
+        range: range,
+      });
+
+      return response.data.values || [];
+    } catch (error) {
+      console.error(`❌ Failed to fetch rows from ${sheetName}:`, error.message);
+      throw error;
+    }
+  }
+
+  /**
+   * 인솔 결제 정보 전체 조회
+   */
+  async getPaymentInfo() {
+    return this.getAllRows('인솔결제정보');
+  }
+
+  /**
+   * 마스터 코스 신청자 전체 조회
+   */
+  async getApplicationInfo() {
+    return this.getAllRows('마스터코스신청자');
+  }
+
+  /**
+   * Master Care 신청자 전체 조회
+   */
+  async getMasterCareInfo() {
+    return this.getAllRows('Master_care');
+  }
+
+  /**
+   * 수료자 명단 전체 조회
+   */
+  async getGraduates() {
+    return this.getAllRows('수료자명단');
+  }
+
+  /**
+   * 수료자 추가
+   */
+  async addGraduate(name, email, batch, date) {
+    if (!this.initialized) {
+      await this.initialize();
+    }
+
+    try {
+      const rowData = [name, email, batch, date];
+      const sheetName = '수료자명단';
+
+      await this.sheets.spreadsheets.values.append({
+        spreadsheetId: this.spreadsheetId,
+        range: `'${sheetName}'!A:D`,
+        valueInputOption: 'USER_ENTERED',
+        requestBody: { values: [rowData] },
+      });
+
+      return true;
+    } catch (error) {
+      console.error('❌ Failed to add graduate:', error);
+      throw error;
+    }
+  }
 }
 
 // 싱글톤 인스턴스

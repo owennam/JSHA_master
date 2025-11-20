@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { ScrollToTop } from "@/components/layout/ScrollToTop";
 import { logPageView } from "@/lib/firebase";
 import Index from "./pages/Index";
@@ -23,6 +23,14 @@ import TermsOfServicePage from "./pages/TermsOfServicePage";
 import RecapPage from "./pages/RecapPage";
 import MasterCarePage from "./pages/MasterCarePage";
 import NotFound from "./pages/NotFound";
+
+// Admin Components
+import { AdminLayout } from "@/components/admin/AdminLayout";
+import AdminLoginPage from "@/pages/admin/AdminLoginPage";
+import AdminDashboard from "@/pages/admin/AdminDashboard";
+import AdminOrdersPage from "@/pages/admin/AdminOrdersPage";
+import AdminApplicationsPage from "@/pages/admin/AdminApplicationsPage";
+import AdminMasterCarePage from "@/pages/admin/AdminMasterCarePage";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +55,7 @@ const App = () => (
         <AnalyticsTracker />
         <ScrollToTop />
         <Routes>
+          {/* Public Routes */}
           <Route path="/" element={<Index />} />
           <Route path="/education" element={<EducationPage />} />
           <Route path="/education/:id" element={<VideoDetailPage />} />
@@ -63,6 +72,17 @@ const App = () => (
           <Route path="/terms-of-service" element={<TermsOfServicePage />} />
           <Route path="/recap" element={<RecapPage />} />
           <Route path="/mastercare" element={<MasterCarePage />} />
+
+          {/* Admin Routes */}
+          <Route path="/admin/login" element={<AdminLoginPage />} />
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<Navigate to="/admin/dashboard" replace />} />
+            <Route path="dashboard" element={<AdminDashboard />} />
+            <Route path="orders" element={<AdminOrdersPage />} />
+            <Route path="applications" element={<AdminApplicationsPage />} />
+            <Route path="mastercare" element={<AdminMasterCarePage />} />
+          </Route>
+
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
