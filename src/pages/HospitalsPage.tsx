@@ -1,7 +1,7 @@
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { HospitalMap } from "@/components/map/HospitalMap";
+import { HospitalMapLocal } from "@/components/map/HospitalMapLocal";
 import { MapPin, Phone } from "lucide-react";
 
 const HospitalsPage = () => {
@@ -61,7 +61,7 @@ const HospitalsPage = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
-              <HospitalMap />
+              <HospitalMapLocal />
             </CardContent>
           </Card>
 
