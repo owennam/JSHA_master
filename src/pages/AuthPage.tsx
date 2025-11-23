@@ -135,7 +135,7 @@ const AuthPage = () => {
         </section>
       </main>
 
-      <Footer />
+      <Footer showBusinessInfo={true} />
     </div>
   );
 };

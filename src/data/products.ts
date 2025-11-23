@@ -4,6 +4,8 @@ export interface Product {
   type?: string;
   price: number;
   description: string;
+  image?: string;
+  isActive: boolean; // For hiding products during approval
   options: {
     sizes: string[];
     types: string[];
@@ -16,7 +18,9 @@ export const products: Product[] = [
     name: "남성 실리콘 인솔",
     type: "기본형",
     price: 9900,
-    description: "",
+    description: "특허받은 척추측만증 교정용 JS Insole",
+    image: "/images/products/insole-main.png",
+    isActive: true,
     options: {
       sizes: ["6mm", "8mm", "11mm", "15mm", "18mm"],
       types: ["기본형"]
@@ -27,7 +31,9 @@ export const products: Product[] = [
     name: "남성 실리콘 인솔",
     type: "각도형",
     price: 9900,
-    description: "",
+    description: "특허받은 척추측만증 교정용 JS Insole",
+    image: "/images/products/insole-main.png",
+    isActive: true,
     options: {
       sizes: ["표준"],
       types: [
@@ -44,7 +50,9 @@ export const products: Product[] = [
     name: "여성 실리콘 인솔",
     type: "기본형",
     price: 9900,
-    description: "",
+    description: "특허받은 척추측만증 교정용 JS Insole",
+    image: "/images/products/insole-main.png",
+    isActive: true,
     options: {
       sizes: ["5mm", "7mm", "10mm", "13mm", "16mm"],
       types: ["기본형"]
@@ -55,7 +63,9 @@ export const products: Product[] = [
     name: "여성 실리콘 인솔",
     type: "각도형",
     price: 9900,
-    description: "",
+    description: "특허받은 척추측만증 교정용 JS Insole",
+    image: "/images/products/insole-main.png",
+    isActive: true,
     options: {
       sizes: ["표준"],
       types: [
@@ -73,6 +83,7 @@ export const products: Product[] = [
     type: "",
     price: 2200,
     description: "",
+    isActive: false, // Hidden for approval
     options: {
       sizes: ["Free"],
       types: ["남성", "여성"]
@@ -80,10 +91,12 @@ export const products: Product[] = [
   },
   {
     id: "aroma-oil",
-    name: "아로마오일",
+    name: "바로마오일",
     type: "",
     price: 15000,
-    description: "",
+    description: "균형있는 신체 밸런스를 위한 발마사지 오일",
+    image: "/images/products/baroma_oil.png",
+    isActive: false, // Hidden until needed
     options: {
       sizes: ["10ml"],
       types: ["기본형"]
@@ -95,6 +108,7 @@ export const products: Product[] = [
     type: "",
     price: 99000,
     description: "",
+    isActive: false, // Hidden for approval
     options: {
       sizes: ["표준"],
       types: ["기본형"]
@@ -105,10 +119,16 @@ export const products: Product[] = [
     name: "쿠룬타",
     type: "",
     price: 132000,
-    description: "",
+    description: "중형 사이즈 쿠룬타 (가로 430mm x 세로 760mm x 높이 160mm)",
+    image: "/images/products/kurunta.png",
+    isActive: false, // Hidden until needed
     options: {
       sizes: ["표준"],
       types: ["기본형"]
     }
   }
 ];
+
+// Export only active products
+export const activeProducts = products.filter(p => p.isActive);
+

@@ -5,7 +5,7 @@ import * as z from "zod";
 import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { products } from "@/data/products";
+import { activeProducts } from "@/data/products";
 import { getAuthStatus, getAuthInfo, clearAuthStatus } from "@/data/authorizedUsers";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -32,8 +32,14 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { useToast } from "@/hooks/use-toast";
-import { ShoppingCart, LogOut, Plus, Minus, Trash2, MapPin } from "lucide-react";
+import { ShoppingCart, LogOut, Plus, Minus, Trash2, MapPin, Package, RefreshCw, CreditCard } from "lucide-react";
 
 // Daum 우편번호 서비스 타입 선언
 declare global {
@@ -138,7 +144,7 @@ const ProductPage = () => {
     },
   });
 
-  const selectedProductData = products.find((p) => p.id === selectedProduct);
+  const selectedProductData = activeProducts.find((p) => p.id === selectedProduct);
 
   // 장바구니에 추가
   const addToCart = () => {
@@ -151,7 +157,7 @@ const ProductPage = () => {
       return;
     }
 
-    const product = products.find((p) => p.id === selectedProduct);
+    const product = activeProducts.find((p) => p.id === selectedProduct);
     if (!product) return;
 
     const cartItem: CartItem = {
@@ -274,33 +280,69 @@ const ProductPage = () => {
 
               {/* 제품 목록 */}
               <div className="space-y-4">
-                {products.map((product) => (
+                {activeProducts.map((product) => (
                   <Card
                     key={product.id}
-                    className="cursor-pointer transition-all hover:shadow-lg"
-                    onClick={() => {
-                      setSelectedProduct(product.id);
-                      setSelectedSize("");
-                      setSelectedType("");
-                      setQuantity(1);
-                      setIsSheetOpen(true);
-                    }}
+                    className="overflow-hidden transition-all hover:shadow-lg"
                   >
-                    <CardHeader>
-                      <CardTitle className="flex items-start justify-between gap-4">
-                        <div className="flex flex-col">
-                          <span className="text-black">{product.name}</span>
-                          {product.type && (
-                            <span className="text-lg font-semibold text-black mt-1">
-                              ({product.type})
+                    <div className="grid md:grid-cols-[200px_1fr] gap-4">
+                      {/* Product Image */}
+                      {product.image && (
+                        <div className="bg-muted/30 flex items-center justify-center p-4">
+                          <img
+                            src={product.image}
+                            alt={product.name}
+                            className="w-full h-auto object-contain max-h-40"
+                          />
+                        </div>
+                      )}
+
+                      {/* Product Info */}
+                      <div className="p-4 md:p-6 flex flex-col justify-between">
+                        <div>
+                          <CardTitle className="flex items-start justify-between gap-4 mb-2">
+                            <div className="flex flex-col">
+                              <span className="text-black">{product.name}</span>
+                              {product.type && (
+                                <span className="text-lg font-semibold text-black mt-1">
+                                  ({product.type})
+                                </span>
+                              )}
+                            </div>
+                            <span className="text-primary shrink-0 text-xl">
+                              {product.price.toLocaleString()}원
                             </span>
+                          </CardTitle>
+                          {product.description && (
+                            <p className="text-muted-foreground text-sm mb-4">
+                              {product.description}
+                            </p>
                           )}
                         </div>
-                        <span className="text-primary shrink-0">
-                          {product.price.toLocaleString()}원
-                        </span>
-                      </CardTitle>
-                    </CardHeader>
+
+                        <div className="flex gap-2 mt-4">
+                          <Button
+                            variant="outline"
+                            onClick={() => navigate(`/products/${product.id}`)}
+                            className="flex-1"
+                          >
+                            상세보기
+                          </Button>
+                          <Button
+                            onClick={() => {
+                              setSelectedProduct(product.id);
+                              setSelectedSize("");
+                              setSelectedType("");
+                              setQuantity(1);
+                              setIsSheetOpen(true);
+                            }}
+                            className="flex-1"
+                          >
+                            구매하기
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
                   </Card>
                 ))}
               </div>
@@ -521,6 +563,121 @@ const ProductPage = () => {
               )}
             </div>
           </div>
+
+          {/* Shipping and Return Policy Section */}
+          <div className="mt-16 max-w-4xl mx-auto">
+            <h2 className="text-2xl font-bold text-center mb-8">배송 및 교환/환불 정책</h2>
+            <Accordion type="single" collapsible className="w-full">
+              {/* Shipping Information */}
+              <AccordionItem value="shipping">
+                <AccordionTrigger className="text-lg font-semibold">
+                  <div className="flex items-center gap-2">
+                    <Package className="w-5 h-5" />
+                    배송 안내
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent>
+                  <div className="space-y-3 text-sm">
+                    <div>
+                      <strong className="text-foreground">배송 방법:</strong>
+                      <span className="text-muted-foreground ml-2">택배 배송 (한진택배)</span>
+                    </div>
+                    <div>
+                      <strong className="text-foreground">배송 지역:</strong>
+                      <span className="text-muted-foreground ml-2">전국 지역</span>
+                    </div>
+                    <div>
+                      <strong className="text-foreground">배송 비용:</strong>
+                      <span className="text-muted-foreground ml-2">무료 배송 (제주 및 도서 산간 지역은 별도의 추가 금액이 발생할 수 있습니다.)</span>
+                    </div>
+                    <div>
+                      <strong className="text-foreground">배송 기간:</strong>
+                      <span className="text-muted-foreground ml-2">결제일로부터 영업일 기준 1일 ~ 3일 이내 발송 (단, 상품 종류 및 배송사 사정에 따라 배송이 다소 지연될 수 있습니다.)</span>
+                    </div>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+
+              {/* Exchange and Return Policy */}
+              <AccordionItem value="exchange-return">
+                <AccordionTrigger className="text-lg font-semibold">
+                  <div className="flex items-center gap-2">
+                    <RefreshCw className="w-5 h-5" />
+                    교환 및 반품 안내
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent>
+                  <div className="space-y-4 text-sm">
+                    <div>
+                      <h4 className="font-semibold text-foreground mb-2">신청 기간</h4>
+                      <ul className="space-y-2 ml-4">
+                        <li className="text-muted-foreground">
+                          • 단순 변심: 상품 수령일로부터 <strong className="text-foreground">7일 이내</strong> (구매자 반품 배송비 부담)
+                        </li>
+                        <li className="text-muted-foreground">
+                          • 표시/광고와 상이, 상품 하자: 상품 수령 후 <strong className="text-foreground">3개월 이내</strong>, 그 사실을 안 날로부터 <strong className="text-foreground">30일 이내</strong> (판매자 반품 배송비 부담)
+                        </li>
+                      </ul>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-foreground mb-2">반품 배송비</h4>
+                      <ul className="space-y-2 ml-4">
+                        <li className="text-muted-foreground">
+                          • 단순 변심으로 인한 교환/반품 시 왕복 배송비(6,000원)는 고객님 부담입니다.
+                        </li>
+                        <li className="text-muted-foreground">
+                          • 상품 불량 및 오배송으로 인한 교환/반품 시 배송비는 업체에서 부담합니다.
+                        </li>
+                      </ul>
+                    </div>
+                    <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
+                      <h4 className="font-semibold text-destructive mb-2">교환 및 반품이 불가능한 경우 (필독)</h4>
+                      <ul className="space-y-2 ml-4">
+                        <li className="text-sm text-muted-foreground">
+                          • 고객님의 책임 사유로 상품이 멸실되거나 훼손된 경우 (단, 상품 내용 확인을 위해 포장 등을 훼손한 경우는 제외)
+                        </li>
+                        <li className="text-sm text-muted-foreground">
+                          • <strong className="text-destructive">사용 흔적이 있는 경우:</strong> 인솔(깔창) 제품 특성상 <strong className="text-destructive">착용 흔적, 오염, 세탁, 수선(가위로 자름 등)</strong>이 발생하여 상품의 가치가 현저히 감소한 경우 교환 및 반품이 절대 불가합니다.
+                        </li>
+                        <li className="text-sm text-muted-foreground">
+                          • 포장이 훼손되어 상품 가치가 상실된 경우 (제품 케이스, 라벨, 택 등이 훼손된 경우)
+                        </li>
+                        <li className="text-sm text-muted-foreground">
+                          • 시간의 경과에 의하여 재판매가 곤란할 정도로 상품 등의 가치가 현저히 감소한 경우
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+
+              {/* Payment and Refund Policy */}
+              <AccordionItem value="payment-refund">
+                <AccordionTrigger className="text-lg font-semibold">
+                  <div className="flex items-center gap-2">
+                    <CreditCard className="w-5 h-5" />
+                    결제 취소 및 환불 규정
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent>
+                  <div className="space-y-3 text-sm">
+                    <div>
+                      <strong className="text-foreground">서비스 제공 기간:</strong>
+                      <span className="text-muted-foreground ml-2">본 상품의 서비스 제공 기간은 결제 완료 후 배송이 완료되는 시점까지입니다.</span>
+                    </div>
+                    <div>
+                      <strong className="text-foreground">환불 처리:</strong>
+                      <span className="text-muted-foreground ml-2">반품 확인 후 영업일 기준 3~5일 이내 환불 처리됩니다.</span>
+                    </div>
+                    <div>
+                      <strong className="text-foreground">결제 취소:</strong>
+                      <span className="text-muted-foreground ml-2">배송 전 결제 취소는 고객센터(010-4002-1094)로 연락 주시면 즉시 처리됩니다.</span>
+                    </div>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </div>
         </div>
       </main>
 
@@ -637,7 +794,7 @@ const ProductPage = () => {
         </SheetContent>
       </Sheet>
 
-      <Footer />
+      <Footer showBusinessInfo={true} />
     </div>
   );
 };

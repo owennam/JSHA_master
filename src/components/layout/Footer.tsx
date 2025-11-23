@@ -1,7 +1,11 @@
 import { Mail, Phone, MapPin, MessageCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 
-export const Footer = () => {
+interface FooterProps {
+  showBusinessInfo?: boolean;
+}
+
+export const Footer = ({ showBusinessInfo = false }: FooterProps) => {
   return (
     <footer className="bg-primary text-primary-foreground py-12">
       <div className="container mx-auto px-4">
@@ -60,6 +64,25 @@ export const Footer = () => {
             </p>
           </div>
         </div>
+
+        {/* Business Registration Info - Only show on product page */}
+        {showBusinessInfo && (
+          <div className="border-t border-primary-foreground/20 pt-8 pb-8">
+            <h4 className="text-lg font-semibold mb-4">사업자 정보</h4>
+            <div className="grid md:grid-cols-2 gap-4 text-sm text-primary-foreground/80">
+              <div>
+                <p><strong className="text-primary-foreground">상호명:</strong> 메디앤테라</p>
+                <p><strong className="text-primary-foreground">대표자명:</strong> 양지선</p>
+                <p><strong className="text-primary-foreground">사업자등록번호:</strong> 394-32-01550</p>
+              </div>
+              <div>
+                <p><strong className="text-primary-foreground">사업장 주소:</strong> 대전광역시 유성구 은구비서로 33, 101호(지족동)</p>
+                <p><strong className="text-primary-foreground">대표 번호:</strong> 010-4002-1094</p>
+                <p><strong className="text-primary-foreground">통신판매업 신고번호:</strong> 2025-대전유성-1489</p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* 구분선 */}
         <div className="border-t border-primary-foreground/20 pt-8">

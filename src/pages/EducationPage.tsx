@@ -2,14 +2,13 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { VideoCard } from "@/components/video/VideoCard";
 import { videos } from "@/data/videos";
-import { certifiedClinics } from "@/data/certifiedClinics";
-import { MapPin, Phone } from "lucide-react";
+import { referralHospitals } from "@/data/referralHospitals";
 
 const EducationPage = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      
+
       <main className="pt-20">
         {/* Hero Section */}
         <section className="relative min-h-[70vh] flex items-center justify-center overflow-hidden py-20 px-4">
@@ -62,7 +61,7 @@ const EducationPage = () => {
                 각 영상을 클릭하여 자세한 설명과 함께 운동법을 배워보세요.
               </p>
             </div>
-            
+
             <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-8">
               {videos.map((video) => (
                 <VideoCard key={video.id} video={video} />
@@ -77,14 +76,14 @@ const EducationPage = () => {
             <h2 className="text-3xl font-bold mb-6">JS Healing Art란?</h2>
             <p className="text-lg text-muted-foreground leading-relaxed">
               JS Healing Art는 <br className='md:hidden' />구조적 불균형을 바로잡아<br /> 근본적인 통증 치료를 추구합니다.
-            <br />
+              <br />
               또한 환자 교육을 통해 스스로 건강을 <br className='md:hidden' />관리하는 힘을 기르도록 돕습니다.
             </p>
           </div>
         </section>
 
         {/* Certified Clinics Section */}
-        <section className="py-20 px-4 bg-background overflow-hidden">
+        <section className="py-20 px-4 bg-background">
           <div className="container mx-auto max-w-6xl">
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-bold mb-4 text-black">JS Healing Art <br className='md:hidden' />인증 의료기관</h2>
@@ -93,67 +92,36 @@ const EducationPage = () => {
               </p>
             </div>
 
-            {/* Sliding Animation Container */}
-            <div className="relative">
-              <div className="flex gap-6 animate-slide">
-                {/* 첫 번째 세트 */}
-                {certifiedClinics.map((clinic) => (
-                  <div
-                    key={clinic.id}
-                    className="flex-shrink-0 w-80 bg-card border-2 border-border rounded-2xl p-6 shadow-card hover:shadow-elevated transition-all duration-300 hover:-translate-y-1"
-                  >
-                    <div className="mb-4">
-                      <h3 className="text-xl font-bold mb-2">{clinic.name}</h3>
-                      <span className="inline-block px-3 py-1 bg-primary/10 text-primary text-sm font-semibold rounded-full">
-                        {clinic.location}
-                      </span>
-                    </div>
-                    <div className="space-y-3 text-sm">
-                      <div className="flex items-start gap-2">
-                        <MapPin className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-                        <span className="text-muted-foreground">{clinic.address}</span>
+            {/* Logo Grid Container */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 md:gap-12 items-center justify-items-center grayscale hover:grayscale-0 transition-all duration-500">
+              {referralHospitals.map((hospital) => (
+                <div
+                  key={hospital.id}
+                  className="flex flex-col items-center gap-3 group"
+                  title={hospital.name}
+                >
+                  <div className="w-full max-w-[160px] aspect-square flex items-center justify-center p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100">
+                    {hospital.logo ? (
+                      <img
+                        src={hospital.logo}
+                        alt={`${hospital.name} 로고`}
+                        className="w-full h-full object-contain opacity-90 group-hover:opacity-100 transition-opacity duration-300"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-center">
+                        <span className="text-sm font-bold text-gray-400 group-hover:text-primary transition-colors break-keep leading-tight">
+                          {hospital.name}
+                        </span>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Phone className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                        <a href={`tel:${clinic.phone}`} className="text-muted-foreground hover:text-primary transition-colors">
-                          {clinic.phone}
-                        </a>
-                      </div>
-                    </div>
+                    )}
                   </div>
-                ))}
-                {/* 두 번째 세트 (무한 루프를 위한 복제) */}
-                {certifiedClinics.map((clinic) => (
-                  <div
-                    key={`${clinic.id}-duplicate`}
-                    className="flex-shrink-0 w-80 bg-card border-2 border-border rounded-2xl p-6 shadow-card hover:shadow-elevated transition-all duration-300 hover:-translate-y-1"
-                  >
-                    <div className="mb-4">
-                      <h3 className="text-xl font-bold mb-2">{clinic.name}</h3>
-                      <span className="inline-block px-3 py-1 bg-primary/10 text-primary text-sm font-semibold rounded-full">
-                        {clinic.location}
-                      </span>
-                    </div>
-                    <div className="space-y-3 text-sm">
-                      <div className="flex items-start gap-2">
-                        <MapPin className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-                        <span className="text-muted-foreground">{clinic.address}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Phone className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                        <a href={`tel:${clinic.phone}`} className="text-muted-foreground hover:text-primary transition-colors">
-                          {clinic.phone}
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
           </div>
         </section>
       </main>
-      
+
       <Footer />
     </div>
   );

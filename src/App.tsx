@@ -15,6 +15,7 @@ import NewsletterListPage from "./pages/NewsletterListPage";
 import NewsletterDetailPage from "./pages/NewsletterDetailPage";
 import AuthPage from "./pages/AuthPage";
 import ProductPage from "./pages/ProductPage";
+import ProductDetailPage from "./pages/ProductDetailPage";
 import PaymentPage from "./pages/PaymentPage";
 import PaymentSuccessPage from "./pages/PaymentSuccessPage";
 import PaymentFailPage from "./pages/PaymentFailPage";
@@ -65,6 +66,7 @@ const App = () => (
           <Route path="/newsletter/:id" element={<NewsletterDetailPage />} />
           <Route path="/auth" element={<AuthPage />} />
           <Route path="/products" element={<ProductPage />} />
+          <Route path="/products/:productId" element={<ProductDetailPage />} />
           <Route path="/payment" element={<PaymentPage />} />
           <Route path="/payment/success" element={<PaymentSuccessPage />} />
           <Route path="/payment/fail" element={<PaymentFailPage />} />

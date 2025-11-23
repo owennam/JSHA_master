@@ -2,7 +2,9 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { HospitalMap } from "@/components/map/HospitalMap";
-import { MapPin, Phone } from "lucide-react";
+
+import { referralHospitals } from "@/data/referralHospitals";
+import { MapPin, Phone, Building2 } from "lucide-react";
 
 const HospitalsPage = () => {
   return (
@@ -99,6 +101,45 @@ const HospitalsPage = () => {
               </div>
             </CardContent>
           </Card>
+
+          {/* Referral Hospitals Section */}
+          <section className="py-20 px-4 bg-background overflow-hidden">
+            <div className="container mx-auto max-w-6xl">
+              <div className="text-center mb-12">
+                <h2 className="text-3xl md:text-4xl font-bold mb-4 text-black">회송 가능 의료기관</h2>
+                <p className="text-lg text-muted-foreground">
+                  JSHA 철학을 기반으로 통증을 치료하는 전국의 회송 가능 의료기관입니다.
+                </p>
+              </div>
+
+              {/* Logo Grid Container */}
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 md:gap-12 items-center justify-items-center grayscale hover:grayscale-0 transition-all duration-500">
+                {referralHospitals.map((hospital) => (
+                  <div
+                    key={hospital.id}
+                    className="flex flex-col items-center gap-3 group"
+                    title={hospital.name}
+                  >
+                    <div className="w-full max-w-[160px] aspect-square flex items-center justify-center p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100">
+                      {hospital.logo ? (
+                        <img
+                          src={hospital.logo}
+                          alt={`${hospital.name} 로고`}
+                          className="w-full h-full object-contain opacity-90 group-hover:opacity-100 transition-opacity duration-300"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-center">
+                          <span className="text-sm font-bold text-gray-400 group-hover:text-primary transition-colors break-keep leading-tight">
+                            {hospital.name}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
 
           {/* Contact CTA */}
           <div className="mt-12 text-center bg-gradient-to-br from-primary/10 to-secondary/10 rounded-2xl p-8">

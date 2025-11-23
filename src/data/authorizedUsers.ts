@@ -7,6 +7,9 @@ export interface AuthorizedUser {
 
 // 인증된 사용자 목록 (의료기관 이름과 원장님 성함)
 export const authorizedUsers: AuthorizedUser[] = [
+  // Test account
+  { id: 'test-clinic-myname', clinicName: 'testclinic', directorName: 'myname', location: '테스트' },
+
   { id: 'seoul-ak-neurosurgery-park', clinicName: 'AK신경외과의원', directorName: '박성만', location: '서울' },
   { id: 'seoul-haegarden-pain-lee', clinicName: '해가든제통의원', directorName: '이승구', location: '서울' },
   { id: 'seoul-bethesda-orthopedics-kang', clinicName: '베데스다 정형외과의원', directorName: '강동헌', location: '서울' },
