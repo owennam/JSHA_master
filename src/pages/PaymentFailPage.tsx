@@ -66,7 +66,7 @@ const PaymentFailPage = () => {
 
 							<div className="space-y-3">
 								<Button
-									onClick={() => navigate("/products")}
+									onClick={() => navigate("/products?autoOpenSheet=true")}
 									className="w-full"
 									size="lg"
 								>

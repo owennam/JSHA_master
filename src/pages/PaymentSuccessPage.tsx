@@ -75,6 +75,10 @@ const PaymentSuccessPage = () => {
 				setPaymentInfo(result.data);
 				setIsConfirming(false);
 
+				// 결제 성공 시 장바구니 및 폼 데이터 초기화
+				localStorage.removeItem("jsha_cart");
+				localStorage.removeItem("jsha_customer_info");
+
 				// Google Analytics 구매 이벤트 로깅
 				try {
 					let items = [];

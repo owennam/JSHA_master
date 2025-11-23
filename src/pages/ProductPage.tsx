@@ -81,6 +81,43 @@ const ProductPage = () => {
   const [authInfo, setAuthInfo] = useState<{ clinicName: string; directorName: string } | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState<boolean>(false);
 
+  // 장바구니 및 폼 데이터 로드
+  useEffect(() => {
+    const savedCart = localStorage.getItem("jsha_cart");
+    if (savedCart) {
+      try {
+        setCart(JSON.parse(savedCart));
+      } catch (e) {
+        console.error("Failed to parse cart from localStorage", e);
+      }
+    }
+
+    const savedCustomerInfo = localStorage.getItem("jsha_customer_info");
+    if (savedCustomerInfo) {
+      try {
+        const parsedInfo = JSON.parse(savedCustomerInfo);
+        Object.keys(parsedInfo).forEach((key) => {
+          form.setValue(key as any, parsedInfo[key]);
+        });
+      } catch (e) {
+        console.error("Failed to parse customer info from localStorage", e);
+      }
+    }
+  }, [form]);
+
+  // 장바구니 변경 시 저장
+  useEffect(() => {
+    localStorage.setItem("jsha_cart", JSON.stringify(cart));
+  }, [cart]);
+
+  // 폼 데이터 변경 감지 및 저장
+  useEffect(() => {
+    const subscription = form.watch((value) => {
+      localStorage.setItem("jsha_customer_info", JSON.stringify(value));
+    });
+    return () => subscription.unsubscribe();
+  }, [form.watch]);
+
   // 인증 체크
   useEffect(() => {
     const isAuthenticated = getAuthStatus();
@@ -91,6 +128,14 @@ const ProductPage = () => {
       setAuthInfo(info);
     }
   }, [navigate]);
+
+  // URL 파라미터로 autoOpenSheet가 있으면 시트 열기 (결제 취소 후 복귀 시)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("autoOpenSheet") === "true" && cart.length > 0) {
+      setIsSheetOpen(true);
+    }
+  }, [cart.length]);
 
   const handleLogout = () => {
     clearAuthStatus();
