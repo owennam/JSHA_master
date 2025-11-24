@@ -103,7 +103,7 @@ const ProductDetailPage = () => {
                             <AlertDescription className="space-y-1 mt-2 text-xs">
                                 <p>• 여성용/남성용 사이즈를 정확히 선택해 주세요.</p>
                                 <p>• 일반형과 대각(Diagonal) 형태를 혼동하지 않도록 주의해 주세요.</p>
-                                <p>• 의료용 교정구 특성상 개봉 및 사용 후에는 단순 변심 반품이 제한될 수 있습니다.</p>
+                                <p>• 교정구 특성상 개봉 및 사용 후에는 단순 변심 반품이 제한될 수 있습니다.</p>
                             </AlertDescription>
                         </Alert>
                     </div>
