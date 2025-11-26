@@ -35,11 +35,11 @@ export const lectureVideos: WorkshopVideo[] = [
 export const qaVideos: WorkshopVideo[] = [
   {
     id: 'qa-master-course',
-    title: 'JSHA 마스터코스 Q&A with 이종성 원장님',
-    description: 'JSHA 마스터코스에서 진행된 이종성 원장님의 Q&A 영상입니다.',
+    title: 'JSHA Q&A with 박지웅 원장님',
+    description: 'JSHA 강사 통해의원 박지웅 원장님의 Q&A 영상입니다.',
     youtubeId: '21v6chx7nFk',
     thumbnailUrl: 'https://img.youtube.com/vi/21v6chx7nFk/maxresdefault.jpg',
-    instructor: '이종성 원장',
+    instructor: '박지웅 원장',
     date: '',
     type: 'qa'
   },
