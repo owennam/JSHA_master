@@ -63,7 +63,7 @@ export const WorkshopVideoSection = () => {
         {/* Q&A 섹션 */}
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Q&A with 이종성 원장님
+            Q&A 
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             JSHA와 JS 인솔에 대해 자주 묻는 질문에 답변합니다
