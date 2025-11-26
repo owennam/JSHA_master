@@ -34,6 +34,16 @@ export const lectureVideos: WorkshopVideo[] = [
 
 export const qaVideos: WorkshopVideo[] = [
   {
+    id: 'qa-master-course',
+    title: 'JSHA 마스터코스 Q&A with 이종성 원장님',
+    description: 'JSHA 마스터코스에서 진행된 이종성 원장님의 Q&A 영상입니다.',
+    youtubeId: '21v6chx7nFk',
+    thumbnailUrl: 'https://img.youtube.com/vi/21v6chx7nFk/maxresdefault.jpg',
+    instructor: '이종성 원장',
+    date: '',
+    type: 'qa'
+  },
+  {
     id: 'qa-what-is-jsha',
     title: 'JSHA는 어떤 치료입니까?',
     description: '이종성 원장님이 JSHA 치료에 대해 설명합니다.',

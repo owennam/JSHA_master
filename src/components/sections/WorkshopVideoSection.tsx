@@ -66,7 +66,7 @@ export const WorkshopVideoSection = () => {
             Q&A with 이종성 원장님
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            JSHA와 JS 인솔에 대한 자주 묻는 질문에 이종성 원장님이 답변합니다
+            JSHA와 JS 인솔에 대해 자주 묻는 질문에 답변합니다
           </p>
         </div>
 
