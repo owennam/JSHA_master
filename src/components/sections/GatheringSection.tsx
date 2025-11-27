@@ -14,10 +14,7 @@ export const GatheringSection = () => {
                     </div>
 
                     <div className="relative rounded-xl overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-700 border border-border bg-background">
-                        {/* Browser Window Header */}
-                        <div className="h-8 bg-muted border-b border-border flex items-center px-4 gap-2">
 
-                        </div>
                         {/* Image Content */}
                         <img
                             src="/images/jsha_9th_gathering.jpg"
