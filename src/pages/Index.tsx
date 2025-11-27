@@ -19,6 +19,7 @@ import { TargetAudienceSection } from "@/components/sections/TargetAudienceSecti
 import { ScheduleSection } from "@/components/sections/ScheduleSection";
 import { FAQSection } from "@/components/sections/FAQSection";
 import { ApplicationSection } from "@/components/sections/ApplicationSection";
+import { GatheringSection } from "@/components/sections/GatheringSection";
 
 const Index = () => {
   return (
@@ -27,6 +28,7 @@ const Index = () => {
       <main>
         <HeroSection />
         <StatsSection />
+        <GatheringSection />
         <SelfAssessmentSection />
         <PhilosophySection />
         <ClinicalCasesSection />
