@@ -13,7 +13,14 @@ export const GatheringSection = () => {
                         </p>
                     </div>
 
-                    <div className="relative rounded-2xl overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-700">
+                    <div className="relative rounded-xl overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-700 border border-border bg-background">
+                        {/* Browser Window Header */}
+                        <div className="h-8 bg-muted border-b border-border flex items-center px-4 gap-2">
+                            <div className="w-3 h-3 rounded-full bg-red-500/80" />
+                            <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
+                            <div className="w-3 h-3 rounded-full bg-green-500/80" />
+                        </div>
+                        {/* Image Content */}
                         <img
                             src="/images/jsha_9th_gathering.jpg"
                             alt="JSHA 제 9차 집담회 현장"
