@@ -6,7 +6,7 @@ export const ScheduleSection = () => {
   const schedule = [
     {
       module: 1,
-      period: "2026년 2월",
+      period: "2026년 3월",
       date: "추후 공지",
       title: "JSHA 핵심 철학 및 통합 진단",
       color: "bg-primary",
@@ -42,7 +42,7 @@ export const ScheduleSection = () => {
             교육 일정
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            2026년 2월부터 5월까지 매월 1회, <br className='md:hidden' />1박 2일 집중 과정
+            2026년 3월부터 5월까지  3주에 1회, <br className='md:hidden' />1박 2일 집중 과정
           </p>
         </div>
 
