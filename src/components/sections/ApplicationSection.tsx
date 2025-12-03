@@ -56,7 +56,7 @@ export const ApplicationSection = () => {
     },
     {
       label: "개강일",
-      value: "2026년 2월",
+      value: "2026년 3월",
       description: "구체적 일정 추후 공지",
     },
     {
