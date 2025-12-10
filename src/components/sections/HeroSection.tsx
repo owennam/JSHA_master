@@ -7,7 +7,7 @@ export const HeroSection = () => {
   };
 
   return (
-    <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden pt-20 md:pt-24 lg:pt-28">
+    <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden pt-36 md:pt-40 lg:pt-44">
       {/* Background with image and enhanced gradient overlay */}
       <div className="absolute inset-0 z-0">
         <img
