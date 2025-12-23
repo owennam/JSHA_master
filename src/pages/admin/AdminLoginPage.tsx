@@ -25,13 +25,17 @@ const AdminLoginPage = () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ password }),
-        credentials: 'include', // 쿠키 포함
       });
 
       const data = await response.json();
 
       if (!response.ok || !data.success) {
         throw new Error(data.message || '로그인에 실패했습니다.');
+      }
+
+      // JWT 토큰을 localStorage에 저장
+      if (data.token) {
+        localStorage.setItem('admin_token', data.token);
       }
 
       toast({

@@ -41,10 +41,14 @@ const AdminOrdersPage = () => {
     setLoading(true);
     try {
       const API_URL = import.meta.env.VITE_API_URL || '';
+      const token = localStorage.getItem('admin_token');
+
       const response = await fetch(`${API_URL}/api/admin/orders`, {
         method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
       });
 
       if (!response.ok) {
@@ -94,10 +98,14 @@ const AdminOrdersPage = () => {
       // 1. Toss Payments 취소 (서버 경유 - 보안상 필요)
       // Toss 취소 API는 Secret Key가 필요하므로 백엔드 호출 유지
       const API_URL = import.meta.env.VITE_API_URL || '';
+      const token = localStorage.getItem('admin_token');
+
       const response = await fetch(`${API_URL}/api/admin/cancel-payment`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({
           paymentKey: selectedOrder.paymentKey,
           cancelReason: cancelReason,

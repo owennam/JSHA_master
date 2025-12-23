@@ -35,15 +35,18 @@ export const AdminLayout = () => {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    // 인증 체크 (간단한 쿠키 확인, 실제 검증은 API 호출 시 수행됨)
+    // 인증 체크 (localStorage의 admin_token 확인)
     useEffect(() => {
-        // 여기서는 간단히 체크하고, 실제 데이터 로딩 시 401 에러가 나면 로그인 페이지로 튕기게 됨
-        // 또는 별도의 /api/admin/check-auth 호출 가능
-    }, []);
+        const token = localStorage.getItem('admin_token');
+        if (!token) {
+            navigate('/admin/login');
+        }
+    }, [navigate]);
 
     const handleLogout = async () => {
         try {
-            await fetch('/api/admin/logout', { method: 'POST' });
+            // localStorage에서 토큰 제거
+            localStorage.removeItem('admin_token');
             navigate('/admin/login');
         } catch (error) {
             console.error('Logout failed:', error);

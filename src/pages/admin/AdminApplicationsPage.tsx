@@ -28,7 +28,16 @@ const AdminApplicationsPage = () => {
     useEffect(() => {
         const fetchApplications = async () => {
             try {
-                const response = await fetch('/api/admin/applications');
+                const API_URL = import.meta.env.VITE_API_URL || '';
+                const token = localStorage.getItem('admin_token');
+
+                const response = await fetch(`${API_URL}/api/admin/applications`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                });
                 const result = await response.json();
                 if (result.success) {
                     setApplications(result.data);

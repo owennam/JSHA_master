@@ -27,10 +27,14 @@ const AdminDashboard = () => {
         const fetchData = async () => {
             try {
                 const API_URL = import.meta.env.VITE_API_URL || '';
+                const token = localStorage.getItem('admin_token');
+
                 const response = await fetch(`${API_URL}/api/admin/dashboard-summary`, {
                     method: 'GET',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
                 });
 
                 if (!response.ok) {

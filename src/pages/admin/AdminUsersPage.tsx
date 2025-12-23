@@ -36,23 +36,30 @@ const AdminUsersPage = () => {
     setLoading(true);
     try {
       const API_URL = import.meta.env.VITE_API_URL || '';
+      const token = localStorage.getItem('admin_token');
 
       // 각 상태별로 병렬 요청
       const [pendingRes, approvedRes, rejectedRes] = await Promise.all([
         fetch(`${API_URL}/api/admin/users?status=pending`, {
           method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
         }),
         fetch(`${API_URL}/api/admin/users?status=approved`, {
           method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
         }),
         fetch(`${API_URL}/api/admin/users?status=rejected`, {
           method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
         }),
       ]);
 
@@ -89,10 +96,14 @@ const AdminUsersPage = () => {
     setUpdatingUserId(uid);
     try {
       const API_URL = import.meta.env.VITE_API_URL || '';
+      const token = localStorage.getItem('admin_token');
+
       const response = await fetch(`${API_URL}/api/admin/users/${uid}/status`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({ status: newStatus }),
       });
 

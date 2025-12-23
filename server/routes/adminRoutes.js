@@ -25,17 +25,11 @@ router.post('/login', (req, res) => {
         { expiresIn: '24h' }
     );
 
-    // 쿠키에 토큰 설정 (HTTP Only)
-    res.cookie('admin_token', token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 크로스 도메인 허용
-        maxAge: 24 * 60 * 60 * 1000 // 24 hours
-    });
-
+    // 토큰을 JSON 응답으로 반환 (클라이언트가 localStorage에 저장)
     res.json({
         success: true,
-        message: 'Login successful'
+        message: 'Login successful',
+        token: token
     });
 });
 
