@@ -122,47 +122,6 @@ export const Header = () => {
                 </button>
               ))}
             </nav>
-
-            {/* User Menu */}
-            {user ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="rounded-full hover:bg-primary/10"
-                  >
-                    <User className="h-5 w-5" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuItem
-                    onClick={() => navigate("/my-orders")}
-                    className="cursor-pointer"
-                  >
-                    <ShoppingBag className="mr-2 h-4 w-4" />
-                    <span>주문 내역</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    onClick={handleLogout}
-                    className="cursor-pointer text-red-600 focus:text-red-600"
-                  >
-                    <LogOut className="mr-2 h-4 w-4" />
-                    <span>로그아웃</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <Button
-                variant="ghost"
-                onClick={() => navigate("/auth")}
-                className="gap-2"
-              >
-                <LogIn className="h-4 w-4" />
-                로그인
-              </Button>
-            )}
           </div>
 
           {/* Mobile Menu Button */}
