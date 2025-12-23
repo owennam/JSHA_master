@@ -276,7 +276,11 @@ const AdminOrdersPage = () => {
                 <div className="grid grid-cols-2 gap-3 text-sm">
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Calendar className="w-4 h-4" />
-                    <span>{format(new Date(order.createdAt), "yyyy-MM-dd HH:mm", { locale: ko })}</span>
+                    <span>
+                      {order.createdAt && !isNaN(new Date(order.createdAt).getTime())
+                        ? format(new Date(order.createdAt), "yyyy-MM-dd HH:mm", { locale: ko })
+                        : order.createdAt || '날짜 없음'}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <DollarSign className="w-4 h-4" />
