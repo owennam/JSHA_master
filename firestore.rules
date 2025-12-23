@@ -12,10 +12,6 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == userId;
     }
 
-    function isAdmin() {
-      return isAuthenticated() && request.auth.token.email == 'admin@jsha.com';
-    }
-
     function isApprovedUser() {
       return isAuthenticated() &&
              get(/databases/$(database)/documents/users/$(request.auth.uid)).data.status == 'approved';
@@ -61,9 +57,10 @@ service cloud.firestore {
     // 다른 컬렉션이 있다면 여기에 추가
     // 예: products, orders 등
 
-    // 나머지 모든 접근은 기본적으로 거부 (Admin은 허용)
+    // 나머지 모든 접근은 기본적으로 거부
+    // 관리자는 Backend API를 통해 Firebase Admin SDK로 접근
     match /{document=**} {
-      allow read, write: if isAdmin();
+      allow read, write: if false;
     }
   }
 }
