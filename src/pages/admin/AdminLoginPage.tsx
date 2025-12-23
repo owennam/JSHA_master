@@ -1,4 +1,3 @@
-```
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
@@ -13,7 +12,7 @@ import { Lock } from "lucide-react";
 const AdminLoginPage = () => {
   // 숨겨진 관리자 이메일 계정
   const ADMIN_EMAIL = "admin@jsha.com";
-  
+
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -25,7 +24,7 @@ const AdminLoginPage = () => {
 
     try {
       await signInWithEmailAndPassword(auth, ADMIN_EMAIL, password);
-      
+
       toast({
         title: "로그인 성공",
         description: "관리자 페이지로 이동합니다.",
@@ -33,10 +32,10 @@ const AdminLoginPage = () => {
       navigate("/admin/dashboard");
     } catch (error: any) {
       console.error("Login failed:", error);
-      
+
       // 계정이 없는 경우 (최초 1회 자동 생성 시도 - 편의성 위함)
       if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
-        // 보안상 비밀번호가 틀린건지 계정이 없는건지 구분하지 않는 게 좋지만, 
+        // 보안상 비밀번호가 틀린건지 계정이 없는건지 구분하지 않는 게 좋지만,
         // 여기서는 마이그레이션 편의를 위해 계정 생성 로직을 고려할 수 있음.
         // 하지만 'admin1234'같은 쉬운 비번으로 자동생성을 열어두면 위험할 수 있으므로
         // 실패 메시지만 띄움.
@@ -100,4 +99,3 @@ const AdminLoginPage = () => {
 };
 
 export default AdminLoginPage;
-```

@@ -148,7 +148,6 @@ const AdminOrdersPage = () => {
   const StatusBadge = ({ status }: { status: string }) => {
     switch (status) {
       case 'completed':
-      case 'completed':
         return <Badge className="bg-green-500 hover:bg-green-600"><CheckCircle className="w-3 h-3 mr-1" />결제 완료</Badge>;
       case 'cancel_requested':
         return <Badge className="bg-orange-500 hover:bg-orange-600"><Ban className="w-3 h-3 mr-1" />취소 요청됨</Badge>;
