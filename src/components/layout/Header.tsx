@@ -1,13 +1,22 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X } from "lucide-react";
+import { Menu, X, User, ShoppingBag, LogOut, LogIn } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useAuth } from "@/contexts/AuthContext";
 
 export const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, logout } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -32,7 +41,6 @@ export const Header = () => {
     { label: "병원 찾기", path: "/hospitals", isSection: false },
     { label: "뉴스레터", path: "/newsletter", isSection: false },
     { label: "인솔 구매", path: "/products", isSection: false },
-    { label: "주문 내역", path: "/my-orders", isSection: false },
     { label: "다시보기", path: "/recap", isSection: false },
   ];
 
@@ -63,6 +71,11 @@ export const Header = () => {
       navigate(item.path);
     }
     setIsMobileMenuOpen(false);
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    navigate("/");
   };
 
   return (
@@ -97,17 +110,60 @@ export const Header = () => {
           </button>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-8">
-            {navItems.map((item, index) => (
-              <button
-                key={item.label + index}
-                onClick={() => handleNavClick(item)}
-                className="text-foreground hover:text-primary transition-all font-semibold px-4 py-2 rounded-xl hover:bg-primary/5"
+          <div className="hidden md:flex items-center gap-4">
+            <nav className="flex items-center gap-8">
+              {navItems.map((item, index) => (
+                <button
+                  key={item.label + index}
+                  onClick={() => handleNavClick(item)}
+                  className="text-foreground hover:text-primary transition-all font-semibold px-4 py-2 rounded-xl hover:bg-primary/5"
+                >
+                  {item.label}
+                </button>
+              ))}
+            </nav>
+
+            {/* User Menu */}
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="rounded-full hover:bg-primary/10"
+                  >
+                    <User className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem
+                    onClick={() => navigate("/my-orders")}
+                    className="cursor-pointer"
+                  >
+                    <ShoppingBag className="mr-2 h-4 w-4" />
+                    <span>주문 내역</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={handleLogout}
+                    className="cursor-pointer text-red-600 focus:text-red-600"
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>로그아웃</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button
+                variant="ghost"
+                onClick={() => navigate("/auth")}
+                className="gap-2"
               >
-                {item.label}
-              </button>
-            ))}
-          </nav>
+                <LogIn className="h-4 w-4" />
+                로그인
+              </Button>
+            )}
+          </div>
 
           {/* Mobile Menu Button */}
           <button
@@ -136,6 +192,45 @@ export const Header = () => {
                 {item.label}
               </button>
             ))}
+
+            {/* User Menu Items for Mobile */}
+            <div className="border-t border-border mt-2 pt-2">
+              {user ? (
+                <>
+                  <button
+                    onClick={() => {
+                      navigate("/my-orders");
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="w-full text-left text-foreground hover:text-primary hover:bg-primary/5 transition-all font-semibold py-3 px-4 rounded-xl flex items-center gap-2"
+                  >
+                    <ShoppingBag className="h-4 w-4" />
+                    주문 내역
+                  </button>
+                  <button
+                    onClick={() => {
+                      handleLogout();
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="w-full text-left text-red-600 hover:bg-red-50 transition-all font-semibold py-3 px-4 rounded-xl flex items-center gap-2"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    로그아웃
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={() => {
+                    navigate("/auth");
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="w-full text-left text-foreground hover:text-primary hover:bg-primary/5 transition-all font-semibold py-3 px-4 rounded-xl flex items-center gap-2"
+                >
+                  <LogIn className="h-4 w-4" />
+                  로그인
+                </button>
+              )}
+            </div>
           </nav>
         </div>
       )}
