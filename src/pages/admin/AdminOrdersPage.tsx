@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { getAllOrders, requestCancelOrder, OrderInfo } from "@/lib/firestore";
+import { OrderInfo, updateOrderStatus } from "@/lib/firestore";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
 
@@ -40,13 +40,28 @@ const AdminOrdersPage = () => {
   const loadOrders = async () => {
     setLoading(true);
     try {
-      const data = await getAllOrders();
-      setOrders(data);
+      const API_URL = import.meta.env.VITE_API_URL || '';
+      const response = await fetch(`${API_URL}/api/admin/orders`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch orders from backend');
+      }
+
+      const result = await response.json();
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to load orders');
+      }
+
+      setOrders(result.data || []);
     } catch (error: any) {
       console.error("Failed to load orders:", error);
       toast({
         title: "주문 목록 로드 실패",
-        description: "Firestore에서 주문 목록을 불러오는데 실패했습니다.",
+        description: error.message || "주문 목록을 불러오는데 실패했습니다.",
         variant: "destructive",
       });
     } finally {
@@ -94,8 +109,18 @@ const AdminOrdersPage = () => {
         throw new Error(data.message || '토스 결제 취소 실패');
       }
 
-      // 2. Firestore 상태 업데이트 (클라이언트에서 직접 수행)
-      await requestCancelOrder(selectedOrder.userId, selectedOrder.orderId, cancelReason);
+      // 2. Firestore 상태 업데이트 (관리자가 직접 취소 완료 처리)
+      if (selectedOrder.userId) {
+        try {
+          await updateOrderStatus(selectedOrder.userId, selectedOrder.orderId, 'canceled', {
+            cancelReason: cancelReason,
+            canceledAt: new Date().toISOString(),
+          });
+          console.log('✅ Firestore order status updated to canceled');
+        } catch (firestoreError) {
+          console.error('⚠️ Firestore 업데이트 실패 (취소는 성공):', firestoreError);
+        }
+      }
 
       toast({
         title: "결제 취소 완료",

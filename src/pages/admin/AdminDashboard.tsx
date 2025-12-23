@@ -7,8 +7,6 @@ import {
     CreditCard,
     ArrowUpRight
 } from 'lucide-react';
-import { getAllOrders, getAllUsers } from '@/lib/firestore';
-
 interface DashboardData {
     totalRevenue: number;
     totalOrders: number;
@@ -28,29 +26,23 @@ const AdminDashboard = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                // 병렬로 데이터 로드
-                const [orders, users] = await Promise.all([
-                    getAllOrders(),
-                    getAllUsers()
-                ]);
-
-                // 1. 총 매출 및 주문 수 계산
-                const completedOrders = orders.filter(o => o.status === 'completed' || o.status === 'DONE');
-                const totalRevenue = completedOrders.reduce((sum, order) => sum + (order.amount || 0), 0);
-                const totalOrders = orders.length;
-
-                // 2. 신규 신청자 (User Status가 'pending'인 경우)
-                const newApplications = users.filter(u => u.status === 'pending').length;
-
-                // 3. 상담 대기 (현재는 데이터가 없으므로 0 처리, 추후 구현)
-                const pendingConsultations = 0;
-
-                setData({
-                    totalRevenue,
-                    totalOrders,
-                    newApplications,
-                    pendingConsultations
+                const API_URL = import.meta.env.VITE_API_URL || '';
+                const response = await fetch(`${API_URL}/api/admin/dashboard-summary`, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
                 });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch dashboard data');
+                }
+
+                const result = await response.json();
+                if (!result.success) {
+                    throw new Error(result.message || 'Failed to load dashboard data');
+                }
+
+                setData(result.data);
             } catch (error) {
                 console.error('Failed to fetch dashboard data:', error);
             } finally {

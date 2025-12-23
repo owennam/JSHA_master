@@ -4,9 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import {
-  getUsersByStatus,
-  getAllUsers,
-  updateUserStatus,
   UserProfile,
   UserStatus
 } from "@/lib/firestore";
@@ -38,15 +35,40 @@ const AdminUsersPage = () => {
   const loadUsers = async () => {
     setLoading(true);
     try {
-      const [pending, approved, rejected] = await Promise.all([
-        getUsersByStatus('pending'),
-        getUsersByStatus('approved'),
-        getUsersByStatus('rejected'),
+      const API_URL = import.meta.env.VITE_API_URL || '';
+
+      // 각 상태별로 병렬 요청
+      const [pendingRes, approvedRes, rejectedRes] = await Promise.all([
+        fetch(`${API_URL}/api/admin/users?status=pending`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+        }),
+        fetch(`${API_URL}/api/admin/users?status=approved`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+        }),
+        fetch(`${API_URL}/api/admin/users?status=rejected`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+        }),
       ]);
 
-      setPendingUsers(pending);
-      setApprovedUsers(approved);
-      setRejectedUsers(rejected);
+      const [pendingData, approvedData, rejectedData] = await Promise.all([
+        pendingRes.json(),
+        approvedRes.json(),
+        rejectedRes.json(),
+      ]);
+
+      if (pendingData.success) setPendingUsers(pendingData.data || []);
+      if (approvedData.success) setApprovedUsers(approvedData.data || []);
+      if (rejectedData.success) setRejectedUsers(rejectedData.data || []);
+
+      if (!pendingData.success || !approvedData.success || !rejectedData.success) {
+        throw new Error('Failed to load some user data');
+      }
     } catch (error) {
       console.error("Failed to load users:", error);
       toast({
@@ -66,7 +88,19 @@ const AdminUsersPage = () => {
   const handleUpdateStatus = async (uid: string, newStatus: UserStatus) => {
     setUpdatingUserId(uid);
     try {
-      await updateUserStatus(uid, newStatus);
+      const API_URL = import.meta.env.VITE_API_URL || '';
+      const response = await fetch(`${API_URL}/api/admin/users/${uid}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || 'Failed to update user status');
+      }
 
       toast({
         title: "상태 업데이트 완료",
@@ -75,11 +109,11 @@ const AdminUsersPage = () => {
 
       // 목록 새로고침
       await loadUsers();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to update status:", error);
       toast({
         title: "상태 업데이트 실패",
-        description: "사용자 상태를 변경하는데 실패했습니다.",
+        description: error.message || "사용자 상태를 변경하는데 실패했습니다.",
         variant: "destructive",
       });
     } finally {

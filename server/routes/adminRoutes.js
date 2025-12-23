@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import { config } from '../config.js';
 import { authMiddleware } from '../middleware/authMiddleware.js';
 import googleSheetsService from '../googleSheetsService.js';
+import { db } from '../firebaseAdmin.js';
 
 const router = express.Router();
 
@@ -85,20 +86,30 @@ router.get('/dashboard-summary', authMiddleware, async (req, res) => {
 router.get('/orders', authMiddleware, async (req, res) => {
     try {
         const rows = await googleSheetsService.getPaymentInfo();
-        // 배열을 객체로 변환 (헤더 순서에 맞게)
+        // 배열을 객체로 변환 (OrderInfo 형식에 맞게)
         const orders = rows.map(row => ({
-            timestamp: row[0],
-            orderId: row[1],
-            productName: row[2],
-            amount: row[3],
-            paymentKey: row[4], // 결제 키 추가 (취소 시 필요)
-            customerName: row[6],
-            status: row[10],
+            createdAt: row[0] || '',
+            orderId: row[1] || '',
+            productName: row[2] || '',
+            amount: parseInt((row[3] || '0').replace(/[^0-9]/g, '')) || 0,
+            paymentKey: row[4] || '',
+            customerEmail: row[5] || '',
+            customerName: row[6] || '',
+            customerPhone: row[7] || '',
+            address: row[8] || '',
+            addressDetail: row[9] || '',
+            status: row[10] || 'completed',
+            postalCode: row[11] || '',
+            userId: '', // Google Sheets에는 userId가 없음
+            cancelReason: row[12] || '',
+            cancelRequestedAt: row[13] || undefined,
+            canceledAt: row[14] || undefined,
         })).reverse(); // 최신순
 
         res.json({ success: true, data: orders });
     } catch (error) {
-        res.status(500).json({ success: false, message: 'Failed to fetch orders' });
+        console.error('Failed to fetch orders:', error);
+        res.json({ success: false, message: 'Failed to fetch orders' });
     }
 });
 
@@ -211,6 +222,83 @@ router.post('/graduates', authMiddleware, async (req, res) => {
         res.json({ success: true, message: 'Graduate added successfully' });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Failed to add graduate' });
+    }
+});
+
+// ============================================
+// 사용자 관리 (Firestore)
+// ============================================
+
+// 사용자 목록 조회
+router.get('/users', authMiddleware, async (req, res) => {
+    if (!db) {
+        return res.status(503).json({
+            success: false,
+            message: 'Firebase Admin is not initialized'
+        });
+    }
+
+    try {
+        const { status } = req.query;
+        let usersRef = db.collection('users');
+
+        // status 쿼리 파라미터가 있으면 필터링
+        if (status) {
+            usersRef = usersRef.where('status', '==', status);
+        }
+
+        const snapshot = await usersRef.get();
+        const users = [];
+
+        snapshot.forEach(doc => {
+            users.push({
+                uid: doc.id,
+                ...doc.data()
+            });
+        });
+
+        res.json({ success: true, data: users });
+    } catch (error) {
+        console.error('Failed to fetch users:', error);
+        res.status(500).json({ success: false, message: 'Failed to fetch users' });
+    }
+});
+
+// 사용자 상태 업데이트
+router.patch('/users/:uid/status', authMiddleware, async (req, res) => {
+    if (!db) {
+        return res.status(503).json({
+            success: false,
+            message: 'Firebase Admin is not initialized'
+        });
+    }
+
+    const { uid } = req.params;
+    const { status } = req.body;
+
+    if (!status || !['pending', 'approved', 'rejected'].includes(status)) {
+        return res.status(400).json({
+            success: false,
+            message: 'Invalid status. Must be: pending, approved, or rejected'
+        });
+    }
+
+    try {
+        await db.collection('users').doc(uid).update({
+            status,
+            updatedAt: new Date().toISOString()
+        });
+
+        res.json({
+            success: true,
+            message: `User status updated to ${status}`
+        });
+    } catch (error) {
+        console.error('Failed to update user status:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to update user status'
+        });
     }
 });
 
