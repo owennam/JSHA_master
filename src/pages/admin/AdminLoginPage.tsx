@@ -17,10 +17,12 @@ const AdminLoginPage = () => {
         setIsLoading(true);
 
         try {
-            const response = await fetch('/api/admin/login', {
+            const API_URL = import.meta.env.VITE_API_URL || '';
+            const response = await fetch(`${API_URL}/api/admin/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ password }),
+                credentials: 'include', // 쿠키 포함
             });
 
             const data = await response.json();

@@ -1,0 +1,45 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isApprovedUser() {
+      return isAuthenticated() &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.status == 'approved';
+    }
+
+    // Users collection
+    match /users/{userId} {
+      // 사용자는 자신의 프로필만 읽을 수 있음
+      allow read: if isOwner(userId);
+
+      // 회원가입 시 새 문서 생성 허용 (본인 UID와 일치할 때만)
+      allow create: if isAuthenticated() && request.auth.uid == userId;
+
+      // 사용자는 status 필드를 제외한 자신의 정보만 수정 가능
+      allow update: if isOwner(userId) &&
+                      (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['status']));
+
+      // status 필드 업데이트는 서버 측(Admin SDK)에서만 가능하도록 제한
+      // 클라이언트에서는 status를 변경할 수 없음
+      allow delete: if false; // 사용자 삭제는 Admin SDK를 통해서만
+    }
+
+    // 다른 컬렉션이 있다면 여기에 추가
+    // 예: products, orders 등
+
+    // 나머지 모든 접근은 기본적으로 거부
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
