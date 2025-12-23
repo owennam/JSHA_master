@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { ScrollToTop } from "@/components/layout/ScrollToTop";
 import { logPageView } from "@/lib/firebase";
+import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
 import EducationPage from "./pages/EducationPage";
 import VideoDetailPage from "./pages/VideoDetailPage";
@@ -14,6 +15,7 @@ import HospitalsPage from "./pages/HospitalsPage";
 import NewsletterListPage from "./pages/NewsletterListPage";
 import NewsletterDetailPage from "./pages/NewsletterDetailPage";
 import AuthPage from "./pages/AuthPage";
+import PendingApprovalPage from "./pages/PendingApprovalPage";
 import ProductPage from "./pages/ProductPage";
 import ProductDetailPage from "./pages/ProductDetailPage";
 import PaymentPage from "./pages/PaymentPage";
@@ -32,6 +34,7 @@ import AdminDashboard from "@/pages/admin/AdminDashboard";
 import AdminOrdersPage from "@/pages/admin/AdminOrdersPage";
 import AdminApplicationsPage from "@/pages/admin/AdminApplicationsPage";
 import AdminMasterCarePage from "@/pages/admin/AdminMasterCarePage";
+import AdminUsersPage from "@/pages/admin/AdminUsersPage";
 
 const queryClient = new QueryClient();
 
@@ -49,13 +52,14 @@ const AnalyticsTracker = () => {
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AnalyticsTracker />
-        <ScrollToTop />
-        <Routes>
+    <AuthProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <AnalyticsTracker />
+          <ScrollToTop />
+          <Routes>
           {/* Public Routes */}
           <Route path="/" element={<Index />} />
           <Route path="/education" element={<EducationPage />} />
@@ -65,6 +69,7 @@ const App = () => (
           <Route path="/newsletter" element={<NewsletterListPage />} />
           <Route path="/newsletter/:id" element={<NewsletterDetailPage />} />
           <Route path="/auth" element={<AuthPage />} />
+          <Route path="/auth/pending" element={<PendingApprovalPage />} />
           <Route path="/products" element={<ProductPage />} />
           <Route path="/products/:productId" element={<ProductDetailPage />} />
           <Route path="/payment" element={<PaymentPage />} />
@@ -83,6 +88,7 @@ const App = () => (
             <Route path="orders" element={<AdminOrdersPage />} />
             <Route path="applications" element={<AdminApplicationsPage />} />
             <Route path="mastercare" element={<AdminMasterCarePage />} />
+            <Route path="users" element={<AdminUsersPage />} />
           </Route>
 
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
@@ -90,6 +96,7 @@ const App = () => (
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 

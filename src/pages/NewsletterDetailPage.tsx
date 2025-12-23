@@ -13,8 +13,8 @@ const NewsletterDetailPage = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      
-      <main className="pt-24 pb-20 px-4">
+
+      <main className="pt-40 pb-20 px-4">
         <article className="container mx-auto max-w-3xl">
           {/* Back Button */}
           <Link to="/newsletter">

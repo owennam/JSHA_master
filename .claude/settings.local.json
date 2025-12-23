@@ -30,7 +30,8 @@
       "Bash(git rm:*)",
       "Bash(find:*)",
       "Bash(nslookup:*)",
-      "Bash(git pull:*)"
+      "Bash(git pull:*)",
+      "WebFetch(domain:firebase.google.com)"
     ],
     "deny": [],
     "ask": []

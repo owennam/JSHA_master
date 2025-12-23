@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { activeProducts } from "@/data/products";
-import { getAuthStatus, getAuthInfo, clearAuthStatus } from "@/data/authorizedUsers";
+import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -73,26 +73,26 @@ type CustomerInfoData = z.infer<typeof customerInfoSchema>;
 const ProductPage = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { user, userProfile, signOut } = useAuth();
   const [selectedProduct, setSelectedProduct] = useState<string>("");
   const [selectedSize, setSelectedSize] = useState<string>("");
   const [selectedType, setSelectedType] = useState<string>("");
   const [quantity, setQuantity] = useState<number>(1);
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [authInfo, setAuthInfo] = useState<{ clinicName: string; directorName: string } | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState<boolean>(false);
 
 
 
   // 인증 체크
   useEffect(() => {
-    const isAuthenticated = getAuthStatus();
-    if (!isAuthenticated) {
+    if (!user) {
+      // 로그인하지 않은 경우
       navigate("/auth");
-    } else {
-      const info = getAuthInfo();
-      setAuthInfo(info);
+    } else if (userProfile && userProfile.status !== 'approved') {
+      // 로그인했지만 승인되지 않은 경우
+      navigate("/auth/pending");
     }
-  }, [navigate]);
+  }, [user, userProfile, navigate]);
 
   // URL 파라미터로 autoOpenSheet가 있으면 시트 열기 (결제 취소 후 복귀 시)
   useEffect(() => {
@@ -102,13 +102,21 @@ const ProductPage = () => {
     }
   }, [cart.length]);
 
-  const handleLogout = () => {
-    clearAuthStatus();
-    toast({
-      title: "로그아웃 완료",
-      description: "안전하게 로그아웃되었습니다.",
-    });
-    navigate("/");
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      toast({
+        title: "로그아웃 완료",
+        description: "안전하게 로그아웃되었습니다.",
+      });
+      navigate("/");
+    } catch (error) {
+      toast({
+        title: "로그아웃 실패",
+        description: "다시 시도해주세요.",
+        variant: "destructive",
+      });
+    }
   };
 
   // 주소 검색 팝업 열기
@@ -167,6 +175,7 @@ const ProductPage = () => {
 
     const savedCustomerInfo = localStorage.getItem("jsha_customer_info");
     if (savedCustomerInfo) {
+      // localStorage에 저장된 정보가 있으면 우선 사용
       try {
         const parsedInfo = JSON.parse(savedCustomerInfo);
         Object.keys(parsedInfo).forEach((key) => {
@@ -175,8 +184,12 @@ const ProductPage = () => {
       } catch (e) {
         console.error("Failed to parse customer info from localStorage", e);
       }
+    } else if (userProfile) {
+      // localStorage에 정보가 없으면 userProfile로 자동 입력
+      form.setValue("name", userProfile.directorName);
+      form.setValue("email", userProfile.email);
     }
-  }, [form]);
+  }, [form, userProfile]);
 
   // 장바구니 변경 시 저장
   useEffect(() => {
@@ -288,15 +301,15 @@ const ProductPage = () => {
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
 
-      <main className="flex-1 container mx-auto px-4 py-16">
+      <main className="flex-1 container mx-auto px-4 pt-40 pb-16">
         <div className="max-w-6xl mx-auto">
           {/* 인증 정보 표시 */}
-          {authInfo && (
+          {userProfile && (
             <div className="mb-8 p-4 bg-primary/10 border border-primary/20 rounded-lg flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">로그인 정보</p>
                 <p className="font-semibold text-foreground">
-                  {authInfo.clinicName} | {authInfo.directorName}
+                  {userProfile.clinicName} | {userProfile.directorName}
                 </p>
               </div>
               <Button

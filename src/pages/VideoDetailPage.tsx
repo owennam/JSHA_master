@@ -28,7 +28,7 @@ const VideoDetailPage = () => {
     return (
       <div className="min-h-screen bg-background">
         <Header />
-        <main className="pt-32 px-4">
+        <main className="pt-40 px-4">
           <div className="container mx-auto max-w-4xl text-center">
             <h1 className="text-3xl font-bold mb-4">영상을 찾을 수 없습니다</h1>
             <Link to="/education">
@@ -47,8 +47,8 @@ const VideoDetailPage = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      
-      <main className="pt-24 pb-20 px-4">
+
+      <main className="pt-40 pb-20 px-4">
         <div className="container mx-auto max-w-5xl">
           {/* Back Button */}
           <Link to="/education">

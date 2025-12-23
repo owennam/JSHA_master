@@ -139,7 +139,7 @@ const RecapPage = () => {
     return (
       <div className="min-h-screen bg-background">
         <Header />
-        <main className="pt-24 pb-20 px-4 bg-gradient-to-br from-primary/7 via-background to-secondary/7 min-h-[calc(100vh-80px)]">
+        <main className="pt-40 pb-20 px-4 bg-gradient-to-br from-primary/7 via-background to-secondary/7 min-h-[calc(100vh-80px)]">
           <div className="container mx-auto max-w-2xl">
             <Card className="border-2 shadow-xl">
               <CardHeader className="text-center">
@@ -176,7 +176,7 @@ const RecapPage = () => {
     return (
       <div className="min-h-screen bg-background">
         <Header />
-        <main className="pt-24 pb-20 px-4 bg-gradient-to-br from-primary/7 via-background to-secondary/7 min-h-[calc(100vh-80px)]">
+        <main className="pt-40 pb-20 px-4 bg-gradient-to-br from-primary/7 via-background to-secondary/7 min-h-[calc(100vh-80px)]">
           <div className="container mx-auto max-w-2xl">
             <Card className="border-2 border-amber-500/20 bg-amber-500/5">
               <CardHeader className="text-center">
@@ -236,7 +236,7 @@ const RecapPage = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <main className="pt-24 pb-20 px-4">
+      <main className="pt-40 pb-20 px-4">
         <div className="container mx-auto max-w-7xl">
           {/* 헤더 */}
           <div className="text-center mb-12 animate-fade-in">

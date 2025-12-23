@@ -6,7 +6,7 @@ export const MasterCareHeroSection = () => {
   };
 
   return (
-    <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden pt-24 md:pt-32 lg:pt-[132px]">
+    <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden pt-40 md:pt-44 lg:pt-48">
       {/* Background with image and gradient overlay */}
       <div className="absolute inset-0 z-0">
         <img

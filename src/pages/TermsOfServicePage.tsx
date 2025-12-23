@@ -7,7 +7,7 @@ const TermsOfServicePage = () => {
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
 
-      <main className="flex-1 container mx-auto px-4 py-16">
+      <main className="flex-1 container mx-auto px-4 pt-40 pb-16">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-4xl font-bold text-foreground mb-8">이용약관</h1>
 

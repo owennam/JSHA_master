@@ -114,7 +114,7 @@ const PaymentSuccessPage = () => {
 		return (
 			<div className="min-h-screen flex flex-col bg-background">
 				<Header />
-				<main className="flex-1 container mx-auto px-4 py-16">
+				<main className="flex-1 container mx-auto px-4 pt-40 pb-16">
 					<Card className="max-w-2xl mx-auto">
 						<CardContent className="py-20 flex flex-col items-center justify-center">
 							<Loader2 className="w-16 h-16 animate-spin text-primary mb-4" />
@@ -132,7 +132,7 @@ const PaymentSuccessPage = () => {
 		return (
 			<div className="min-h-screen flex flex-col bg-background">
 				<Header />
-				<main className="flex-1 container mx-auto px-4 py-16">
+				<main className="flex-1 container mx-auto px-4 pt-40 pb-16">
 					<Card className="max-w-2xl mx-auto">
 						<CardHeader>
 							<CardTitle className="text-red-500 text-center">
@@ -161,7 +161,7 @@ const PaymentSuccessPage = () => {
 		<div className="min-h-screen flex flex-col bg-background">
 			<Header />
 
-			<main className="flex-1 container mx-auto px-4 py-16">
+			<main className="flex-1 container mx-auto px-4 pt-40 pb-16">
 				<div className="max-w-2xl mx-auto">
 					<Card className="text-center">
 						<CardContent className="pt-12 pb-8">

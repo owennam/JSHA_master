@@ -5,6 +5,7 @@ import {
     ShoppingBag,
     GraduationCap,
     Stethoscope,
+    Users,
     LogOut,
     Menu,
     X
@@ -51,10 +52,10 @@ export const AdminLayout = () => {
 
     const menuItems = [
         { icon: LayoutDashboard, label: '대시보드', path: '/admin/dashboard' },
+        { icon: Users, label: '사용자 관리', path: '/admin/users' },
         { icon: ShoppingBag, label: '주문 관리', path: '/admin/orders' },
         { icon: GraduationCap, label: '마스터 코스', path: '/admin/applications' },
         { icon: Stethoscope, label: 'Master Care', path: '/admin/mastercare' },
-        // { icon: Users, label: '수료자 관리', path: '/admin/graduates' },
     ];
 
     return (

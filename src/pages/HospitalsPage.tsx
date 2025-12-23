@@ -11,7 +11,7 @@ const HospitalsPage = () => {
     <div className="min-h-screen bg-background">
       <Header />
 
-      <main className="pt-20">
+      <main className="pt-40">
         {/* Hero Section */}
         <section className="relative min-h-[70vh] flex items-center justify-center overflow-hidden py-20 px-4">
           {/* Background with image and gradient overlay */}

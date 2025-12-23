@@ -6,17 +6,21 @@ import { Footer } from "@/components/layout/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const clientKey = import.meta.env.VITE_TOSS_CLIENT_KEY;
-const customerKey = import.meta.env.VITE_TOSS_CUSTOMER_KEY;
 
 const PaymentPage = () => {
 	const [searchParams] = useSearchParams();
 	const navigate = useNavigate();
+	const { user } = useAuth();
 	const [isReady, setIsReady] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const paymentWidgetRef = useRef<any>(null);
 	const [mounted, setMounted] = useState(false);
+
+	// 로그인한 사용자의 uid를 customerKey로 사용, 없으면 ANONYMOUS
+	const customerKey = user?.uid || "ANONYMOUS";
 
 	// URL 파라미터에서 주문 정보 가져오기
 	const orderInfo = {

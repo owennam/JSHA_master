@@ -83,7 +83,8 @@ export const products: Product[] = [
     type: "",
     price: 2200,
     description: "",
-    isActive: false, // Hidden for approval
+    image: "/images/products/socks.jpg",
+    isActive: true, // Now active
     options: {
       sizes: ["Free"],
       types: ["남성", "여성"]
@@ -96,7 +97,7 @@ export const products: Product[] = [
     price: 15000,
     description: "균형있는 신체 밸런스를 위한 발마사지 오일",
     image: "/images/products/baroma_oil.png",
-    isActive: false, // Hidden until needed
+    isActive: true, // Now active
     options: {
       sizes: ["10ml"],
       types: ["기본형"]
@@ -108,7 +109,8 @@ export const products: Product[] = [
     type: "",
     price: 99000,
     description: "",
-    isActive: false, // Hidden for approval
+    image: "/images/products/healing_max.jpg",
+    isActive: true, // Now active
     options: {
       sizes: ["표준"],
       types: ["기본형"]
@@ -121,7 +123,7 @@ export const products: Product[] = [
     price: 132000,
     description: "중형 사이즈 쿠룬타 (가로 430mm x 세로 760mm x 높이 160mm)",
     image: "/images/products/kurunta.png",
-    isActive: false, // Hidden until needed
+    isActive: true, // Now active
     options: {
       sizes: ["표준"],
       types: ["기본형"]

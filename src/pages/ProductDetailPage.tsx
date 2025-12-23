@@ -17,7 +17,7 @@ const ProductDetailPage = () => {
         return (
             <div className="min-h-screen bg-background">
                 <Header />
-                <main className="container mx-auto px-4 py-20">
+                <main className="container mx-auto px-4 pt-40 pb-20">
                     <div className="max-w-2xl mx-auto text-center">
                         <h1 className="text-2xl font-bold mb-4">상품을 찾을 수 없습니다</h1>
                         <Button onClick={() => navigate("/products")}>
@@ -216,7 +216,7 @@ const ProductDetailPage = () => {
         <div className="min-h-screen bg-background">
             <Header />
 
-            <main className="container mx-auto px-4 py-20">
+            <main className="container mx-auto px-4 pt-40 pb-20">
                 <div className="max-w-4xl mx-auto">
                     {/* Back Button */}
                     <Button
