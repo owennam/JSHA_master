@@ -151,6 +151,24 @@ const AuthPage = () => {
       const status = isWhitelisted ? 'approved' : 'pending';
       await signUp(signupEmail, signupPassword, clinicName, directorName, location, status);
 
+      // 관리자에게 알림 전송
+      try {
+        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+        fetch(`${API_URL}/notify-signup`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: signupEmail,
+            clinicName,
+            directorName,
+            location,
+            status
+          })
+        }).catch(err => console.error('Failed to send signup notification:', err));
+      } catch (notifyError) {
+        console.error('Notification error:', notifyError);
+      }
+
       // 회원가입 성공
       if (isWhitelisted) {
         // 화이트리스트 사용자는 바로 제품 페이지로

@@ -299,6 +299,44 @@ class SMSService {
   /**
    * Master Care 신청 알림 SMS 발송 (관리자에게)
    */
+  /**
+   * 새 회원가입 알림 SMS 발송 (관리자에게)
+   */
+  async sendSignupNotificationSMS(userData) {
+    if (!this.initialized || !this.messageService) {
+      console.warn('⚠️ SMS service not initialized, skipping SMS');
+      return { success: false, message: 'SMS service not initialized' };
+    }
+
+    try {
+      if (!config.adminPhone) {
+        console.warn('⚠️ Admin phone number not configured');
+        return { success: false, message: 'Admin phone not configured' };
+      }
+
+      const { clinicName, directorName, email, status } = userData;
+      const statusText = status === 'approved' ? '자동승인' : '승인대기';
+
+      const to = this.formatPhoneNumber(config.adminPhone);
+      const from = config.solapiFromNumber;
+
+      const message = `[JSHA 관리자] 새 회원가입\n\n병원: ${clinicName}\n원장: ${directorName}\n이메일: ${email}\n상태: ${statusText}`;
+
+      const response = await this.messageService.send({
+        to,
+        from,
+        text: message,
+      });
+
+      console.log('✅ Signup notification SMS sent to admin');
+      return { success: true, messageId: response.messageId };
+    } catch (error) {
+      console.error('❌ Failed to send signup notification SMS:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+
   async sendMasterCareNotificationSMS(mastercareData) {
     if (!this.initialized || !this.messageService) {
       console.warn('⚠️ SMS service not initialized, skipping SMS');

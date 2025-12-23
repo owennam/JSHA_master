@@ -451,6 +451,61 @@ app.post('/submit-mastercare', async (req, res) => {
   }
 });
 
+// 회원가입 알림 엔드포인트
+app.post('/notify-signup', async (req, res) => {
+  const { email, clinicName, directorName, location, status } = req.body;
+
+  // 요청 파라미터 검증
+  if (!email || !clinicName || !directorName) {
+    return res.status(400).json({
+      success: false,
+      error: 'Missing required parameters',
+      message: 'email, clinicName, directorName are required'
+    });
+  }
+
+  try {
+    console.log('회원가입 알림 요청:', { email, clinicName, directorName, status });
+
+    const userData = {
+      email,
+      clinicName,
+      directorName,
+      location: location || '기타',
+      status: status || 'pending'
+    };
+
+    // 이메일 발송
+    const emailResult = await emailService.sendSignupNotificationToAdmin(userData);
+    if (emailResult.success) {
+      console.log('✅ 관리자에게 가입 알림 이메일 발송 성공');
+    } else {
+      console.warn('⚠️ 관리자에게 가입 알림 이메일 발송 실패:', emailResult.error);
+    }
+
+    // SMS 발송
+    const smsResult = await smsService.sendSignupNotificationSMS(userData);
+    if (smsResult.success) {
+      console.log('✅ 관리자에게 가입 알림 SMS 발송 성공');
+    } else {
+      console.warn('⚠️ 관리자에게 가입 알림 SMS 발송 실패:', smsResult.error);
+    }
+
+    res.json({
+      success: true,
+      message: 'Notification sent successfully'
+    });
+
+  } catch (error) {
+    console.error('회원가입 알림 처리 중 오류:', error);
+    res.status(500).json({
+      success: false,
+      error: 'INTERNAL_SERVER_ERROR',
+      message: 'Failed to process signup notification'
+    });
+  }
+});
+
 // 404 핸들러
 app.use((req, res) => {
   res.status(404).json({

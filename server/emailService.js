@@ -681,8 +681,109 @@ class EmailService {
   }
 
   /**
-   * 관리자에게 새 Master Care 신청 알림 이메일 발송
+   * 관리자에게 새 회원가입 알림 이메일 발송
    */
+  async sendSignupNotificationToAdmin(userData) {
+    if (!this.initialized) {
+      await this.initialize();
+    }
+
+    if (!config.adminEmail) {
+      console.warn('⚠️ Admin email not configured. Skipping admin notification.');
+      return { success: false, error: 'Admin email not configured' };
+    }
+
+    const { email, clinicName, directorName, location, status } = userData;
+
+    const statusText = status === 'approved' ? '자동 승인 (화이트리스트)' : '승인 대기';
+    const statusColor = status === 'approved' ? '#166534' : '#b45309';
+    const statusBg = status === 'approved' ? '#dcfce7' : '#fef3c7';
+
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+      </head>
+      <body style="font-family: 'Noto Sans KR', sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+          <h1 style="color: white; margin: 0; font-size: 28px;">🔔 새로운 회원가입 알림</h1>
+        </div>
+
+        <div style="background-color: #ffffff; padding: 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 10px 10px;">
+          <p style="font-size: 16px; margin-bottom: 20px;">
+            새로운 의료기관 회원이 가입했습니다.
+          </p>
+
+          <div style="background-color: ${statusBg}; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h2 style="margin-top: 0; color: #1f2937; font-size: 20px;">가입 정보</h2>
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 8px 0; color: #4b5563; font-weight: bold;">의료기관명</td>
+                <td style="padding: 8px 0; text-align: right;">${clinicName}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #4b5563; font-weight: bold;">원장명</td>
+                <td style="padding: 8px 0; text-align: right;">${directorName}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #4b5563; font-weight: bold;">이메일</td>
+                <td style="padding: 8px 0; text-align: right;"><a href="mailto:${email}">${email}</a></td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #4b5563; font-weight: bold;">지역</td>
+                <td style="padding: 8px 0; text-align: right;">${location}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #4b5563; font-weight: bold;">상태</td>
+                <td style="padding: 8px 0; text-align: right; color: ${statusColor}; font-weight: bold;">${statusText}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #4b5563; font-weight: bold;">가입일시</td>
+                <td style="padding: 8px 0; text-align: right;">${new Date().toLocaleString('ko-KR')}</td>
+              </tr>
+            </table>
+          </div>
+
+          ${status === 'pending' ? `
+          <div style="background-color: #fff1f2; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #e11d48;">
+            <h3 style="margin-top: 0; color: #be123c; font-size: 18px;">⚠️ 승인 필요</h3>
+            <p style="margin: 0; color: #881337;">
+              이 회원은 현재 승인 대기 상태입니다.<br>
+              Firebase Console에서 회원 정보를 확인하고 승인 처리해주세요.
+            </p>
+          </div>
+          ` : ''}
+
+          <div style="margin-top: 30px; text-align: center; color: #6b7280; font-size: 14px;">
+            <p>이 이메일은 자동으로 발송되었습니다.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    try {
+      const { data, error } = await this.resend.emails.send({
+        from: `JSHA 웹사이트 <${config.resendFromEmail}>`,
+        to: [config.adminEmail],
+        subject: `[JSHA 관리자] 새 회원가입 - ${clinicName} (${directorName})`,
+        html: htmlContent,
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      console.log('✅ Signup notification email sent to admin:', config.adminEmail);
+      return { success: true, messageId: data.id };
+    } catch (error) {
+      console.error('❌ Failed to send signup email to admin:', error);
+      throw error;
+    }
+  }
+
+
   async sendMasterCareNotificationToAdmin(mastercareData) {
     if (!this.initialized) {
       await this.initialize();
