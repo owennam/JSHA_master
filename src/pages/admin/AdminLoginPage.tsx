@@ -1,7 +1,5 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
-import { auth } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,49 +8,48 @@ import { useToast } from "@/hooks/use-toast";
 import { Lock } from "lucide-react";
 
 const AdminLoginPage = () => {
-  // 숨겨진 관리자 이메일 계정
-  const ADMIN_EMAIL = "admin@jsha.com";
-
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    setError('');
+    setIsLoading(true);
 
     try {
-      await signInWithEmailAndPassword(auth, ADMIN_EMAIL, password);
+      const API_URL = import.meta.env.VITE_API_URL || '';
+      const response = await fetch(`${API_URL}/api/admin/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
+        credentials: 'include', // 쿠키 포함
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || '로그인에 실패했습니다.');
+      }
 
       toast({
         title: "로그인 성공",
         description: "관리자 페이지로 이동합니다.",
       });
-      navigate("/admin/dashboard");
-    } catch (error: any) {
-      console.error("Login failed:", error);
 
-      // 계정이 없는 경우 (최초 1회 자동 생성 시도 - 편의성 위함)
-      if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
-        // 보안상 비밀번호가 틀린건지 계정이 없는건지 구분하지 않는 게 좋지만,
-        // 여기서는 마이그레이션 편의를 위해 계정 생성 로직을 고려할 수 있음.
-        // 하지만 'admin1234'같은 쉬운 비번으로 자동생성을 열어두면 위험할 수 있으므로
-        // 실패 메시지만 띄움.
-        toast({
-          title: "로그인 실패",
-          description: "비밀번호가 올바르지 않습니다. (초기 설정이 필요하면 문의해주세요)",
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "로그인 오류",
-          description: error.message,
-          variant: "destructive",
-        });
-      }
+      navigate('/admin/dashboard');
+    } catch (err: any) {
+      console.error('Admin login error:', err);
+      setError(err.message || '서버 오류가 발생했습니다.');
+      toast({
+        title: "로그인 실패",
+        description: err.message || "비밀번호를 확인해주세요.",
+        variant: "destructive",
+      });
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -72,11 +69,6 @@ const AdminLoginPage = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
-            {/* 이메일 입력 필드는 숨김 */}
-            <div className="hidden">
-               <Input value={ADMIN_EMAIL} readOnly />
-            </div>
-
             <div className="space-y-2">
               <Label htmlFor="password">비밀번호</Label>
               <Input
@@ -86,10 +78,18 @@ const AdminLoginPage = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="비밀번호 입력"
                 required
+                disabled={isLoading}
               />
             </div>
-            <Button className="w-full" type="submit" disabled={loading}>
-              {loading ? "로그인 중..." : "로그인"}
+
+            {error && (
+              <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">
+                {error}
+              </div>
+            )}
+
+            <Button className="w-full" type="submit" disabled={isLoading}>
+              {isLoading ? "로그인 중..." : "로그인"}
             </Button>
           </form>
         </CardContent>
