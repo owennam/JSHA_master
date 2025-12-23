@@ -1,4 +1,4 @@
-import { getFirestore, doc, setDoc, getDoc, collection, query, where, getDocs, orderBy, Timestamp } from 'firebase/firestore';
+import { getFirestore, doc, setDoc, getDoc, collection, query, where, getDocs, orderBy, Timestamp, collectionGroup } from 'firebase/firestore';
 import { auth } from './firebase';
 
 // Firestore 인스턴스 (firebase.ts에서 app이 초기화된 경우에만 사용 가능)
@@ -285,4 +285,19 @@ export const requestCancelOrder = async (
     cancelRequestedAt: new Date().toISOString(),
   });
   console.log('✅ Cancel request submitted:', orderId);
+};
+
+/**
+ * 모든 주문 조회 (Admin용)
+ */
+export const getAllOrders = async (): Promise<OrderInfo[]> => {
+  if (!db) {
+    throw new Error('Firestore is not initialized');
+  }
+
+  // users/{userId}/orders 하위 컬렉션 전체 조회
+  const ordersQuery = query(collectionGroup(db, 'orders'), orderBy('createdAt', 'desc'));
+  const querySnapshot = await getDocs(ordersQuery);
+
+  return querySnapshot.docs.map(doc => doc.data() as OrderInfo);
 };

@@ -22,47 +22,31 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
-interface Order {
-  timestamp: string;
-  orderId: string;
-  productName: string;
-  amount: string;
-  paymentKey: string;
-  customerName: string;
-  status: string;
-}
+import { getAllOrders, requestCancelOrder, OrderInfo } from "@/lib/firestore";
+import { format } from "date-fns";
+import { ko } from "date-fns/locale";
 
 const AdminOrdersPage = () => {
   const { toast } = useToast();
-  const [orders, setOrders] = useState<Order[]>([]);
+  const [orders, setOrders] = useState<OrderInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [cancelingOrderId, setCancelingOrderId] = useState<string | null>(null);
 
   // 취소 다이얼로그 상태
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<OrderInfo | null>(null);
   const [cancelReason, setCancelReason] = useState("");
 
   const loadOrders = async () => {
     setLoading(true);
     try {
-      const API_URL = import.meta.env.VITE_API_URL || '';
-      const response = await fetch(`${API_URL}/api/admin/orders`, {
-        credentials: 'include',
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to load orders');
-      }
-
-      const data = await response.json();
-      setOrders(data.data || []);
-    } catch (error) {
+      const data = await getAllOrders();
+      setOrders(data);
+    } catch (error: any) {
       console.error("Failed to load orders:", error);
       toast({
         title: "주문 목록 로드 실패",
-        description: "주문 목록을 불러오는데 실패했습니다.",
+        description: "Firestore에서 주문 목록을 불러오는데 실패했습니다.",
         variant: "destructive",
       });
     } finally {
@@ -74,7 +58,7 @@ const AdminOrdersPage = () => {
     loadOrders();
   }, []);
 
-  const handleCancelClick = (order: Order) => {
+  const handleCancelClick = (order: OrderInfo) => {
     setSelectedOrder(order);
     setCancelReason("");
     setIsCancelDialogOpen(true);
@@ -92,6 +76,8 @@ const AdminOrdersPage = () => {
 
     setCancelingOrderId(selectedOrder.orderId);
     try {
+      // 1. Toss Payments 취소 (서버 경유 - 보안상 필요)
+      // Toss 취소 API는 Secret Key가 필요하므로 백엔드 호출 유지
       const API_URL = import.meta.env.VITE_API_URL || '';
       const response = await fetch(`${API_URL}/api/admin/cancel-payment`, {
         method: 'POST',
@@ -104,10 +90,12 @@ const AdminOrdersPage = () => {
       });
 
       const data = await response.json();
-
       if (!response.ok || !data.success) {
-        throw new Error(data.message || '결제 취소에 실패했습니다.');
+        throw new Error(data.message || '토스 결제 취소 실패');
       }
+
+      // 2. Firestore 상태 업데이트 (클라이언트에서 직접 수행)
+      await requestCancelOrder(selectedOrder.userId, selectedOrder.orderId, cancelReason);
 
       toast({
         title: "결제 취소 완료",
@@ -133,13 +121,17 @@ const AdminOrdersPage = () => {
   };
 
   const StatusBadge = ({ status }: { status: string }) => {
-    if (status?.includes('취소') || status?.includes('CANCELED')) {
-      return <Badge variant="destructive"><Ban className="w-3 h-3 mr-1" />취소됨</Badge>;
+    switch (status) {
+      case 'completed':
+      case 'completed':
+        return <Badge className="bg-green-500 hover:bg-green-600"><CheckCircle className="w-3 h-3 mr-1" />결제 완료</Badge>;
+      case 'cancel_requested':
+        return <Badge className="bg-orange-500 hover:bg-orange-600"><Ban className="w-3 h-3 mr-1" />취소 요청됨</Badge>;
+      case 'canceled':
+        return <Badge variant="destructive"><Ban className="w-3 h-3 mr-1" />취소 완료</Badge>;
+      default:
+        return <Badge variant="secondary">{status}</Badge>;
     }
-    if (status?.includes('완료') || status?.includes('DONE')) {
-      return <Badge className="bg-green-500"><CheckCircle className="w-3 h-3 mr-1" />완료</Badge>;
-    }
-    return <Badge variant="secondary">{status || '처리 중'}</Badge>;
   };
 
   if (loading) {
@@ -191,8 +183,11 @@ const AdminOrdersPage = () => {
           <CardContent>
             <div className="text-2xl font-bold">
               {orders.reduce((sum, order) => {
-                const amount = parseInt(order.amount?.replace(/[^0-9]/g, '') || '0');
-                return sum + amount;
+                // completed 상태인 주문만 집계
+                if (order.status === 'completed') {
+                  return sum + (order.amount || 0);
+                }
+                return sum;
               }, 0).toLocaleString()}원
             </div>
             <p className="text-xs text-muted-foreground">
@@ -208,7 +203,7 @@ const AdminOrdersPage = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {orders.filter(o => o.status?.includes('취소') || o.status?.includes('CANCELED')).length}
+              {orders.filter(o => o.status === 'cancel_requested' || o.status === 'canceled').length}
             </div>
             <p className="text-xs text-muted-foreground">
               취소된 주문 건수
@@ -223,7 +218,11 @@ const AdminOrdersPage = () => {
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-12">
               <ShoppingBag className="w-12 h-12 text-muted-foreground mb-4" />
-              <p className="text-muted-foreground">주문 내역이 없습니다</p>
+              <p className="text-muted-foreground mb-2">주문 내역이 없습니다</p>
+              <p className="text-xs text-muted-foreground text-center">
+                Firestore로 마이그레이션된 이후의 주문만 표시됩니다.<br />
+                이전 내역은 구글 시트를 확인하시거나, 새 주문을 테스트해보세요.
+              </p>
             </CardContent>
           </Card>
         ) : (
@@ -245,11 +244,11 @@ const AdminOrdersPage = () => {
                 <div className="grid grid-cols-2 gap-3 text-sm">
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Calendar className="w-4 h-4" />
-                    <span>{new Date(order.timestamp).toLocaleDateString('ko-KR')}</span>
+                    <span>{format(new Date(order.createdAt), "yyyy-MM-dd HH:mm", { locale: ko })}</span>
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <DollarSign className="w-4 h-4" />
-                    <span className="font-semibold">{order.amount}</span>
+                    <span className="font-semibold">{order.amount.toLocaleString()}원</span>
                   </div>
                 </div>
 
@@ -257,7 +256,7 @@ const AdminOrdersPage = () => {
                   <p>주문번호: {order.orderId}</p>
                 </div>
 
-                {(!order.status?.includes('취소') && !order.status?.includes('CANCELED')) && (
+                {(order.status !== 'canceled' && order.status !== 'cancel_requested') && (
                   <div className="flex gap-2 pt-3 border-t">
                     <Button
                       size="sm"

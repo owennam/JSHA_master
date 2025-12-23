@@ -61,43 +61,43 @@ const App = () => (
           <AnalyticsTracker />
           <ScrollToTop />
           <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={<Index />} />
-          <Route path="/education" element={<EducationPage />} />
-          <Route path="/education/:id" element={<VideoDetailPage />} />
-          <Route path="/workshop/:id" element={<WorkshopVideoDetailPage />} />
-          <Route path="/hospitals" element={<HospitalsPage />} />
-          <Route path="/newsletter" element={<NewsletterListPage />} />
-          <Route path="/newsletter/:id" element={<NewsletterDetailPage />} />
-          <Route path="/auth" element={<AuthPage />} />
-          <Route path="/auth/pending" element={<PendingApprovalPage />} />
-          <Route path="/products" element={<ProductPage />} />
-          <Route path="/products/:productId" element={<ProductDetailPage />} />
-          <Route path="/payment" element={<PaymentPage />} />
-          <Route path="/payment/success" element={<PaymentSuccessPage />} />
-          <Route path="/payment/fail" element={<PaymentFailPage />} />
-          <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
-          <Route path="/terms-of-service" element={<TermsOfServicePage />} />
-          <Route path="/recap" element={<RecapPage />} />
-          <Route path="/mastercare" element={<MasterCarePage />} />
-          <Route path="/my-orders" element={<MyOrdersPage />} />
+            {/* Public Routes */}
+            <Route path="/" element={<Index />} />
+            <Route path="/education" element={<EducationPage />} />
+            <Route path="/education/:id" element={<VideoDetailPage />} />
+            <Route path="/workshop/:id" element={<WorkshopVideoDetailPage />} />
+            <Route path="/hospitals" element={<HospitalsPage />} />
+            <Route path="/newsletter" element={<NewsletterListPage />} />
+            <Route path="/newsletter/:id" element={<NewsletterDetailPage />} />
+            <Route path="/auth" element={<AuthPage />} />
+            <Route path="/auth/pending" element={<PendingApprovalPage />} />
+            <Route path="/products" element={<ProductPage />} />
+            <Route path="/products/:productId" element={<ProductDetailPage />} />
+            <Route path="/payment" element={<PaymentPage />} />
+            <Route path="/payment/success" element={<PaymentSuccessPage />} />
+            <Route path="/payment/fail" element={<PaymentFailPage />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+            <Route path="/terms-of-service" element={<TermsOfServicePage />} />
+            <Route path="/recap" element={<RecapPage />} />
+            <Route path="/mastercare" element={<MasterCarePage />} />
+            <Route path="/my-orders" element={<MyOrdersPage />} />
 
-          {/* Admin Routes */}
-          <Route path="/admin/login" element={<AdminLoginPage />} />
-          <Route path="/admin" element={<AdminLayout />}>
-            <Route index element={<Navigate to="/admin/dashboard" replace />} />
-            <Route path="dashboard" element={<AdminDashboard />} />
-            <Route path="orders" element={<AdminOrdersPage />} />
-            <Route path="applications" element={<AdminApplicationsPage />} />
-            <Route path="mastercare" element={<AdminMasterCarePage />} />
-            <Route path="users" element={<AdminUsersPage />} />
-          </Route>
+            {/* Admin Routes */}
+            <Route path="/admin/login" element={<AdminLoginPage />} />
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route index element={<Navigate to="/admin/dashboard" replace />} />
+              <Route path="dashboard" element={<AdminDashboard />} />
+              <Route path="orders" element={<AdminOrdersPage />} />
+              <Route path="applications" element={<AdminApplicationsPage />} />
+              <Route path="mastercare" element={<AdminMasterCarePage />} />
+              <Route path="users" element={<AdminUsersPage />} />
+            </Route>
 
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
     </AuthProvider>
   </QueryClientProvider>
 );

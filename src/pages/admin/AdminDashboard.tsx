@@ -7,6 +7,7 @@ import {
     CreditCard,
     ArrowUpRight
 } from 'lucide-react';
+import { getAllOrders, getAllUsers } from '@/lib/firestore';
 
 interface DashboardData {
     totalRevenue: number;
@@ -27,11 +28,29 @@ const AdminDashboard = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch('/api/admin/dashboard-summary');
-                const result = await response.json();
-                if (result.success) {
-                    setData(result.data);
-                }
+                // 병렬로 데이터 로드
+                const [orders, users] = await Promise.all([
+                    getAllOrders(),
+                    getAllUsers()
+                ]);
+
+                // 1. 총 매출 및 주문 수 계산
+                const completedOrders = orders.filter(o => o.status === 'completed' || o.status === 'DONE');
+                const totalRevenue = completedOrders.reduce((sum, order) => sum + (order.amount || 0), 0);
+                const totalOrders = orders.length;
+
+                // 2. 신규 신청자 (User Status가 'pending'인 경우)
+                const newApplications = users.filter(u => u.status === 'pending').length;
+
+                // 3. 상담 대기 (현재는 데이터가 없으므로 0 처리, 추후 구현)
+                const pendingConsultations = 0;
+
+                setData({
+                    totalRevenue,
+                    totalOrders,
+                    newApplications,
+                    pendingConsultations
+                });
             } catch (error) {
                 console.error('Failed to fetch dashboard data:', error);
             } finally {
@@ -56,10 +75,10 @@ const AdminDashboard = () => {
             bg: "bg-blue-100"
         },
         {
-            title: "신규 신청",
+            title: "신규 가입 대기",
             value: `${data.newApplications}명`,
             icon: Users,
-            description: "마스터 코스 신청자",
+            description: "승인 대기 회원",
             color: "text-green-600",
             bg: "bg-green-100"
         },
@@ -67,7 +86,7 @@ const AdminDashboard = () => {
             title: "상담 대기",
             value: `${data.pendingConsultations}건`,
             icon: Calendar,
-            description: "Master Care 신청",
+            description: "구현 예정",
             color: "text-orange-600",
             bg: "bg-orange-100"
         },
@@ -82,7 +101,9 @@ const AdminDashboard = () => {
     ];
 
     if (isLoading) {
-        return <div className="flex items-center justify-center h-96">로딩 중...</div>;
+        return <div className="flex items-center justify-center h-96">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>;
     }
 
     return (
@@ -116,40 +137,20 @@ const AdminDashboard = () => {
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-                <Card className="col-span-4">
-                    <CardHeader>
-                        <CardTitle>최근 활동</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="space-y-8">
-                            {/* 여기에 최근 활동 리스트 추가 예정 */}
-                            <div className="flex items-center">
-                                <div className="ml-4 space-y-1">
-                                    <p className="text-sm font-medium leading-none">시스템 준비 중</p>
-                                    <p className="text-sm text-muted-foreground">
-                                        최근 활동 내역 기능이 곧 업데이트됩니다.
-                                    </p>
-                                </div>
-                                <div className="ml-auto font-medium">Just now</div>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <Card className="col-span-3">
+                <Card className="col-span-full">
                     <CardHeader>
                         <CardTitle>빠른 바로가기</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="space-y-4">
-                            <a href="https://docs.google.com/spreadsheets" target="_blank" rel="noreferrer"
-                                className="flex items-center p-3 rounded-lg hover:bg-slate-100 transition-colors">
-                                <div className="h-9 w-9 rounded bg-green-100 flex items-center justify-center mr-3">
-                                    <ArrowUpRight className="h-5 w-5 text-green-600" />
+                        <div className="flex gap-4">
+                            <a href="https://console.firebase.google.com/" target="_blank" rel="noreferrer"
+                                className="flex items-center p-4 rounded-lg border hover:bg-slate-50 transition-colors flex-1">
+                                <div className="h-10 w-10 rounded bg-orange-100 flex items-center justify-center mr-3">
+                                    <ArrowUpRight className="h-6 w-6 text-orange-600" />
                                 </div>
                                 <div>
-                                    <p className="font-medium">Google Sheets 열기</p>
-                                    <p className="text-sm text-muted-foreground">원본 데이터 확인</p>
+                                    <p className="font-medium">Firebase 콘솔</p>
+                                    <p className="text-sm text-muted-foreground">데이터베이스 관리</p>
                                 </div>
                             </a>
                         </div>

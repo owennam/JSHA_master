@@ -32,6 +32,7 @@ export const Header = () => {
     { label: "병원 찾기", path: "/hospitals", isSection: false },
     { label: "뉴스레터", path: "/newsletter", isSection: false },
     { label: "인솔 구매", path: "/products", isSection: false },
+    { label: "주문 내역", path: "/my-orders", isSection: false },
     { label: "다시보기", path: "/recap", isSection: false },
   ];
 
@@ -66,11 +67,11 @@ export const Header = () => {
 
   return (
     <header
-      className={`fixed top-[52px] left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled
+      className={`fixed left-0 right-0 z-50 transition-all duration-300 ${location.pathname === "/" ? "top-[52px]" : "top-0"
+        } ${isScrolled
           ? "bg-white/95 backdrop-blur-md shadow-card"
-          : "bg-transparent"
-      }`}
+          : "bg-white/50 backdrop-blur-sm"
+        }`}
     >
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-20">

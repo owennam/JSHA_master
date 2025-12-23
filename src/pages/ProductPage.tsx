@@ -312,15 +312,26 @@ const ProductPage = () => {
                   {userProfile.clinicName} | {userProfile.directorName}
                 </p>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleLogout}
-                className="gap-2"
-              >
-                <LogOut className="w-4 h-4" />
-                로그아웃
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigate("/my-orders")}
+                  className="gap-2"
+                >
+                  <Package className="w-4 h-4" />
+                  주문 내역
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleLogout}
+                  className="gap-2"
+                >
+                  <LogOut className="w-4 h-4" />
+                  로그아웃
+                </Button>
+              </div>
             </div>
           )}
 
