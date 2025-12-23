@@ -32,6 +32,26 @@ service cloud.firestore {
       // status 필드 업데이트는 서버 측(Admin SDK)에서만 가능하도록 제한
       // 클라이언트에서는 status를 변경할 수 없음
       allow delete: if false; // 사용자 삭제는 Admin SDK를 통해서만
+
+      // Orders subcollection
+      match /orders/{orderId} {
+        // 사용자는 자신의 주문만 읽을 수 있음
+        allow read: if isOwner(userId);
+
+        // 결제 성공 시 주문 생성 허용 (본인 주문만)
+        allow create: if isOwner(userId) &&
+                         request.resource.data.userId == userId &&
+                         request.resource.data.status == 'completed';
+
+        // 주문 취소 요청 허용 (본인 주문, status를 'cancel_requested'로만 변경 가능)
+        allow update: if isOwner(userId) &&
+                         resource.data.userId == userId &&
+                         request.resource.data.status == 'cancel_requested' &&
+                         resource.data.status == 'completed';
+
+        // 주문 삭제는 불가
+        allow delete: if false;
+      }
     }
 
     // 다른 컬렉션이 있다면 여기에 추가

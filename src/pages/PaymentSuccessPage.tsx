@@ -6,12 +6,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, Loader2 } from "lucide-react";
 import { logCustomEvent } from "@/lib/firebase";
+import { useAuth } from "@/contexts/AuthContext";
+import { createOrder, OrderInfo } from "@/lib/firestore";
 
 const SERVER_URL = import.meta.env.VITE_SERVER_URL;
 
 const PaymentSuccessPage = () => {
 	const [searchParams] = useSearchParams();
 	const navigate = useNavigate();
+	const { user } = useAuth();
 	const [isConfirming, setIsConfirming] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const [paymentInfo, setPaymentInfo] = useState<any>(null);
@@ -73,6 +76,33 @@ const PaymentSuccessPage = () => {
 
 				console.log("결제 승인 성공:", result.data);
 				setPaymentInfo(result.data);
+
+				// Firestore에 주문 정보 저장
+				if (user) {
+					try {
+						const orderData: OrderInfo = {
+							orderId: result.data.orderId,
+							userId: user.uid,
+							paymentKey: paymentKey!,
+							productName: result.data.orderName || "주문 상품",
+							amount: result.data.totalAmount,
+							customerName: customerName || "",
+							customerEmail: customerEmail || "",
+							customerPhone: customerPhone || "",
+							address: address || "",
+							addressDetail: addressDetail || "",
+							postalCode: postalCode || "",
+							status: 'completed',
+							createdAt: new Date().toISOString(),
+						};
+
+						await createOrder(orderData);
+						console.log("✅ Order saved to Firestore:", result.data.orderId);
+					} catch (firestoreError) {
+						console.error("⚠️ Firestore 저장 실패 (결제는 성공):", firestoreError);
+					}
+				}
+
 				setIsConfirming(false);
 
 				// 결제 성공 시 장바구니 및 폼 데이터 초기화

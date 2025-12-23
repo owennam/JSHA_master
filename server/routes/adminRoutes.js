@@ -91,6 +91,7 @@ router.get('/orders', authMiddleware, async (req, res) => {
             orderId: row[1],
             productName: row[2],
             amount: row[3],
+            paymentKey: row[4], // 결제 키 추가 (취소 시 필요)
             customerName: row[6],
             status: row[10],
         })).reverse(); // 최신순
@@ -98,6 +99,65 @@ router.get('/orders', authMiddleware, async (req, res) => {
         res.json({ success: true, data: orders });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Failed to fetch orders' });
+    }
+});
+
+// 결제 취소 (환불)
+router.post('/cancel-payment', authMiddleware, async (req, res) => {
+    const { paymentKey, cancelReason, cancelAmount } = req.body;
+
+    if (!paymentKey || !cancelReason) {
+        return res.status(400).json({
+            success: false,
+            message: 'paymentKey and cancelReason are required'
+        });
+    }
+
+    try {
+        console.log('결제 취소 요청:', { paymentKey, cancelReason, cancelAmount });
+
+        // Toss Payments API에 취소 요청
+        const response = await fetch(`https://api.tosspayments.com/v1/payments/${paymentKey}/cancel`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Basic ${Buffer.from(config.tossSecretKey + ':').toString('base64')}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                cancelReason,
+                ...(cancelAmount && { cancelAmount: parseInt(cancelAmount) })
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            console.error('결제 취소 실패:', data);
+            return res.status(response.status).json({
+                success: false,
+                error: data.code || 'CANCEL_FAILED',
+                message: data.message || '결제 취소에 실패했습니다.'
+            });
+        }
+
+        console.log('결제 취소 성공:', data.orderId);
+
+        // TODO: Google Sheets에 취소 상태 업데이트
+        // TODO: Firestore에 취소 정보 저장
+
+        res.json({
+            success: true,
+            data: data,
+            message: '결제가 취소되었습니다.'
+        });
+
+    } catch (error) {
+        console.error('결제 취소 중 오류:', error);
+        res.status(500).json({
+            success: false,
+            error: 'INTERNAL_SERVER_ERROR',
+            message: '결제 취소 중 서버 오류가 발생했습니다.'
+        });
     }
 });
 

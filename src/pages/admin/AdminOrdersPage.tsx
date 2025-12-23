@@ -1,127 +1,332 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow
-} from "@/components/ui/table";
+  RefreshCw,
+  ShoppingBag,
+  Calendar,
+  DollarSign,
+  User,
+  Ban,
+  CheckCircle,
+} from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+import { Label } from "@/components/ui/label";
 
 interface Order {
-    timestamp: string;
-    orderId: string;
-    productName: string;
-    amount: string;
-    customerName: string;
-    status: string;
+  timestamp: string;
+  orderId: string;
+  productName: string;
+  amount: string;
+  paymentKey: string;
+  customerName: string;
+  status: string;
 }
 
 const AdminOrdersPage = () => {
-    const [orders, setOrders] = useState<Order[]>([]);
-    const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
-    const [searchTerm, setSearchTerm] = useState("");
-    const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [cancelingOrderId, setCancelingOrderId] = useState<string | null>(null);
 
-    useEffect(() => {
-        const fetchOrders = async () => {
-            try {
-                const response = await fetch('/api/admin/orders');
-                const result = await response.json();
-                if (result.success) {
-                    setOrders(result.data);
-                    setFilteredOrders(result.data);
-                }
-            } catch (error) {
-                console.error('Failed to fetch orders:', error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
+  // 취소 다이얼로그 상태
+  const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [cancelReason, setCancelReason] = useState("");
 
-        fetchOrders();
-    }, []);
+  const loadOrders = async () => {
+    setLoading(true);
+    try {
+      const API_URL = import.meta.env.VITE_API_URL || '';
+      const response = await fetch(`${API_URL}/api/admin/orders`, {
+        credentials: 'include',
+      });
 
-    useEffect(() => {
-        const filtered = orders.filter(order =>
-            order.customerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            order.orderId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            order.productName?.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-        setFilteredOrders(filtered);
-    }, [searchTerm, orders]);
+      if (!response.ok) {
+        throw new Error('Failed to load orders');
+      }
 
+      const data = await response.json();
+      setOrders(data.data || []);
+    } catch (error) {
+      console.error("Failed to load orders:", error);
+      toast({
+        title: "주문 목록 로드 실패",
+        description: "주문 목록을 불러오는데 실패했습니다.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadOrders();
+  }, []);
+
+  const handleCancelClick = (order: Order) => {
+    setSelectedOrder(order);
+    setCancelReason("");
+    setIsCancelDialogOpen(true);
+  };
+
+  const handleCancelConfirm = async () => {
+    if (!selectedOrder || !cancelReason.trim()) {
+      toast({
+        title: "취소 사유 입력 필요",
+        description: "취소 사유를 입력해주세요.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setCancelingOrderId(selectedOrder.orderId);
+    try {
+      const API_URL = import.meta.env.VITE_API_URL || '';
+      const response = await fetch(`${API_URL}/api/admin/cancel-payment`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          paymentKey: selectedOrder.paymentKey,
+          cancelReason: cancelReason,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || '결제 취소에 실패했습니다.');
+      }
+
+      toast({
+        title: "결제 취소 완료",
+        description: `주문번호 ${selectedOrder.orderId}이(가) 취소되었습니다.`,
+      });
+
+      setIsCancelDialogOpen(false);
+      setSelectedOrder(null);
+      setCancelReason("");
+
+      // 주문 목록 새로고침
+      await loadOrders();
+    } catch (error: any) {
+      console.error("Failed to cancel payment:", error);
+      toast({
+        title: "결제 취소 실패",
+        description: error.message || "결제를 취소하는데 실패했습니다.",
+        variant: "destructive",
+      });
+    } finally {
+      setCancelingOrderId(null);
+    }
+  };
+
+  const StatusBadge = ({ status }: { status: string }) => {
+    if (status?.includes('취소') || status?.includes('CANCELED')) {
+      return <Badge variant="destructive"><Ban className="w-3 h-3 mr-1" />취소됨</Badge>;
+    }
+    if (status?.includes('완료') || status?.includes('DONE')) {
+      return <Badge className="bg-green-500"><CheckCircle className="w-3 h-3 mr-1" />완료</Badge>;
+    }
+    return <Badge variant="secondary">{status || '처리 중'}</Badge>;
+  };
+
+  if (loading) {
     return (
-        <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h2 className="text-3xl font-bold tracking-tight">주문 관리</h2>
-                    <p className="text-muted-foreground">
-                        전체 주문 내역을 확인하고 검색할 수 있습니다.
-                    </p>
-                </div>
-            </div>
-
-            <div className="flex items-center space-x-2">
-                <div className="relative flex-1 max-w-sm">
-                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input
-                        placeholder="주문번호, 이름, 상품명 검색..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-9"
-                    />
-                </div>
-            </div>
-
-            <div className="rounded-md border bg-white">
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>주문일시</TableHead>
-                            <TableHead>주문번호</TableHead>
-                            <TableHead>상품명</TableHead>
-                            <TableHead>주문자</TableHead>
-                            <TableHead className="text-right">결제금액</TableHead>
-                            <TableHead>상태</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {isLoading ? (
-                            <TableRow>
-                                <TableCell colSpan={6} className="h-24 text-center">
-                                    로딩 중...
-                                </TableCell>
-                            </TableRow>
-                        ) : filteredOrders.length === 0 ? (
-                            <TableRow>
-                                <TableCell colSpan={6} className="h-24 text-center">
-                                    주문 내역이 없습니다.
-                                </TableCell>
-                            </TableRow>
-                        ) : (
-                            filteredOrders.map((order, index) => (
-                                <TableRow key={index}>
-                                    <TableCell>{order.timestamp}</TableCell>
-                                    <TableCell className="font-mono text-xs">{order.orderId}</TableCell>
-                                    <TableCell>{order.productName}</TableCell>
-                                    <TableCell>{order.customerName}</TableCell>
-                                    <TableCell className="text-right">{order.amount}</TableCell>
-                                    <TableCell>
-                                        <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-green-100 text-green-800">
-                                            {order.status || '결제완료'}
-                                        </span>
-                                    </TableCell>
-                                </TableRow>
-                            ))
-                        )}
-                    </TableBody>
-                </Table>
-            </div>
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <RefreshCw className="w-8 h-8 animate-spin text-primary mx-auto mb-4" />
+          <p className="text-muted-foreground">주문 목록을 불러오는 중...</p>
         </div>
+      </div>
     );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">주문 관리</h1>
+          <p className="text-muted-foreground">
+            결제된 주문을 관리하고 환불 처리할 수 있습니다
+          </p>
+        </div>
+        <Button onClick={loadOrders} variant="outline">
+          <RefreshCw className="w-4 h-4 mr-2" />
+          새로고침
+        </Button>
+      </div>
+
+      {/* 통계 카드 */}
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">총 주문</CardTitle>
+            <ShoppingBag className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{orders.length}</div>
+            <p className="text-xs text-muted-foreground">
+              전체 주문 건수
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">총 매출</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {orders.reduce((sum, order) => {
+                const amount = parseInt(order.amount?.replace(/[^0-9]/g, '') || '0');
+                return sum + amount;
+              }, 0).toLocaleString()}원
+            </div>
+            <p className="text-xs text-muted-foreground">
+              총 결제 금액
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">취소 주문</CardTitle>
+            <Ban className="h-4 w-4 text-red-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {orders.filter(o => o.status?.includes('취소') || o.status?.includes('CANCELED')).length}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              취소된 주문 건수
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* 주문 목록 */}
+      <div className="space-y-4">
+        {orders.length === 0 ? (
+          <Card>
+            <CardContent className="flex flex-col items-center justify-center py-12">
+              <ShoppingBag className="w-12 h-12 text-muted-foreground mb-4" />
+              <p className="text-muted-foreground">주문 내역이 없습니다</p>
+            </CardContent>
+          </Card>
+        ) : (
+          orders.map((order) => (
+            <Card key={order.orderId}>
+              <CardHeader>
+                <div className="flex items-start justify-between">
+                  <div className="space-y-1">
+                    <CardTitle className="text-lg">{order.productName}</CardTitle>
+                    <CardDescription className="flex items-center gap-2">
+                      <User className="w-4 h-4" />
+                      {order.customerName}
+                    </CardDescription>
+                  </div>
+                  <StatusBadge status={order.status} />
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Calendar className="w-4 h-4" />
+                    <span>{new Date(order.timestamp).toLocaleDateString('ko-KR')}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <DollarSign className="w-4 h-4" />
+                    <span className="font-semibold">{order.amount}</span>
+                  </div>
+                </div>
+
+                <div className="text-xs text-muted-foreground">
+                  <p>주문번호: {order.orderId}</p>
+                </div>
+
+                {(!order.status?.includes('취소') && !order.status?.includes('CANCELED')) && (
+                  <div className="flex gap-2 pt-3 border-t">
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => handleCancelClick(order)}
+                      disabled={cancelingOrderId === order.orderId}
+                      className="flex-1"
+                    >
+                      <Ban className="w-4 h-4 mr-2" />
+                      {cancelingOrderId === order.orderId ? '취소 처리 중...' : '환불'}
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          ))
+        )}
+      </div>
+
+      {/* 취소 확인 다이얼로그 */}
+      <Dialog open={isCancelDialogOpen} onOpenChange={setIsCancelDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>결제 취소 확인</DialogTitle>
+            <DialogDescription>
+              이 주문을 취소하시겠습니까? 취소 후에는 되돌릴 수 없습니다.
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedOrder && (
+            <div className="py-4 space-y-4">
+              <div className="p-4 bg-muted rounded-lg space-y-2 text-sm">
+                <p><strong>주문번호:</strong> {selectedOrder.orderId}</p>
+                <p><strong>상품명:</strong> {selectedOrder.productName}</p>
+                <p><strong>금액:</strong> {selectedOrder.amount}</p>
+                <p><strong>고객명:</strong> {selectedOrder.customerName}</p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="cancelReason">취소 사유 *</Label>
+                <Input
+                  id="cancelReason"
+                  placeholder="예: 고객 변심, 상품 불량 등"
+                  value={cancelReason}
+                  onChange={(e) => setCancelReason(e.target.value)}
+                />
+              </div>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsCancelDialogOpen(false)}
+            >
+              취소
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleCancelConfirm}
+              disabled={!cancelReason.trim() || cancelingOrderId !== null}
+            >
+              환불 처리
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
 };
 
 export default AdminOrdersPage;

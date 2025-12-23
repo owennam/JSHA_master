@@ -25,6 +25,7 @@ import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 import TermsOfServicePage from "./pages/TermsOfServicePage";
 import RecapPage from "./pages/RecapPage";
 import MasterCarePage from "./pages/MasterCarePage";
+import MyOrdersPage from "./pages/MyOrdersPage";
 import NotFound from "./pages/NotFound";
 
 // Admin Components
@@ -79,6 +80,7 @@ const App = () => (
           <Route path="/terms-of-service" element={<TermsOfServicePage />} />
           <Route path="/recap" element={<RecapPage />} />
           <Route path="/mastercare" element={<MasterCarePage />} />
+          <Route path="/my-orders" element={<MyOrdersPage />} />
 
           {/* Admin Routes */}
           <Route path="/admin/login" element={<AdminLoginPage />} />

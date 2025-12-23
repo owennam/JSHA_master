@@ -1,4 +1,4 @@
-import { getFirestore, doc, setDoc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { getFirestore, doc, setDoc, getDoc, collection, query, where, getDocs, orderBy, Timestamp } from 'firebase/firestore';
 import { auth } from './firebase';
 
 // Firestore 인스턴스 (firebase.ts에서 app이 초기화된 경우에만 사용 가능)
@@ -18,6 +18,29 @@ export { db };
 
 // 사용자 승인 상태
 export type UserStatus = 'pending' | 'approved' | 'rejected';
+
+// 주문 상태
+export type OrderStatus = 'completed' | 'cancel_requested' | 'canceled';
+
+// 주문 정보 타입
+export interface OrderInfo {
+  orderId: string;
+  userId: string;
+  paymentKey: string;
+  productName: string;
+  amount: number;
+  customerName: string;
+  customerEmail: string;
+  customerPhone: string;
+  address: string;
+  addressDetail: string;
+  postalCode: string;
+  status: OrderStatus;
+  createdAt: string;
+  cancelRequestedAt?: string;
+  canceledAt?: string;
+  cancelReason?: string;
+}
 
 // 사용자 정보 타입
 export interface UserProfile {
@@ -169,4 +192,97 @@ export const getUsersByStatus = async (status: UserStatus): Promise<UserProfile[
   const querySnapshot = await getDocs(q);
 
   return querySnapshot.docs.map(doc => doc.data() as UserProfile);
+};
+
+// ============================================
+// 주문 관련 함수들
+// ============================================
+
+/**
+ * Firestore에 주문 정보 저장
+ */
+export const createOrder = async (orderData: OrderInfo): Promise<void> => {
+  if (!db) {
+    throw new Error('Firestore is not initialized');
+  }
+
+  const orderRef = doc(db, 'users', orderData.userId, 'orders', orderData.orderId);
+  await setDoc(orderRef, orderData);
+  console.log('✅ Order created:', orderData.orderId);
+};
+
+/**
+ * 사용자의 주문 목록 조회
+ */
+export const getUserOrders = async (userId: string): Promise<OrderInfo[]> => {
+  if (!db) {
+    throw new Error('Firestore is not initialized');
+  }
+
+  const ordersRef = collection(db, 'users', userId, 'orders');
+  const q = query(ordersRef, orderBy('createdAt', 'desc'));
+  const querySnapshot = await getDocs(q);
+
+  return querySnapshot.docs.map(doc => doc.data() as OrderInfo);
+};
+
+/**
+ * 주문 상세 정보 조회
+ */
+export const getOrderById = async (userId: string, orderId: string): Promise<OrderInfo | null> => {
+  if (!db) {
+    throw new Error('Firestore is not initialized');
+  }
+
+  const orderDoc = await getDoc(doc(db, 'users', userId, 'orders', orderId));
+
+  if (orderDoc.exists()) {
+    return orderDoc.data() as OrderInfo;
+  }
+
+  return null;
+};
+
+/**
+ * 주문 상태 업데이트
+ */
+export const updateOrderStatus = async (
+  userId: string,
+  orderId: string,
+  status: OrderStatus,
+  additionalData?: Partial<OrderInfo>
+): Promise<void> => {
+  if (!db) {
+    throw new Error('Firestore is not initialized');
+  }
+
+  const orderRef = doc(db, 'users', userId, 'orders', orderId);
+  await setDoc(
+    orderRef,
+    {
+      status,
+      ...additionalData,
+    },
+    { merge: true }
+  );
+  console.log('✅ Order status updated:', orderId, 'new status:', status);
+};
+
+/**
+ * 주문 취소 요청
+ */
+export const requestCancelOrder = async (
+  userId: string,
+  orderId: string,
+  cancelReason: string
+): Promise<void> => {
+  if (!db) {
+    throw new Error('Firestore is not initialized');
+  }
+
+  await updateOrderStatus(userId, orderId, 'cancel_requested', {
+    cancelReason,
+    cancelRequestedAt: new Date().toISOString(),
+  });
+  console.log('✅ Cancel request submitted:', orderId);
 };
