@@ -1,5 +1,7 @@
 import express from 'express';
 import googleSheetsService from '../googleSheetsService.js';
+import emailService from '../emailService.js';
+import admin from 'firebase-admin';
 
 const router = express.Router();
 
@@ -77,6 +79,65 @@ router.get('/orders', async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Failed to fetch user orders',
+            error: error.message
+        });
+    }
+});
+
+/**
+ * 주문 취소 요청
+ * POST /api/user/cancel-request
+ */
+router.post('/cancel-request', async (req, res) => {
+    try {
+        const { userId, orderId, cancelReason, orderData } = req.body;
+
+        if (!userId || !orderId || !cancelReason) {
+            return res.status(400).json({
+                success: false,
+                message: 'userId, orderId, cancelReason are required'
+            });
+        }
+
+        // Firestore에서 주문 상태 업데이트
+        const db = admin.firestore();
+        const orderRef = db.collection('users').doc(userId).collection('orders').doc(orderId);
+
+        await orderRef.update({
+            status: 'cancel_requested',
+            cancelReason: cancelReason,
+            cancelRequestedAt: new Date().toISOString()
+        });
+
+        console.log(`✅ Cancel request submitted for order: ${orderId}`);
+
+        // 관리자에게 이메일 알림 발송
+        try {
+            await emailService.sendCancelRequestNotificationToAdmin({
+                orderId: orderId,
+                productName: orderData?.productName || '주문 상품',
+                amount: orderData?.amount || 0,
+                customerName: orderData?.customerName || '',
+                customerEmail: orderData?.customerEmail || '',
+                customerPhone: orderData?.customerPhone || '',
+                cancelReason: cancelReason,
+                requestedAt: new Date().toISOString()
+            });
+            console.log('✅ Cancel request email sent to admin');
+        } catch (emailError) {
+            console.error('⚠️ Failed to send email notification:', emailError);
+            // 이메일 실패해도 취소 요청은 성공으로 처리
+        }
+
+        res.json({
+            success: true,
+            message: 'Cancel request submitted successfully'
+        });
+    } catch (error) {
+        console.error('Failed to submit cancel request:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to submit cancel request',
             error: error.message
         });
     }

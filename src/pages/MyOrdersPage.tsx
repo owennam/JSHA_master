@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/contexts/AuthContext";
-import { getUserOrders, OrderInfo, requestCancelOrder } from "@/lib/firestore";
+import { getUserOrders, OrderInfo } from "@/lib/firestore";
 import { Loader2, Package, ShoppingBag, Clock, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -157,11 +157,35 @@ const MyOrdersPage = () => {
     setIsCanceling(true);
 
     try {
-      await requestCancelOrder(user.uid, selectedOrder.orderId, cancelReason);
+      // 백엔드 API 호출 (이메일 알림 포함)
+      const response = await fetch(`${SERVER_URL}/api/user/cancel-request`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: user.uid,
+          orderId: selectedOrder.orderId,
+          cancelReason: cancelReason,
+          orderData: {
+            productName: selectedOrder.productName,
+            amount: selectedOrder.amount,
+            customerName: selectedOrder.customerName,
+            customerEmail: selectedOrder.customerEmail,
+            customerPhone: selectedOrder.customerPhone,
+          }
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.message || "취소 요청에 실패했습니다.");
+      }
 
       toast({
         title: "취소 요청 완료",
-        description: "관리자 확인 후 환불 처리됩니다.",
+        description: "관리자에게 이메일이 발송되었습니다. 확인 후 환불 처리됩니다.",
       });
 
       // 주문 목록 새로고침

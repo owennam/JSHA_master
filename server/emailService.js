@@ -973,6 +973,114 @@ class EmailService {
 
     return results;
   }
+
+  /**
+   * 관리자에게 주문 취소 요청 알림 이메일 발송
+   */
+  async sendCancelRequestNotificationToAdmin(cancelData) {
+    if (!this.initialized) {
+      await this.initialize();
+    }
+
+    const { orderId, productName, amount, customerName, customerEmail, customerPhone, cancelReason, requestedAt } = cancelData;
+
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+      </head>
+      <body style="font-family: 'Noto Sans KR', sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+          <h1 style="color: white; margin: 0; font-size: 28px;">⚠️ 주문 취소 요청</h1>
+          <p style="color: #fecaca; margin: 10px 0 0 0;">고객이 주문 취소를 요청했습니다</p>
+        </div>
+
+        <div style="background-color: #ffffff; padding: 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 10px 10px;">
+
+          <div style="background-color: #fee2e2; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ef4444;">
+            <h2 style="margin-top: 0; color: #991b1b; font-size: 20px;">취소 요청 정보</h2>
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 8px 0; color: #7f1d1d; font-weight: bold;">주문번호</td>
+                <td style="padding: 8px 0; text-align: right; font-family: monospace;">${orderId}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #7f1d1d; font-weight: bold;">상품명</td>
+                <td style="padding: 8px 0; text-align: right;">${productName}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #7f1d1d; font-weight: bold;">결제 금액</td>
+                <td style="padding: 8px 0; text-align: right; font-size: 1.2em; font-weight: bold; color: #dc2626;">${amount.toLocaleString()}원</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #7f1d1d; font-weight: bold;">요청일시</td>
+                <td style="padding: 8px 0; text-align: right;">${new Date(requestedAt).toLocaleString('ko-KR')}</td>
+              </tr>
+            </table>
+          </div>
+
+          <div style="background-color: #fef3c7; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f59e0b;">
+            <h2 style="margin-top: 0; color: #92400e; font-size: 20px;">취소 사유</h2>
+            <p style="margin: 0; line-height: 1.8; color: #78350f; background-color: #ffffff; padding: 15px; border-radius: 5px;">
+              ${cancelReason}
+            </p>
+          </div>
+
+          <div style="background-color: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h2 style="margin-top: 0; color: #1f2937; font-size: 20px;">고객 정보</h2>
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 8px 0; color: #0c4a6e; font-weight: bold;">이름</td>
+                <td style="padding: 8px 0; text-align: right;">${customerName}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #0c4a6e; font-weight: bold;">이메일</td>
+                <td style="padding: 8px 0; text-align: right;">${customerEmail}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #0c4a6e; font-weight: bold;">전화번호</td>
+                <td style="padding: 8px 0; text-align: right;">${customerPhone}</td>
+              </tr>
+            </table>
+          </div>
+
+          <div style="background-color: #dbeafe; padding: 20px; border-radius: 8px; margin: 30px 0; text-align: center;">
+            <p style="margin: 0 0 15px 0; color: #1e40af; font-weight: bold;">관리자 페이지에서 취소 요청을 확인하고 처리해주세요</p>
+            <a href="${config.adminPageUrl || 'https://jsha-master.vercel.app/admin/orders'}"
+               style="display: inline-block; background-color: #2563eb; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold;">
+              관리자 페이지 바로가기
+            </a>
+          </div>
+
+          <div style="text-align: center; padding-top: 20px; border-top: 1px solid #e5e7eb; color: #6b7280; font-size: 14px;">
+            <p>본 메일은 시스템에서 자동으로 발송되었습니다.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    try {
+      const { data, error } = await this.resend.emails.send({
+        from: config.emailFrom,
+        to: config.adminEmail,
+        subject: `⚠️ [주문 취소 요청] ${orderId} - ${customerName}`,
+        html: htmlContent,
+      });
+
+      if (error) {
+        console.error('❌ Failed to send cancel request email to admin:', error);
+        return { success: false, error };
+      }
+
+      console.log('✅ Cancel request notification sent to admin:', data?.id);
+      return { success: true, messageId: data?.id };
+    } catch (error) {
+      console.error('❌ Error sending cancel request email to admin:', error);
+      return { success: false, error: error.message };
+    }
+  }
 }
 
 // 싱글톤 인스턴스
