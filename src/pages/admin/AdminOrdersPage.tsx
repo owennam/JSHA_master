@@ -214,45 +214,31 @@ const AdminOrdersPage = () => {
     return phone;
   };
 
-  // 유틸리티: 날짜 포맷팅
+  // 유틸리티: 날짜 포맷팅 (강력한 파싱)
   const formatDate = (dateStr: string) => {
     if (!dateStr) return '-';
 
-    // 이미 깔끔한 포맷이면 그대로 (단, 줄바꿈은 제거)
-    // 하지만 통일성을 위해 재파싱 시도
-    let timestamp = 0;
-    const time = new Date(dateStr).getTime();
-    if (!isNaN(time)) {
-      timestamp = time;
-    } else {
-      // 비표준 포맷 파싱 (YYYY.MM.DD...)
-      try {
-        const refined = dateStr.replace(/[\.\-\n]/g, ' ').replace(/오전|오후/g, '').trim();
-        const matches = refined.match(/(\d{4})\s*(\d{1,2})\s*(\d{1,2})(?:\s*(\d{1,2}))?(?:\s*(\d{1,2}))?/);
-        if (matches) {
-          const y = parseInt(matches[1]);
-          const m = parseInt(matches[2]) - 1;
-          const d = parseInt(matches[3]);
-          let h = matches[4] ? parseInt(matches[4]) : 0;
-          const min = matches[5] ? parseInt(matches[5]) : 0;
+    // 1. 숫자 그룹 추출
+    const digits = dateStr.match(/\d+/g);
+    if (!digits || digits.length < 3) return dateStr; // 파싱 불가시 원본
 
-          if (dateStr.includes('오후') && h < 12) h += 12;
-          if (dateStr.includes('오전') && h === 12) h = 0;
+    let y = parseInt(digits[0]);
+    let m = parseInt(digits[1]) - 1; // 월 (0-11)
+    let d = parseInt(digits[2]);
+    let h = digits[3] ? parseInt(digits[3]) : 0;
+    let min = digits[4] ? parseInt(digits[4]) : 0;
 
-          timestamp = new Date(y, m, d, h, min).getTime();
-        }
-      } catch (e) {
-        // ignore
-      }
-    }
+    // 연도 2자리 처리
+    if (y < 100) y += 2000;
 
-    if (timestamp > 0) {
-      const date = new Date(timestamp);
-      // 포맷: 2025. 12. 25. 14:30
-      return `${date.getFullYear()}. ${(date.getMonth() + 1).toString().padStart(2, '0')}. ${date.getDate().toString().padStart(2, '0')}. ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
-    }
+    // 오전/오후 처리
+    if (dateStr.includes('오후') && h < 12) h += 12;
+    if (dateStr.includes('오전') && h === 12) h = 0;
 
-    return dateStr; // 파싱 실패 시 원본
+    const date = new Date(y, m, d, h, min);
+
+    // 포맷: 2025. 12. 25. 14:30
+    return `${date.getFullYear()}. ${(date.getMonth() + 1).toString().padStart(2, '0')}. ${date.getDate().toString().padStart(2, '0')}. ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
   };
 
   if (loading) {
