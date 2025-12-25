@@ -405,6 +405,24 @@ router.patch('/users/:uid/status', authMiddleware, async (req, res) => {
             updatedAt: new Date().toISOString()
         });
 
+        // 승인 시 이메일 발송
+        if (status === 'approved') {
+            try {
+                const userDoc = await db.collection('users').doc(uid).get();
+                if (userDoc.exists) {
+                    const userData = userDoc.data();
+                    // 이메일 발송 (비동기, 에러가 전체 응답을 방해하지 않도록 함)
+                    emailService.sendAccountApprovalToUser({
+                        email: userData.email,
+                        directorName: userData.directorName || '원장님',
+                        clinicName: userData.clinicName || '병원'
+                    }).catch(err => console.error('Failed to send approval email (async):', err));
+                }
+            } catch (emailError) {
+                console.error('Error fetching user data for email:', emailError);
+            }
+        }
+
         res.json({
             success: true,
             message: `User status updated to ${status}`

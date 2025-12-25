@@ -1081,6 +1081,87 @@ class EmailService {
       return { success: false, error: error.message };
     }
   }
+
+  /**
+   * 사용자에게 계정 승인 알림 이메일 발송
+   */
+  async sendAccountApprovalToUser(userData) {
+    if (!this.initialized) {
+      await this.initialize();
+    }
+
+    const { email, directorName, clinicName } = userData;
+    // 디버깅: 이메일 발송 대상 확인
+    console.log(`Sending approval email to: ${email}, Director: ${directorName}`);
+
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+      </head>
+      <body style="font-family: 'Noto Sans KR', sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+          <h1 style="color: white; margin: 0; font-size: 28px;">회원 가입이 승인되었습니다</h1>
+        </div>
+
+        <div style="background-color: #ffffff; padding: 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 10px 10px;">
+          <p style="font-size: 16px; margin-bottom: 20px;">
+            안녕하세요, <strong>${directorName} 원장님</strong> (${clinicName})!<br>
+            JSHA 웹사이트 회원 가입 신청이 최종 승인되었습니다.
+          </p>
+
+          <div style="background-color: #ecfdf5; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #10b981;">
+            <p style="margin: 0; color: #065f46;">
+              이제 웹사이트에 로그인하여 JSHA 제품을 구매하고<br>
+              다양한 관련 자료를 확인하실 수 있습니다.
+            </p>
+          </div>
+
+          <div style="text-align: center; margin: 40px 0;">
+            <a href="https://www.jshamaster.com/auth" style="background-color: #10b981; color: white; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px; display: inline-block;">
+              지금 로그인하기
+            </a>
+          </div>
+
+          <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin-top: 30px;">
+            <h3 style="margin-top: 0; color: #374151; font-size: 16px;">서비스 이용 안내</h3>
+            <ul style="margin: 0; padding-left: 20px; color: #4b5563; font-size: 14px;">
+              <li style="margin-bottom: 5px;">로그인 후 [제품 구매] 메뉴를 이용하실 수 있습니다.</li>
+              <li style="margin-bottom: 5px;">마이페이지에서 주문 내역을 확인하실 수 있습니다.</li>
+              <li style="margin-bottom: 5px;">문의사항은 언제든지 고객센터로 연락주세요.</li>
+            </ul>
+          </div>
+
+          <div style="margin-top: 30px; text-align: center; color: #6b7280; font-size: 14px;">
+            <p>이 이메일은 발신 전용입니다.</p>
+            <p style="margin: 10px 0;">© 2025 JSHA. All rights reserved.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    try {
+      const { data, error } = await this.resend.emails.send({
+        from: `JSHA 웹사이트 <${config.resendFromEmail}>`,
+        to: [email],
+        subject: `[JSHA] 가입 승인이 완료되었습니다 - ${directorName} 원장님`,
+        html: htmlContent,
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      console.log('✅ Account approval email sent to user:', email);
+      return { success: true, messageId: data.id };
+    } catch (error) {
+      console.error('❌ Failed to send approval email to user:', error);
+      // 이메일 발송 실패가 전체 로직(승인 처리)을 망가지게 하지 않도록 에러를 로깅만 함
+      return { success: false, error: error.message };
+    }
+  }
 }
 
 // 싱글톤 인스턴스
