@@ -14,6 +14,54 @@ import { ko } from "date-fns/locale";
 
 const SERVER_URL = import.meta.env.VITE_SERVER_URL;
 
+// 날짜 파싱 헬퍼 함수 (Firestore ISO 형식 & Google Sheets 한글 형식 모두 지원)
+const parseOrderDate = (dateString: string): Date => {
+  if (!dateString) {
+    return new Date();
+  }
+
+  // ISO 형식 시도 (Firestore)
+  const isoDate = new Date(dateString);
+  if (!isNaN(isoDate.getTime())) {
+    return isoDate;
+  }
+
+  // 한글 형식 파싱 시도 (Google Sheets: "2025. 12. 25. 오후 9:37:27")
+  try {
+    // "2025. 12. 25. 오후 9:37:27" -> "2025-12-25 21:37:27" 변환
+    const koreanDateRegex = /(\d{4})\.\s*(\d{1,2})\.\s*(\d{1,2})\.\s*(오전|오후)\s*(\d{1,2}):(\d{1,2}):(\d{1,2})/;
+    const match = dateString.match(koreanDateRegex);
+
+    if (match) {
+      const [, year, month, day, ampm, hour, minute, second] = match;
+      let hours = parseInt(hour);
+
+      // 오후/오전 처리
+      if (ampm === '오후' && hours !== 12) hours += 12;
+      if (ampm === '오전' && hours === 12) hours = 0;
+
+      const parsedDate = new Date(
+        parseInt(year),
+        parseInt(month) - 1,
+        parseInt(day),
+        hours,
+        parseInt(minute),
+        parseInt(second)
+      );
+
+      if (!isNaN(parsedDate.getTime())) {
+        return parsedDate;
+      }
+    }
+  } catch (e) {
+    console.error('Failed to parse Korean date format:', e);
+  }
+
+  // 파싱 실패 시 현재 시각 반환
+  console.warn('Failed to parse date:', dateString);
+  return new Date();
+};
+
 const MyOrdersPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -145,7 +193,7 @@ const MyOrdersPage = () => {
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                       <div className="space-y-1">
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <span>{format(new Date(order.createdAt), "yyyy. MM. dd (EEE) HH:mm", { locale: ko })}</span>
+                          <span>{format(parseOrderDate(order.createdAt), "yyyy. MM. dd (EEE) HH:mm", { locale: ko })}</span>
                           <span>•</span>
                           <span>주문번호 {order.orderId}</span>
                         </div>
