@@ -77,50 +77,104 @@ router.get('/dashboard-summary', authMiddleware, async (req, res) => {
     }
 });
 
-// 주문 목록 조회 (Firestore 사용)
+// 주문 목록 조회 (Hybrid: Google Sheets + Firestore)
 router.get('/orders', authMiddleware, async (req, res) => {
     try {
-        if (!db) {
-            // Firestore가 초기화되지 않은 경우 Google Sheets 폴백
-            console.log('⚠️ Firestore not initialized, falling back to Google Sheets');
-            const rows = await googleSheetsService.getPaymentInfo();
-            // ... (기존 Google Sheets 매핑 로직 유지 가능하지만 복잡하므로 생략하거나 필요한 경우 추가)
-            return res.json({ success: false, message: 'Firestore DB not available' });
-        }
+        // 1. Google Sheets 데이터 조회 (과거 데이터 포함)
+        const sheetRows = await googleSheetsService.getPaymentInfo();
+        const sheetOrders = sheetRows.map(row => {
+            const rawStatus = (row[10] || 'DONE').toUpperCase();
+            let status = 'completed';
+            if (rawStatus === 'DONE' || rawStatus === 'COMPLETED') {
+                status = 'completed';
+            } else if (rawStatus === 'CANCELED' || rawStatus === 'CANCELLED') {
+                status = 'canceled';
+            } else if (rawStatus.includes('CANCEL')) {
+                status = 'cancel_requested';
+            }
 
-        // users 컬렉션의 모든 문서를 조회한 후, 각 user의 orders 서브컬렉션을 조회해야 함
-        // 하지만 collectionGroup을 사용하면 더 효율적
-        const status = req.query.status;
-        let ordersQuery = db.collectionGroup('orders');
-
-        // 상태 필터링이 있다면 적용
-        if (status && status !== 'all') {
-            ordersQuery = ordersQuery.where('status', '==', status);
-        }
-
-        // Firestore 정렬은 인덱스가 필요할 수 있으므로 메모리에서 정렬하거나 인덱스 생성 필요
-        // 여기서는 가져온 후 메모리 정렬 (데이터 양이 적을 때 유효)
-        const snapshot = await ordersQuery.get();
-
-        const orders = [];
-        snapshot.forEach(doc => {
-            const data = doc.data();
-            orders.push({
-                ...data,
-                // 날짜 포맷팅 등 필요한 전처리
-            });
+            return {
+                createdAt: row[0] || '',
+                orderId: row[1] || '',
+                productName: row[2] || '',
+                amount: parseInt((row[3] || '0').replace(/[^0-9]/g, '')) || 0,
+                paymentMethod: row[4] || '',
+                customerName: row[6] || '',
+                customerEmail: row[7] || '',
+                customerPhone: row[8] || '',
+                address: row[9] || '',
+                addressDetail: '',
+                status: status,
+                approvedAt: row[11] || '',
+                paymentKey: row[12] || '',
+                userId: '',
+                postalCode: '',
+                cancelReason: '',
+                cancelRequestedAt: undefined,
+                canceledAt: undefined,
+                source: 'sheets' // 디버깅용 출처 표시
+            };
         });
 
+        // 2. Firestore 데이터 조회 (실시간 상태 반영)
+        let dbOrders = [];
+        if (db) {
+            try {
+                const ordersSnapshot = await db.collectionGroup('orders').get();
+                ordersSnapshot.forEach(doc => {
+                    dbOrders.push({
+                        ...doc.data(),
+                        source: 'firestore'
+                    });
+                });
+            } catch (dbError) {
+                console.error('Failed to fetch from Firestore:', dbError);
+                // Firestore 실패 시 구글 시트 데이터만이라도 반환하려고 시도할 수 있음
+            }
+        }
+
+        // 3. 데이터 병합 (Firestore 데이터 우선)
+        // Map을 사용하여 orderId 기준으로 중복 제거 및 병합
+        const ordersMap = new Map();
+
+        // 먼저 구글 시트 데이터 넣기
+        sheetOrders.forEach(order => {
+            if (order.orderId) {
+                ordersMap.set(order.orderId, order);
+            }
+        });
+
+        // Firestore 데이터로 덮어쓰기 (상태 업데이트 반영됨)
+        dbOrders.forEach(order => {
+            if (order.orderId) {
+                // 기존 데이터가 있으면 병합 (없던 필드 추가 등), 없으면 추가
+                const existing = ordersMap.get(order.orderId) || {};
+                ordersMap.set(order.orderId, { ...existing, ...order });
+            }
+        });
+
+        // 4. 배열로 변환 및 정렬, 필터링
+        let finalOrders = Array.from(ordersMap.values());
+
+        // 상태 필터링
+        const status = req.query.status;
+        if (status && status !== 'all') {
+            finalOrders = finalOrders.filter(order => order.status === status);
+        }
+
         // 최신순 정렬 (createdAt 기준)
-        orders.sort((a, b) => {
+        finalOrders.sort((a, b) => {
             const dateA = new Date(a.createdAt).getTime();
             const dateB = new Date(b.createdAt).getTime();
+            // 날짜 파싱 실패 시(NaN) 처리
+            if (isNaN(dateA)) return 1;
+            if (isNaN(dateB)) return -1;
             return dateB - dateA;
         });
 
-        res.json({ success: true, data: orders });
+        res.json({ success: true, data: finalOrders });
     } catch (error) {
-        console.error('Failed to fetch orders from Firestore:', error);
+        console.error('Failed to fetch orders:', error);
         res.status(500).json({ success: false, message: 'Failed to fetch orders', error: error.message });
     }
 });
