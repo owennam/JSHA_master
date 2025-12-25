@@ -37,6 +37,15 @@ class GoogleSheetsService {
     return phone; // 형식이 맞지 않으면 원본 반환
   }
 
+  /**
+   * 현재 한국 시간을 표준 포맷(YYYY-MM-DD HH:mm:ss)으로 반환
+   */
+  getCurrentKSTString() {
+    const now = new Date();
+    const kstDate = new Date(now.getTime() + (9 * 60 * 60 * 1000));
+    return kstDate.toISOString().replace('T', ' ').substring(0, 19);
+  }
+
   async initialize() {
     if (this.initialized) return;
 
@@ -101,7 +110,8 @@ class GoogleSheetsService {
       }
 
       // 현재 시각 (한국 시간)
-      const now = new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' });
+      // 현재 시각 (한국 시간 표준 포맷)
+      const now = this.getCurrentKSTString();
 
       // 장바구니 상품 정보를 텍스트로 변환
       let cartItemsText = '';
@@ -178,7 +188,8 @@ class GoogleSheetsService {
       const { name, email, phone, hospital, workType } = applicationData;
 
       // 현재 시각 (한국 시간)
-      const now = new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' });
+      // 현재 시각 (한국 시간 표준 포맷)
+      const now = this.getCurrentKSTString();
 
       // 저장할 행 데이터
       const rowData = [
@@ -277,7 +288,8 @@ class GoogleSheetsService {
         : '';
 
       // 현재 시각 (한국 시간)
-      const now = new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' });
+      // 현재 시각 (한국 시간 표준 포맷)
+      const now = this.getCurrentKSTString();
 
       // 저장할 행 데이터
       const rowData = [
