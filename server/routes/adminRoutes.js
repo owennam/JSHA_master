@@ -182,7 +182,7 @@ router.get('/orders', authMiddleware, async (req, res) => {
             finalOrders = finalOrders.filter(order => order.status === status);
         }
 
-        // 날짜 파싱 헬퍼 함수
+        // 날짜 파싱 헬퍼 함수 (숫자 추출 방식)
         const parseDate = (dateStr) => {
             if (!dateStr) return 0;
 
@@ -190,34 +190,29 @@ router.get('/orders', authMiddleware, async (req, res) => {
             const time = new Date(dateStr).getTime();
             if (!isNaN(time)) return time;
 
-            // 2. 구글 시트 한국어 포맷 등 비표준 형식 처리
-            // 예: "2025.12.25 12:40", "2025. 12. 25. 오전 9:46:38", "2025.12.25\n12:40"
+            // 2. 비표준 포맷 처리 (숫자만 추출하여 파싱)
             try {
-                // 숫자만 추출하되, 날짜/시간 구성요소를 분해하기 위해 구분자를 공백으로 치환 등 전처리 필요하지만
-                // 간단히 숫자들의 나열을 정규식으로 추출해서 Date 객체 생성 시도
+                // 모든 숫자 그룹 추출
+                const digits = dateStr.match(/\d+/g);
+                if (!digits || digits.length < 3) return 0; // 최소 연,월,일은 있어야 함
 
-                // case: "2025.12.25" 또는 "2025-12-25" 포함된 경우
-                // 구분자(., -, 공백, 줄바꿈)를 모두 공백으로 변경 후 숫자 추출 시도
-                const refined = dateStr.replace(/[\.\-\n]/g, ' ').replace(/오전|오후/g, '').trim();
-                // 매칭: YYYY MM DD HH mm ss (최소 YYYY MM DD)
-                const matches = refined.match(/(\d{4})\s*(\d{1,2})\s*(\d{1,2})(?:\s*(\d{1,2}))?(?:\s*(\d{1,2}))?(?:\s*(\d{1,2}))?/);
+                let y = parseInt(digits[0]);
+                let m = parseInt(digits[1]) - 1; // 월 (0-11)
+                let d = parseInt(digits[2]);
+                let h = digits[3] ? parseInt(digits[3]) : 0;
+                let min = digits[4] ? parseInt(digits[4]) : 0;
+                let s = digits[5] ? parseInt(digits[5]) : 0;
 
-                if (matches) {
-                    const y = parseInt(matches[1]);
-                    const m = parseInt(matches[2]) - 1; // 월은 0-indexed
-                    const d = parseInt(matches[3]);
-                    let h = matches[4] ? parseInt(matches[4]) : 0;
-                    const min = matches[5] ? parseInt(matches[5]) : 0;
-                    const s = matches[6] ? parseInt(matches[6]) : 0;
+                // 연도가 2자리인 경우 (예: 25.12.25) 2000년대 간주
+                if (y < 100) y += 2000;
 
-                    // '오후' 키워드가 원본에 있었고, 12시 미만이면 12 더하기 (간이 처리)
-                    if (dateStr.includes('오후') && h < 12) h += 12;
-                    // '오전' 이고 12시면 0시로 (12:00 AM)
-                    if (dateStr.includes('오전') && h === 12) h = 0;
+                // 오전/오후 처리
+                if (dateStr.includes('오후') && h < 12) h += 12;
+                if (dateStr.includes('오전') && h === 12) h = 0;
 
-                    const parsedTime = new Date(y, m, d, h, min, s).getTime();
-                    if (!isNaN(parsedTime)) return parsedTime;
-                }
+                const parsedTime = new Date(y, m, d, h, min, s).getTime();
+                if (!isNaN(parsedTime)) return parsedTime;
+
             } catch (e) {
                 // ignore
             }

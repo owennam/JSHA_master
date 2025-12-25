@@ -191,6 +191,70 @@ const AdminOrdersPage = () => {
     }
   };
 
+  // 유틸리티: 전화번호 포맷팅
+  const formatPhoneNumber = (phone: string) => {
+    if (!phone) return '-';
+    // 숫자만 추출
+    const cleaned = phone.replace(/[^0-9]/g, '');
+
+    // 01012345678 -> 010-1234-5678
+    if (cleaned.length === 11) {
+      return cleaned.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
+    }
+    // 0101234567 -> 010-123-4567 (옛날 번호)
+    if (cleaned.length === 10) {
+      return cleaned.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
+    }
+    // 0212345678 -> 02-1234-5678
+    if (cleaned.length < 10 && cleaned.startsWith('02')) {
+      if (cleaned.length === 9) return cleaned.replace(/(\d{2})(\d{3})(\d{4})/, '$1-$2-$3');
+      if (cleaned.length === 10) return cleaned.replace(/(\d{2})(\d{4})(\d{4})/, '$1-$2-$3');
+    }
+
+    return phone;
+  };
+
+  // 유틸리티: 날짜 포맷팅
+  const formatDate = (dateStr: string) => {
+    if (!dateStr) return '-';
+
+    // 이미 깔끔한 포맷이면 그대로 (단, 줄바꿈은 제거)
+    // 하지만 통일성을 위해 재파싱 시도
+    let timestamp = 0;
+    const time = new Date(dateStr).getTime();
+    if (!isNaN(time)) {
+      timestamp = time;
+    } else {
+      // 비표준 포맷 파싱 (YYYY.MM.DD...)
+      try {
+        const refined = dateStr.replace(/[\.\-\n]/g, ' ').replace(/오전|오후/g, '').trim();
+        const matches = refined.match(/(\d{4})\s*(\d{1,2})\s*(\d{1,2})(?:\s*(\d{1,2}))?(?:\s*(\d{1,2}))?/);
+        if (matches) {
+          const y = parseInt(matches[1]);
+          const m = parseInt(matches[2]) - 1;
+          const d = parseInt(matches[3]);
+          let h = matches[4] ? parseInt(matches[4]) : 0;
+          const min = matches[5] ? parseInt(matches[5]) : 0;
+
+          if (dateStr.includes('오후') && h < 12) h += 12;
+          if (dateStr.includes('오전') && h === 12) h = 0;
+
+          timestamp = new Date(y, m, d, h, min).getTime();
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
+
+    if (timestamp > 0) {
+      const date = new Date(timestamp);
+      // 포맷: 2025. 12. 25. 14:30
+      return `${date.getFullYear()}. ${(date.getMonth() + 1).toString().padStart(2, '0')}. ${date.getDate().toString().padStart(2, '0')}. ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+    }
+
+    return dateStr; // 파싱 실패 시 원본
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -259,8 +323,8 @@ const AdminOrdersPage = () => {
               key={tab.key}
               onClick={() => setStatusFilter(tab.key)}
               className={`flex items-center px-4 py-2 text-sm font-medium rounded-md transition-all ${statusFilter === tab.key
-                  ? 'bg-white text-slate-900 shadow-sm ring-1 ring-slate-200'
-                  : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900'
+                ? 'bg-white text-slate-900 shadow-sm ring-1 ring-slate-200'
+                : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900'
                 }`}
             >
               {tab.label}
@@ -310,7 +374,7 @@ const AdminOrdersPage = () => {
                       <div className="font-medium text-sm text-slate-900">{order.customerName}</div>
                     </TableCell>
                     <TableCell className="text-center border-r border-slate-100 p-2 text-xs text-slate-500">
-                      {order.customerPhone}
+                      {formatPhoneNumber(order.customerPhone)}
                     </TableCell>
                     <TableCell className="text-center border-r border-slate-100 p-2 font-bold text-slate-900 text-sm">
                       {order.amount.toLocaleString()}원
