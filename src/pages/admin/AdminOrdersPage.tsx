@@ -3,6 +3,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   RefreshCw,
   ShoppingBag,
@@ -31,6 +40,7 @@ const AdminOrdersPage = () => {
   const [orders, setOrders] = useState<OrderInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [cancelingOrderId, setCancelingOrderId] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<string>("all");
 
   // 취소 다이얼로그 상태
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
@@ -153,6 +163,22 @@ const AdminOrdersPage = () => {
     }
   };
 
+  // 상태별 필터링
+  const getFilteredOrders = () => {
+    if (statusFilter === "all") return orders;
+    return orders.filter(order => order.status === statusFilter);
+  };
+
+  const filteredOrders = getFilteredOrders();
+
+  // 상태별 카운트
+  const statusCounts = {
+    all: orders.length,
+    completed: orders.filter(o => o.status === 'completed').length,
+    cancel_requested: orders.filter(o => o.status === 'cancel_requested').length,
+    canceled: orders.filter(o => o.status === 'canceled').length,
+  };
+
   const StatusBadge = ({ status }: { status: string }) => {
     switch (status) {
       case 'completed':
@@ -160,7 +186,7 @@ const AdminOrdersPage = () => {
       case 'cancel_requested':
         return <Badge className="bg-orange-500 hover:bg-orange-600"><Ban className="w-3 h-3 mr-1" />취소 요청됨</Badge>;
       case 'canceled':
-        return <Badge variant="destructive"><Ban className="w-3 h-3 mr-1" />취소 완료</Badge>;
+        return <Badge variant="destructive"><Ban className="w-3 h-3 mr-1" />환불 완료</Badge>;
       default:
         return <Badge variant="secondary">{status}</Badge>;
     }
@@ -244,73 +270,102 @@ const AdminOrdersPage = () => {
         </Card>
       </div>
 
-      {/* 주문 목록 */}
-      <div className="space-y-4">
-        {orders.length === 0 ? (
-          <Card>
-            <CardContent className="flex flex-col items-center justify-center py-12">
-              <ShoppingBag className="w-12 h-12 text-muted-foreground mb-4" />
-              <p className="text-muted-foreground mb-2">주문 내역이 없습니다</p>
-              <p className="text-xs text-muted-foreground text-center">
-                Firestore로 마이그레이션된 이후의 주문만 표시됩니다.<br />
-                이전 내역은 구글 시트를 확인하시거나, 새 주문을 테스트해보세요.
-              </p>
-            </CardContent>
-          </Card>
-        ) : (
-          orders.map((order) => (
-            <Card key={order.orderId}>
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="space-y-1">
-                    <CardTitle className="text-lg">{order.productName}</CardTitle>
-                    <CardDescription className="flex items-center gap-2">
-                      <User className="w-4 h-4" />
-                      {order.customerName}
-                    </CardDescription>
-                  </div>
-                  <StatusBadge status={order.status} />
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="grid grid-cols-2 gap-3 text-sm">
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Calendar className="w-4 h-4" />
-                    <span>
-                      {order.createdAt && !isNaN(new Date(order.createdAt).getTime())
-                        ? format(new Date(order.createdAt), "yyyy-MM-dd HH:mm", { locale: ko })
-                        : order.createdAt || '날짜 없음'}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <DollarSign className="w-4 h-4" />
-                    <span className="font-semibold">{order.amount.toLocaleString()}원</span>
-                  </div>
-                </div>
+      {/* 주문 목록 - Tabs */}
+      <Tabs value={statusFilter} onValueChange={setStatusFilter} className="space-y-4">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="all">
+            전체 ({statusCounts.all})
+          </TabsTrigger>
+          <TabsTrigger value="completed">
+            결제 완료 ({statusCounts.completed})
+          </TabsTrigger>
+          <TabsTrigger value="cancel_requested">
+            취소 요청 ({statusCounts.cancel_requested})
+          </TabsTrigger>
+          <TabsTrigger value="canceled">
+            환불 완료 ({statusCounts.canceled})
+          </TabsTrigger>
+        </TabsList>
 
-                <div className="text-xs text-muted-foreground">
-                  <p>주문번호: {order.orderId}</p>
-                </div>
-
-                {(order.status !== 'canceled' && order.status !== 'cancel_requested') && (
-                  <div className="flex gap-2 pt-3 border-t">
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={() => handleCancelClick(order)}
-                      disabled={cancelingOrderId === order.orderId}
-                      className="flex-1"
-                    >
-                      <Ban className="w-4 h-4 mr-2" />
-                      {cancelingOrderId === order.orderId ? '취소 처리 중...' : '환불'}
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          ))
-        )}
-      </div>
+        <Card>
+          <CardContent className="p-0">
+            {filteredOrders.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-12">
+                <ShoppingBag className="w-12 h-12 text-muted-foreground mb-4" />
+                <p className="text-muted-foreground mb-2">주문 내역이 없습니다</p>
+                <p className="text-xs text-muted-foreground text-center">
+                  {statusFilter === "all"
+                    ? "Firestore로 마이그레이션된 이후의 주문만 표시됩니다."
+                    : "해당 상태의 주문이 없습니다."}
+                </p>
+              </div>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[100px]">상태</TableHead>
+                    <TableHead>주문번호</TableHead>
+                    <TableHead>상품명</TableHead>
+                    <TableHead>고객명</TableHead>
+                    <TableHead>연락처</TableHead>
+                    <TableHead>금액</TableHead>
+                    <TableHead>주문일시</TableHead>
+                    <TableHead className="text-right">관리</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredOrders.map((order) => (
+                    <TableRow key={order.orderId}>
+                      <TableCell>
+                        <StatusBadge status={order.status} />
+                      </TableCell>
+                      <TableCell className="font-mono text-xs">
+                        {order.orderId.replace('ORDER_', '')}
+                      </TableCell>
+                      <TableCell className="font-medium">{order.productName}</TableCell>
+                      <TableCell>{order.customerName}</TableCell>
+                      <TableCell className="text-xs">{order.customerPhone}</TableCell>
+                      <TableCell className="font-semibold">{order.amount.toLocaleString()}원</TableCell>
+                      <TableCell className="text-xs">
+                        {order.createdAt && !isNaN(new Date(order.createdAt).getTime())
+                          ? format(new Date(order.createdAt), "yyyy.MM.dd HH:mm", { locale: ko })
+                          : order.createdAt || '-'}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {order.status === 'cancel_requested' && (
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => handleCancelClick(order)}
+                            disabled={cancelingOrderId === order.orderId}
+                          >
+                            <Ban className="w-4 h-4 mr-1" />
+                            {cancelingOrderId === order.orderId ? '처리중...' : '환불 처리'}
+                          </Button>
+                        )}
+                        {order.status === 'completed' && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleCancelClick(order)}
+                            disabled={cancelingOrderId === order.orderId}
+                          >
+                            <Ban className="w-4 h-4 mr-1" />
+                            {cancelingOrderId === order.orderId ? '처리중...' : '환불'}
+                          </Button>
+                        )}
+                        {order.status === 'canceled' && (
+                          <Badge variant="secondary">완료</Badge>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </CardContent>
+        </Card>
+      </Tabs>
 
       {/* 취소 확인 다이얼로그 */}
       <Dialog open={isCancelDialogOpen} onOpenChange={setIsCancelDialogOpen}>
