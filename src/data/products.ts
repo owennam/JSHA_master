@@ -16,7 +16,7 @@ export const products: Product[] = [
   {
     id: "male-silicon-basic",
     name: "남성 실리콘 인솔",
-    type: "기본형",
+    type: "높이 조절",
     price: 9900,
     description: "특허받은 척추측만증 교정용 JS Insole",
     image: "/images/products/insole-main.png",
@@ -29,7 +29,7 @@ export const products: Product[] = [
   {
     id: "male-silicon-angle",
     name: "남성 실리콘 인솔",
-    type: "각도형",
+    type: "웨지형",
     price: 9900,
     description: "특허받은 척추측만증 교정용 JS Insole",
     image: "/images/products/insole-main.png",
@@ -48,7 +48,7 @@ export const products: Product[] = [
   {
     id: "female-silicon-basic",
     name: "여성 실리콘 인솔",
-    type: "기본형",
+    type: "높이 조절",
     price: 9900,
     description: "특허받은 척추측만증 교정용 JS Insole",
     image: "/images/products/insole-main.png",
@@ -61,7 +61,7 @@ export const products: Product[] = [
   {
     id: "female-silicon-angle",
     name: "여성 실리콘 인솔",
-    type: "각도형",
+    type: "웨지형",
     price: 9900,
     description: "특허받은 척추측만증 교정용 JS Insole",
     image: "/images/products/insole-main.png",
@@ -122,7 +122,7 @@ export const products: Product[] = [
     type: "",
     price: 132000,
     description: "중형 사이즈 쿠룬타 (가로 430mm x 세로 760mm x 높이 160mm)",
-    image: "/images/products/kurunta.png",
+    image: "/images/products/kurunta_final.jpg",
     isActive: true, // Now active
     options: {
       sizes: ["표준"],
@@ -133,4 +133,3 @@ export const products: Product[] = [
 
 // Export only active products
 export const activeProducts = products.filter(p => p.isActive);
-

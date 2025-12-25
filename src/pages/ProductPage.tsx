@@ -317,7 +317,7 @@ const ProductPage = () => {
       <Header />
 
       <main className="flex-1 container mx-auto px-4 pt-40 pb-16">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-7xl mx-auto">
           {/* 인증 정보 표시 */}
           {userProfile && (
             <div className="mb-8 p-4 bg-primary/10 border border-primary/20 rounded-lg flex items-center justify-between">
@@ -359,74 +359,70 @@ const ProductPage = () => {
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-3 gap-8">
+          <div className="space-y-16">
             {/* 제품 선택 영역 */}
-            <div className="lg:col-span-2 space-y-6">
-              <h2 className="text-2xl font-semibold mb-4">제품 선택</h2>
+            <div className="space-y-6">
+              <h2 className="text-2xl font-semibold mb-4 text-center sm:text-left">제품 리스트</h2>
 
-              {/* 제품 목록 */}
-              <div className="space-y-4">
+              {/* 제품 목록 - 4열 그리드 (핵심 변경) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {activeProducts.map((product) => (
                   <Card
                     key={product.id}
-                    className="overflow-hidden transition-all hover:shadow-lg"
+                    className="overflow-hidden transition-all hover:shadow-lg flex flex-col h-full bg-white group"
                   >
-                    <div className="grid md:grid-cols-[200px_1fr] gap-4">
-                      {/* Product Image */}
-                      {product.image && (
-                        <div className="bg-muted/30 flex items-center justify-center p-4">
-                          <img
-                            src={product.image}
-                            alt={product.name}
-                            className="w-full h-auto object-contain max-h-40"
-                          />
-                        </div>
-                      )}
+                    {/* Product Image */}
+                    {product.image && (
+                      <div className="bg-white border-b border-slate-100 aspect-square flex items-center justify-center relative overflow-hidden">
+                        <img
+                          src={product.image}
+                          alt={product.name}
+                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                        />
+                      </div>
+                    )}
 
-                      {/* Product Info */}
-                      <div className="p-4 md:p-6 flex flex-col justify-between">
-                        <div>
-                          <CardTitle className="flex items-start justify-between gap-4 mb-2">
-                            <div className="flex flex-col">
-                              <span className="text-black">{product.name}</span>
-                              {product.type && (
-                                <span className="text-lg font-semibold text-black mt-1">
-                                  ({product.type})
-                                </span>
-                              )}
-                            </div>
-                            <span className="text-primary shrink-0 text-xl">
-                              {product.price.toLocaleString()}원
+                    {/* Product Info */}
+                    <div className="p-5 flex flex-col flex-1">
+                      <div className="mb-4">
+                        <CardTitle className="mb-2 line-clamp-2 min-h-[4rem] flex flex-col justify-start">
+                          <span className="text-black font-extrabold text-xl leading-tight">{product.name}</span>
+                          {product.type && (
+                            <span className="text-lg font-extrabold text-slate-600 mt-1">
+                              {product.type}
                             </span>
-                          </CardTitle>
-                          {product.description && (
-                            <p className="text-muted-foreground text-sm mb-4">
-                              {product.description}
-                            </p>
                           )}
-                        </div>
+                        </CardTitle>
+                        {product.description && (
+                          <p className="text-muted-foreground text-sm line-clamp-2 min-h-[2.5rem] mb-2">
+                            {product.description}
+                          </p>
+                        )}
+                        <p className="text-xl font-extrabold text-blue-600 mt-2">
+                          {product.price.toLocaleString()}원
+                        </p>
+                      </div>
 
-                        <div className="flex gap-2 mt-4">
-                          <Button
-                            variant="outline"
-                            onClick={() => navigate(`/products/${product.id}`)}
-                            className="flex-1"
-                          >
-                            상세보기
-                          </Button>
-                          <Button
-                            onClick={() => {
-                              setSelectedProduct(product.id);
-                              setSelectedSize("");
-                              setSelectedType("");
-                              setQuantity(1);
-                              setIsSheetOpen(true);
-                            }}
-                            className="flex-1"
-                          >
-                            구매하기
-                          </Button>
-                        </div>
+                      <div className="mt-auto space-y-2">
+                        <Button
+                          onClick={() => {
+                            setSelectedProduct(product.id);
+                            setSelectedSize("");
+                            setSelectedType("");
+                            setQuantity(1);
+                            setIsSheetOpen(true);
+                          }}
+                          className="w-full font-bold shadow-sm"
+                        >
+                          옵션 선택 및 담기
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          onClick={() => navigate(`/products/${product.id}`)}
+                          className="w-full text-xs h-8 text-muted-foreground hover:text-primary"
+                        >
+                          상세보기
+                        </Button>
                       </div>
                     </div>
                   </Card>
@@ -434,225 +430,235 @@ const ProductPage = () => {
               </div>
             </div>
 
-            {/* 장바구니 및 결제 영역 */}
-            <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <ShoppingCart className="w-5 h-5" />
-                    장바구니 ({cart.length})
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {cart.length === 0 ? (
-                    <p className="text-muted-foreground text-center py-8">
-                      장바구니가 비어있습니다
-                    </p>
-                  ) : (
-                    <div className="space-y-4">
-                      {cart.map((item) => (
-                        <div key={item.id} className="border-b pb-4 last:border-b-0">
-                          <div className="flex justify-between items-start mb-2">
-                            <div className="flex-1">
-                              <p className="font-medium">{item.productName}</p>
-                              <p className="text-sm text-muted-foreground">
-                                {item.size} / {item.type}
+            {/* 하단: 장바구니 및 결제 영역 (2열 배치) */}
+            <div className="grid lg:grid-cols-2 gap-12 border-t pt-12">
+              {/* 장바구니 영역 */}
+              <div className="space-y-6">
+                <Card className="h-full border-slate-200 shadow-md">
+                  <CardHeader className="bg-slate-50 border-b border-slate-100">
+                    <CardTitle className="flex items-center gap-2 text-slate-800">
+                      <ShoppingCart className="w-5 h-5" />
+                      장바구니 ({cart.length})
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-6">
+                    {cart.length === 0 ? (
+                      <div className="flex flex-col items-center justify-center py-12 text-center text-muted-foreground h-full min-h-[200px]">
+                        <ShoppingCart className="w-16 h-16 mb-4 opacity-10" />
+                        <p className="font-medium text-lg text-slate-400">장바구니가 비어있습니다</p>
+                        <p className="text-sm mt-1 text-slate-400">원하시는 상품을 담아주세요</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-6">
+                        {cart.map((item) => (
+                          <div key={item.id} className="border-b border-slate-100 pb-4 last:border-b-0">
+                            <div className="flex justify-between items-start mb-3">
+                              <div className="flex-1">
+                                <p className="font-bold text-slate-800">{item.productName}</p>
+                                <div className="text-sm text-slate-500 mt-1 flex flex-col">
+                                  <span>옵션: {item.size} / {item.type}</span>
+                                </div>
+                              </div>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => removeCartItem(item.id)}
+                                className="text-slate-400 hover:text-red-500 hover:bg-red-50 -mt-2 -mr-2"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                            <div className="flex items-center justify-between bg-slate-50 p-2 rounded-lg">
+                              <div className="flex items-center gap-3 bg-white rounded border px-2 py-1">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-6 w-6"
+                                  onClick={() => updateCartItemQuantity(item.id, item.quantity - 1)}
+                                >
+                                  <Minus className="w-3 h-3" />
+                                </Button>
+                                <span className="w-8 text-center font-bold text-sm">{item.quantity}</span>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-6 w-6"
+                                  onClick={() => updateCartItemQuantity(item.id, item.quantity + 1)}
+                                >
+                                  <Plus className="w-3 h-3" />
+                                </Button>
+                              </div>
+                              <p className="font-bold text-lg text-slate-900">
+                                {(item.price * item.quantity).toLocaleString()}원
                               </p>
                             </div>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => removeCartItem(item.id)}
-                              className="text-destructive"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
                           </div>
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <Button
-                                variant="outline"
-                                size="icon"
-                                className="h-8 w-8"
-                                onClick={() => updateCartItemQuantity(item.id, item.quantity - 1)}
-                              >
-                                <Minus className="w-3 h-3" />
-                              </Button>
-                              <span className="w-8 text-center">{item.quantity}</span>
-                              <Button
-                                variant="outline"
-                                size="icon"
-                                className="h-8 w-8"
-                                onClick={() => updateCartItemQuantity(item.id, item.quantity + 1)}
-                              >
-                                <Plus className="w-3 h-3" />
-                              </Button>
-                            </div>
-                            <p className="font-semibold">
-                              {(item.price * item.quantity).toLocaleString()}원
-                            </p>
-                          </div>
-                        </div>
-                      ))}
+                        ))}
 
-                      <div className="bg-accent/20 p-4 rounded-lg mt-4">
-                        <div className="flex justify-between items-center text-lg font-semibold">
-                          <span>총 결제 금액</span>
-                          <span className="text-primary text-2xl">
-                            {totalAmount.toLocaleString()}원
-                          </span>
+                        <div className="bg-slate-900 text-white p-5 rounded-lg mt-6 shadow-lg">
+                          <div className="flex justify-between items-center text-lg font-bold">
+                            <span>총 결제 금액</span>
+                            <span className="text-2xl text-yellow-400">
+                              {totalAmount.toLocaleString()}원
+                            </span>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
 
-              {/* 구매자 정보 */}
-              {cart.length > 0 && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>구매자 정보</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <Form {...form}>
-                      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                        <FormField
-                          control={form.control}
-                          name="name"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>이름</FormLabel>
-                              <FormControl>
-                                <Input placeholder="홍길동" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+              {/* 구매자 정보 및 결제 폼 */}
+              <div className="space-y-6">
+                {cart.length > 0 ? (
+                  <Card className="border-slate-200 shadow-md">
+                    <CardHeader className="bg-slate-50 border-b border-slate-100">
+                      <CardTitle className="text-slate-800">구매자 정보</CardTitle>
+                      <CardDescription>정확한 배송을 위해 주소를 입력해주세요</CardDescription>
+                    </CardHeader>
+                    <CardContent className="p-6">
+                      <Form {...form}>
+                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                          <div className="grid grid-cols-2 gap-4">
+                            <FormField
+                              control={form.control}
+                              name="name"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>이름</FormLabel>
+                                  <FormControl>
+                                    <Input placeholder="홍길동" {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={form.control}
+                              name="phone"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>연락처</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      type="tel"
+                                      placeholder="01012345678"
+                                      {...field}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
 
-                        <FormField
-                          control={form.control}
-                          name="email"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>이메일</FormLabel>
-                              <FormControl>
-                                <Input
-                                  type="email"
-                                  placeholder="example@email.com"
-                                  {...field}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <FormField
-                          control={form.control}
-                          name="phone"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>전화번호</FormLabel>
-                              <FormControl>
-                                <Input
-                                  type="tel"
-                                  placeholder="01012345678"
-                                  {...field}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <FormField
-                          control={form.control}
-                          name="postalCode"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>우편번호</FormLabel>
-                              <div className="flex gap-2">
+                          <FormField
+                            control={form.control}
+                            name="email"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>이메일</FormLabel>
                                 <FormControl>
                                   <Input
-                                    placeholder="12345"
+                                    type="email"
+                                    placeholder="example@email.com"
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <div className="grid grid-cols-[1fr_80px] gap-2 items-end">
+                            <FormField
+                              control={form.control}
+                              name="postalCode"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>주소</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      placeholder="우편번호"
+                                      {...field}
+                                      readOnly
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={handleAddressSearch}
+                              className="mb-2" // FormMessage 공간 고려 미세조정 필요시
+                            >
+                              검색
+                            </Button>
+                          </div>
+                          <FormField
+                            control={form.control}
+                            name="address"
+                            render={({ field }) => (
+                              <FormItem className="-mt-2">
+                                <FormControl>
+                                  <Input
+                                    placeholder="기본 주소"
                                     {...field}
                                     readOnly
                                   />
                                 </FormControl>
-                                <Button
-                                  type="button"
-                                  variant="outline"
-                                  onClick={handleAddressSearch}
-                                  className="shrink-0"
-                                >
-                                  <MapPin className="w-4 h-4 mr-2" />
-                                  주소 검색
-                                </Button>
-                              </div>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
 
-                        <FormField
-                          control={form.control}
-                          name="address"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>기본 주소</FormLabel>
-                              <FormControl>
-                                <Input
-                                  placeholder="주소 검색 버튼을 클릭하세요"
-                                  {...field}
-                                  readOnly
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                          <FormField
+                            control={form.control}
+                            name="addressDetail"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormControl>
+                                  <Input
+                                    placeholder="상세주소 입력"
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
 
-                        <FormField
-                          control={form.control}
-                          name="addressDetail"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>상세 주소</FormLabel>
-                              <FormControl>
-                                <Input
-                                  placeholder="101동 1001호"
-                                  {...field}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                          <Button
+                            type="submit"
+                            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold h-12 text-lg shadow-md mt-6"
+                          >
+                            결제하기
+                          </Button>
 
-                        <Button
-                          type="submit"
-                          className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
-                          size="lg"
-                        >
-                          결제하기
-                        </Button>
-
-                        <p className="text-sm text-muted-foreground text-center">
-                          * 토스페이먼츠를 통해 안전하게 결제됩니다.
-                        </p>
-                      </form>
-                    </Form>
-                  </CardContent>
-                </Card>
-              )}
+                          <p className="text-xs text-muted-foreground text-center mt-2 flex items-center justify-center gap-1">
+                            <CreditCard className="w-3 h-3" /> 토스페이먼츠 보안 결제
+                          </p>
+                        </form>
+                      </Form>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <div className="h-full flex flex-col items-center justify-center p-8 border rounded-lg bg-slate-50 text-slate-400 border-dashed min-h-[300px]">
+                    <CreditCard className="w-16 h-16 mb-4 opacity-30" />
+                    <p className="font-semibold text-lg">결제 정보 입력</p>
+                    <p className="text-sm mt-1">상품을 먼저 장바구니에 담아주세요</p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
           {/* Shipping and Return Policy Section */}
-          <div className="mt-16 max-w-4xl mx-auto">
-            <h2 className="text-2xl font-bold text-center mb-8">배송 및 교환/환불 정책</h2>
+          <div className="mt-20 max-w-4xl mx-auto border-t pt-10">
+            <h2 className="text-2xl font-bold text-center mb-8 text-slate-800">배송 및 교환/환불 정책</h2>
             <Accordion type="single" collapsible className="w-full">
               {/* Shipping Information */}
               <AccordionItem value="shipping">
@@ -800,7 +806,7 @@ const ProductPage = () => {
                   <SelectValue placeholder="사이즈 선택" />
                 </SelectTrigger>
                 <SelectContent>
-                  {selectedProductData?.options.sizes.map((size) => (
+                  {selectedProductData?.options?.sizes.map((size) => (
                     <SelectItem key={size} value={size}>
                       {size}
                     </SelectItem>
@@ -816,7 +822,7 @@ const ProductPage = () => {
                   <SelectValue placeholder="타입 선택" />
                 </SelectTrigger>
                 <SelectContent>
-                  {selectedProductData?.options.types.map((type) => (
+                  {selectedProductData?.options?.types.map((type) => (
                     <SelectItem key={type} value={type}>
                       {type}
                     </SelectItem>
@@ -825,26 +831,22 @@ const ProductPage = () => {
               </Select>
             </div>
 
+            {/* 수량 선택 */}
             <div>
               <label className="block text-sm font-medium mb-2">수량</label>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-4">
                 <Button
-                  type="button"
                   variant="outline"
                   size="icon"
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                  disabled={quantity <= 1}
                 >
                   <Minus className="w-4 h-4" />
                 </Button>
-                <Input
-                  type="number"
-                  min="1"
-                  value={quantity}
-                  onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                  className="w-20 text-center"
-                />
+                <span className="text-xl font-medium w-8 text-center">
+                  {quantity}
+                </span>
                 <Button
-                  type="button"
                   variant="outline"
                   size="icon"
                   onClick={() => setQuantity(quantity + 1)}
@@ -855,32 +857,22 @@ const ProductPage = () => {
             </div>
 
             {/* 총 금액 */}
-            {selectedProductData && selectedSize && selectedType && (
-              <div className="bg-accent/20 p-4 rounded-lg">
-                <div className="flex justify-between items-center">
-                  <span className="font-medium">총 금액</span>
-                  <span className="text-xl font-bold text-primary">
-                    {(selectedProductData.price * quantity).toLocaleString()}원
-                  </span>
-                </div>
+            <div className="pt-4 border-t">
+              <div className="flex justify-between items-center mb-4">
+                <span className="font-semibold">총 금액</span>
+                <span className="text-xl font-bold text-primary">
+                  {(selectedProductData ? selectedProductData.price * quantity : 0).toLocaleString()}원
+                </span>
               </div>
-            )}
-
-            {/* 장바구니 담기 버튼 */}
-            <Button
-              onClick={addToCart}
-              className="w-full"
-              size="lg"
-              disabled={!selectedSize || !selectedType}
-            >
-              <ShoppingCart className="w-4 h-4 mr-2" />
-              장바구니에 담기
-            </Button>
+              <Button onClick={addToCart} className="w-full" size="lg">
+                장바구니 담기
+              </Button>
+            </div>
           </div>
         </SheetContent>
       </Sheet>
 
-      <Footer showBusinessInfo={true} />
+      <Footer />
     </div>
   );
 };
