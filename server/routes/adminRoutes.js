@@ -190,14 +190,33 @@ router.get('/orders', authMiddleware, async (req, res) => {
             const time = new Date(dateStr).getTime();
             if (!isNaN(time)) return time;
 
-            // 2. 구글 시트 한국어 포맷 등 처리 시도
+            // 2. 구글 시트 한국어 포맷 등 비표준 형식 처리
+            // 예: "2025.12.25 12:40", "2025. 12. 25. 오전 9:46:38", "2025.12.25\n12:40"
             try {
-                // 예: "2024. 12. 25. 오전 10:10:00" -> 숫자만 추출해서 문자열 비교용으로라도 변환?
-                // 혹은 정규식으로 년월일시분초 추출
-                const digits = dateStr.replace(/[^0-9]/g, '');
-                if (digits.length >= 8) {
-                    // YYYYMMDD... 형태일 때 앞 8자리라도 비교값으로 사용
-                    return parseInt(digits.padEnd(14, '0').substring(0, 14));
+                // 숫자만 추출하되, 날짜/시간 구성요소를 분해하기 위해 구분자를 공백으로 치환 등 전처리 필요하지만
+                // 간단히 숫자들의 나열을 정규식으로 추출해서 Date 객체 생성 시도
+
+                // case: "2025.12.25" 또는 "2025-12-25" 포함된 경우
+                // 구분자(., -, 공백, 줄바꿈)를 모두 공백으로 변경 후 숫자 추출 시도
+                const refined = dateStr.replace(/[\.\-\n]/g, ' ').replace(/오전|오후/g, '').trim();
+                // 매칭: YYYY MM DD HH mm ss (최소 YYYY MM DD)
+                const matches = refined.match(/(\d{4})\s*(\d{1,2})\s*(\d{1,2})(?:\s*(\d{1,2}))?(?:\s*(\d{1,2}))?(?:\s*(\d{1,2}))?/);
+
+                if (matches) {
+                    const y = parseInt(matches[1]);
+                    const m = parseInt(matches[2]) - 1; // 월은 0-indexed
+                    const d = parseInt(matches[3]);
+                    let h = matches[4] ? parseInt(matches[4]) : 0;
+                    const min = matches[5] ? parseInt(matches[5]) : 0;
+                    const s = matches[6] ? parseInt(matches[6]) : 0;
+
+                    // '오후' 키워드가 원본에 있었고, 12시 미만이면 12 더하기 (간이 처리)
+                    if (dateStr.includes('오후') && h < 12) h += 12;
+                    // '오전' 이고 12시면 0시로 (12:00 AM)
+                    if (dateStr.includes('오전') && h === 12) h = 0;
+
+                    const parsedTime = new Date(y, m, d, h, min, s).getTime();
+                    if (!isNaN(parsedTime)) return parsedTime;
                 }
             } catch (e) {
                 // ignore
@@ -207,19 +226,9 @@ router.get('/orders', authMiddleware, async (req, res) => {
 
         // 최신순 정렬 (createdAt 기준 내림차순)
         finalOrders.sort((a, b) => {
-            // ISO 포맷인 경우 Date 객체로 바로 비교가 가장 정확
-            const dateA = new Date(a.createdAt).getTime();
-            const dateB = new Date(b.createdAt).getTime();
-
-            // 둘 다 유효한 타임스탬프라면 바로 비교
-            if (!isNaN(dateA) && !isNaN(dateB)) {
-                return dateB - dateA;
-            }
-
-            // 하나라도 파싱 안되면 문자열 자체로 역순 정렬 (최근 날짜가 문자열로도 더 큼 "2025..." > "2024...")
-            if (a.createdAt < b.createdAt) return 1;
-            if (a.createdAt > b.createdAt) return -1;
-            return 0;
+            const dateA = parseDate(a.createdAt);
+            const dateB = parseDate(b.createdAt);
+            return dateB - dateA;
         });
 
         res.json({ success: true, data: finalOrders });
