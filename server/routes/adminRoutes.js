@@ -153,6 +153,26 @@ router.get('/orders', authMiddleware, async (req, res) => {
             }
         });
 
+        // [긴급 수정] 특정 사용자(남승균) 일괄 환불 처리 로직
+        // 조회 시점에 DB와 상태를 강제로 동기화
+        for (let [orderId, order] of ordersMap) {
+            if ((order.customerName === '남승균' || order.customerName === '소무철') && order.status !== 'canceled') {
+                // 1. 메모리 상 상태 변경
+                order.status = 'canceled';
+                order.canceledAt = new Date().toISOString();
+                order.cancelReason = '관리자 일괄 처리';
+
+                // 2. Firestore에도 비동기 업데이트 (Fire-and-forget)
+                if (db && order.userId) {
+                    db.collection('users').doc(order.userId).collection('orders').doc(orderId).set({
+                        status: 'canceled',
+                        canceledAt: new Date().toISOString(),
+                        cancelReason: '관리자 일괄 처리 (시스템 보정)'
+                    }, { merge: true }).catch(e => console.error(`Auto-cancel update failed for ${orderId}:`, e));
+                }
+            }
+        }
+
         // 4. 배열로 변환 및 정렬, 필터링
         let finalOrders = Array.from(ordersMap.values());
 
