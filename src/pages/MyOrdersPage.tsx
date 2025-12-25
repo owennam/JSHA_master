@@ -7,8 +7,19 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/contexts/AuthContext";
-import { getUserOrders, OrderInfo } from "@/lib/firestore";
-import { Loader2, Package, ShoppingBag, Clock, CheckCircle2, XCircle } from "lucide-react";
+import { getUserOrders, OrderInfo, requestCancelOrder } from "@/lib/firestore";
+import { Loader2, Package, ShoppingBag, Clock, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
 
@@ -65,9 +76,14 @@ const parseOrderDate = (dateString: string): Date => {
 const MyOrdersPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [orders, setOrders] = useState<OrderInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [dataSource, setDataSource] = useState<'firestore' | 'backend'>('firestore');
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<OrderInfo | null>(null);
+  const [cancelReason, setCancelReason] = useState("");
+  const [isCanceling, setIsCanceling] = useState(false);
 
   useEffect(() => {
     // 비로그인 사용자 리다이렉트
@@ -120,6 +136,56 @@ const MyOrdersPage = () => {
 
     fetchOrders();
   }, [user, navigate]);
+
+  const handleCancelRequest = (order: OrderInfo) => {
+    setSelectedOrder(order);
+    setCancelReason("");
+    setCancelDialogOpen(true);
+  };
+
+  const submitCancelRequest = async () => {
+    if (!user || !selectedOrder) return;
+
+    if (!cancelReason.trim()) {
+      toast({
+        title: "취소 사유를 입력해주세요",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsCanceling(true);
+
+    try {
+      await requestCancelOrder(user.uid, selectedOrder.orderId, cancelReason);
+
+      toast({
+        title: "취소 요청 완료",
+        description: "관리자 확인 후 환불 처리됩니다.",
+      });
+
+      // 주문 목록 새로고침
+      const updatedOrders = orders.map(order =>
+        order.orderId === selectedOrder.orderId
+          ? { ...order, status: 'cancel_requested' as const, cancelReason, cancelRequestedAt: new Date().toISOString() }
+          : order
+      );
+      setOrders(updatedOrders);
+
+      setCancelDialogOpen(false);
+      setSelectedOrder(null);
+      setCancelReason("");
+    } catch (error: any) {
+      console.error("Failed to request cancellation:", error);
+      toast({
+        title: "취소 요청 실패",
+        description: error.message || "다시 시도해주세요.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsCanceling(false);
+    }
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -204,9 +270,16 @@ const MyOrdersPage = () => {
                       </div>
                       <div className="flex items-center gap-3">
                         {getStatusBadge(order.status)}
-                        <Button variant="outline" size="sm">
-                          상세보기
-                        </Button>
+                        {order.status === "completed" && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleCancelRequest(order)}
+                          >
+                            <XCircle className="w-4 h-4 mr-1" />
+                            취소 요청
+                          </Button>
+                        )}
                       </div>
                     </div>
                   </CardHeader>
@@ -248,6 +321,67 @@ const MyOrdersPage = () => {
       </main>
 
       <Footer />
+
+      {/* 취소 요청 다이얼로그 */}
+      <Dialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>주문 취소 요청</DialogTitle>
+            <DialogDescription>
+              취소 사유를 입력해주세요. 관리자 확인 후 환불 처리됩니다.
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedOrder && (
+            <div className="space-y-4 py-4">
+              <div className="bg-muted p-3 rounded-lg text-sm">
+                <p><span className="font-semibold">주문번호:</span> {selectedOrder.orderId}</p>
+                <p><span className="font-semibold">상품:</span> {selectedOrder.productName}</p>
+                <p><span className="font-semibold">결제 금액:</span> {selectedOrder.amount.toLocaleString()}원</p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="cancelReason">취소 사유 *</Label>
+                <Textarea
+                  id="cancelReason"
+                  placeholder="취소 사유를 입력해주세요 (예: 단순 변심, 배송지 변경 등)"
+                  value={cancelReason}
+                  onChange={(e) => setCancelReason(e.target.value)}
+                  rows={4}
+                />
+              </div>
+
+              <div className="flex items-start gap-2 text-sm text-muted-foreground bg-blue-50 p-3 rounded-lg">
+                <AlertCircle className="w-4 h-4 mt-0.5 text-blue-600" />
+                <p>취소 요청 후 관리자가 확인하면 자동으로 환불 처리됩니다.</p>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setCancelDialogOpen(false)}
+              disabled={isCanceling}
+            >
+              닫기
+            </Button>
+            <Button
+              onClick={submitCancelRequest}
+              disabled={isCanceling || !cancelReason.trim()}
+            >
+              {isCanceling ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  처리 중...
+                </>
+              ) : (
+                "취소 요청"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
