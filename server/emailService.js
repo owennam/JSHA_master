@@ -1108,7 +1108,7 @@ class EmailService {
         <div style="background-color: #ffffff; padding: 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 10px 10px;">
           <p style="font-size: 16px; margin-bottom: 20px;">
             안녕하세요, <strong>${directorName} 원장님</strong> (${clinicName})!<br>
-            JSHA 웹사이트 회원 가입 신청이 최종 승인되었습니다.
+            JSHA 회원 가입 신청이 최종 승인되었습니다.
           </p>
 
           <div style="background-color: #ecfdf5; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #10b981;">
