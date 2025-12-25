@@ -35,6 +35,17 @@ router.get('/orders', async (req, res) => {
                 const address = addressParts.slice(1, -1).join(' ') || '';
                 const addressDetail = addressParts[addressParts.length - 1] || '';
 
+                // Google Sheets 상태를 Firestore 형식으로 매핑
+                const rawStatus = (row[10] || 'DONE').toUpperCase();
+                let status = 'completed';
+                if (rawStatus === 'DONE' || rawStatus === 'COMPLETED') {
+                    status = 'completed';
+                } else if (rawStatus === 'CANCELED' || rawStatus === 'CANCELLED') {
+                    status = 'canceled';
+                } else if (rawStatus.includes('CANCEL')) {
+                    status = 'cancel_requested';
+                }
+
                 return {
                     orderId: row[1] || '',
                     userId: '',  // Google Sheets에는 userId가 없음
@@ -47,7 +58,7 @@ router.get('/orders', async (req, res) => {
                     address: fullAddress,
                     addressDetail: '',
                     postalCode: '',
-                    status: row[10] || 'completed',
+                    status: status,
                     createdAt: row[0] || '',
                     cancelRequestedAt: undefined,
                     canceledAt: undefined,
