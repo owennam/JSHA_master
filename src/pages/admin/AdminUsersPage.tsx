@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
@@ -13,9 +13,6 @@ import {
   XCircle,
   Clock,
   RefreshCw,
-  Mail,
-  Building2,
-  MapPin
 } from "lucide-react";
 import {
   Tabs,
@@ -23,6 +20,14 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 const AdminUsersPage = () => {
   const { toast } = useToast();
@@ -38,28 +43,18 @@ const AdminUsersPage = () => {
       const API_URL = import.meta.env.VITE_API_URL || '';
       const token = localStorage.getItem('admin_token');
 
-      // 각 상태별로 병렬 요청
       const [pendingRes, approvedRes, rejectedRes] = await Promise.all([
         fetch(`${API_URL}/api/admin/users?status=pending`, {
           method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         }),
         fetch(`${API_URL}/api/admin/users?status=approved`, {
           method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         }),
         fetch(`${API_URL}/api/admin/users?status=rejected`, {
           method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         }),
       ]);
 
@@ -73,14 +68,11 @@ const AdminUsersPage = () => {
       if (approvedData.success) setApprovedUsers(approvedData.data || []);
       if (rejectedData.success) setRejectedUsers(rejectedData.data || []);
 
-      if (!pendingData.success || !approvedData.success || !rejectedData.success) {
-        throw new Error('Failed to load some user data');
-      }
     } catch (error) {
       console.error("Failed to load users:", error);
       toast({
-        title: "사용자 목록 로드 실패",
-        description: "사용자 목록을 불러오는데 실패했습니다.",
+        title: "로드 실패",
+        description: "사용자 목록을 불러오지 못했습니다.",
         variant: "destructive",
       });
     } finally {
@@ -114,17 +106,16 @@ const AdminUsersPage = () => {
       }
 
       toast({
-        title: "상태 업데이트 완료",
+        title: "처리 완료",
         description: `사용자 상태가 ${newStatus === 'approved' ? '승인' : '거부'}되었습니다.`,
       });
 
-      // 목록 새로고침
       await loadUsers();
     } catch (error: any) {
       console.error("Failed to update status:", error);
       toast({
-        title: "상태 업데이트 실패",
-        description: error.message || "사용자 상태를 변경하는데 실패했습니다.",
+        title: "처리 실패",
+        description: error.message,
         variant: "destructive",
       });
     } finally {
@@ -132,202 +123,158 @@ const AdminUsersPage = () => {
     }
   };
 
-  const StatusBadge = ({ status }: { status: UserStatus }) => {
-    switch (status) {
-      case 'approved':
-        return <Badge className="bg-green-500"><CheckCircle className="w-3 h-3 mr-1" />승인됨</Badge>;
-      case 'pending':
-        return <Badge variant="secondary"><Clock className="w-3 h-3 mr-1" />대기 중</Badge>;
-      case 'rejected':
-        return <Badge variant="destructive"><XCircle className="w-3 h-3 mr-1" />거부됨</Badge>;
+  // 사용자 테이블 컴포넌트
+  const UserTable = ({ users, isPending }: { users: UserProfile[], isPending: boolean }) => {
+    if (users.length === 0) {
+      return (
+        <div className="flex flex-col items-center justify-center py-12 border rounded-md bg-white">
+          <Users className="w-10 h-10 text-muted-foreground mb-3 opacity-20" />
+          <p className="text-muted-foreground text-sm">해당되는 사용자가 없습니다</p>
+        </div>
+      );
     }
+
+    return (
+      <div className="rounded-md border bg-white overflow-hidden">
+        <Table>
+          <TableHeader className="bg-muted/50">
+            <TableRow>
+              <TableHead className="w-[200px]">이름 / 병원명</TableHead>
+              <TableHead>이메일</TableHead>
+              <TableHead className="w-[100px]">지역</TableHead>
+              <TableHead className="w-[120px]">신청일</TableHead>
+              <TableHead className="text-right w-[180px]">{isPending ? '관리' : '상태'}</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {users.map((user) => (
+              <TableRow key={user.uid} className="group hover:bg-muted/5">
+                <TableCell className="font-medium">
+                  <div className="flex flex-col">
+                    <span className="text-sm font-bold text-slate-800">{user.directorName} 원장님</span>
+                    <span className="text-xs text-muted-foreground flex items-center gap-1">
+                      {user.clinicName}
+                    </span>
+                  </div>
+                </TableCell>
+                <TableCell className="text-sm text-slate-600 font-mono">{user.email}</TableCell>
+                <TableCell>
+                  <Badge variant="outline" className="font-normal text-xs text-slate-600">
+                    {user.location}
+                  </Badge>
+                </TableCell>
+                <TableCell className="text-xs text-muted-foreground">
+                  {new Date(user.createdAt).toLocaleDateString('ko-KR')}
+                </TableCell>
+                <TableCell className="text-right">
+                  {isPending ? (
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        size="sm"
+                        className="h-8 px-3 text-xs bg-green-600 hover:bg-green-700"
+                        onClick={() => handleUpdateStatus(user.uid, 'approved')}
+                        disabled={updatingUserId === user.uid}
+                      >
+                        {updatingUserId === user.uid ? '처리중...' : '승인'}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-8 px-3 text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
+                        onClick={() => handleUpdateStatus(user.uid, 'rejected')}
+                        disabled={updatingUserId === user.uid}
+                      >
+                        거부
+                      </Button>
+                    </div>
+                  ) : (
+                    <Badge
+                      variant={user.status === 'approved' ? 'default' : 'destructive'}
+                      className={user.status === 'approved' ? 'bg-blue-100 text-blue-700 hover:bg-blue-100 shadow-none' : 'bg-red-100 text-red-700 hover:bg-red-100 shadow-none'}
+                    >
+                      {user.status === 'approved' ? '승인완료' : '거부됨'}
+                    </Badge>
+                  )}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    );
   };
-
-  const UserCard = ({ user, showActions }: { user: UserProfile; showActions: boolean }) => (
-    <Card key={user.uid} className="mb-4">
-      <CardHeader>
-        <div className="flex items-start justify-between">
-          <div className="space-y-1">
-            <CardTitle className="text-lg">{user.directorName} 원장님</CardTitle>
-            <CardDescription className="flex items-center gap-2">
-              <Building2 className="w-4 h-4" />
-              {user.clinicName}
-            </CardDescription>
-          </div>
-          <StatusBadge status={user.status} />
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        <div className="grid grid-cols-2 gap-3 text-sm">
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <Mail className="w-4 h-4" />
-            <span className="truncate">{user.email}</span>
-          </div>
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <MapPin className="w-4 h-4" />
-            <span>{user.location}</span>
-          </div>
-        </div>
-
-        <div className="text-xs text-muted-foreground">
-          <p>가입일: {new Date(user.createdAt).toLocaleDateString('ko-KR')}</p>
-          {user.updatedAt !== user.createdAt && (
-            <p>수정일: {new Date(user.updatedAt).toLocaleDateString('ko-KR')}</p>
-          )}
-        </div>
-
-        {showActions && (
-          <div className="flex gap-2 pt-3 border-t">
-            <Button
-              size="sm"
-              onClick={() => handleUpdateStatus(user.uid, 'approved')}
-              disabled={updatingUserId === user.uid}
-              className="flex-1"
-            >
-              <CheckCircle className="w-4 h-4 mr-2" />
-              승인
-            </Button>
-            <Button
-              size="sm"
-              variant="destructive"
-              onClick={() => handleUpdateStatus(user.uid, 'rejected')}
-              disabled={updatingUserId === user.uid}
-              className="flex-1"
-            >
-              <XCircle className="w-4 h-4 mr-2" />
-              거부
-            </Button>
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  );
 
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <RefreshCw className="w-8 h-8 animate-spin text-primary mx-auto mb-4" />
-          <p className="text-muted-foreground">사용자 목록을 불러오는 중...</p>
-        </div>
+        <RefreshCw className="w-8 h-8 animate-spin text-primary opacity-20" />
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-7xl mx-auto">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">사용자 관리</h1>
-          <p className="text-muted-foreground">
-            회원 가입 신청을 승인하거나 거부할 수 있습니다
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">사용자 관리</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            회원 승인 및 현황을 한눈에 관리하세요
           </p>
         </div>
-        <Button onClick={loadUsers} variant="outline">
-          <RefreshCw className="w-4 h-4 mr-2" />
+        <Button onClick={loadUsers} variant="outline" size="sm" className="h-9">
+          <RefreshCw className="w-3.5 h-3.5 mr-2" />
           새로고침
         </Button>
       </div>
 
-      {/* 통계 카드 */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">승인 대기</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
+      {/* 요약 카드 */}
+      <div className="grid grid-cols-3 gap-4">
+        <Card className="shadow-sm">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-4 pt-4">
+            <CardTitle className="text-sm font-medium text-muted-foreground">승인 대기</CardTitle>
+            <Clock className="h-4 w-4 text-orange-500" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{pendingUsers.length}</div>
-            <p className="text-xs text-muted-foreground">
-              검토가 필요한 신청
-            </p>
+          <CardContent className="px-4 pb-4">
+            <div className="text-2xl font-bold text-slate-800">{pendingUsers.length}</div>
           </CardContent>
         </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">승인됨</CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-600" />
+        <Card className="shadow-sm">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-4 pt-4">
+            <CardTitle className="text-sm font-medium text-muted-foreground">활동중인 회원</CardTitle>
+            <CheckCircle className="h-4 w-4 text-blue-500" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{approvedUsers.length}</div>
-            <p className="text-xs text-muted-foreground">
-              활성 사용자
-            </p>
+          <CardContent className="px-4 pb-4">
+            <div className="text-2xl font-bold text-slate-800">{approvedUsers.length}</div>
           </CardContent>
         </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">거부됨</CardTitle>
-            <XCircle className="h-4 w-4 text-red-600" />
+        <Card className="shadow-sm">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-4 pt-4">
+            <CardTitle className="text-sm font-medium text-muted-foreground">거부됨</CardTitle>
+            <XCircle className="h-4 w-4 text-red-500" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{rejectedUsers.length}</div>
-            <p className="text-xs text-muted-foreground">
-              접근 거부
-            </p>
+          <CardContent className="px-4 pb-4">
+            <div className="text-2xl font-bold text-slate-800">{rejectedUsers.length}</div>
           </CardContent>
         </Card>
       </div>
 
-      {/* 사용자 목록 탭 */}
       <Tabs defaultValue="pending" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="pending">
-            승인 대기 ({pendingUsers.length})
-          </TabsTrigger>
-          <TabsTrigger value="approved">
-            승인됨 ({approvedUsers.length})
-          </TabsTrigger>
-          <TabsTrigger value="rejected">
-            거부됨 ({rejectedUsers.length})
-          </TabsTrigger>
+        <TabsList className="grid w-full max-w-md grid-cols-3 mb-6 bg-slate-100 p-1">
+          <TabsTrigger value="pending" className="text-xs">승인 대기 ({pendingUsers.length})</TabsTrigger>
+          <TabsTrigger value="approved" className="text-xs">승인됨 ({approvedUsers.length})</TabsTrigger>
+          <TabsTrigger value="rejected" className="text-xs">거부됨 ({rejectedUsers.length})</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="pending" className="mt-6">
-          {pendingUsers.length === 0 ? (
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center py-12">
-                <Users className="w-12 h-12 text-muted-foreground mb-4" />
-                <p className="text-muted-foreground">승인 대기 중인 사용자가 없습니다</p>
-              </CardContent>
-            </Card>
-          ) : (
-            pendingUsers.map((user) => (
-              <UserCard key={user.uid} user={user} showActions={true} />
-            ))
-          )}
+        <TabsContent value="pending" className="mt-0">
+          <UserTable users={pendingUsers} isPending={true} />
         </TabsContent>
 
-        <TabsContent value="approved" className="mt-6">
-          {approvedUsers.length === 0 ? (
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center py-12">
-                <Users className="w-12 h-12 text-muted-foreground mb-4" />
-                <p className="text-muted-foreground">승인된 사용자가 없습니다</p>
-              </CardContent>
-            </Card>
-          ) : (
-            approvedUsers.map((user) => (
-              <UserCard key={user.uid} user={user} showActions={false} />
-            ))
-          )}
+        <TabsContent value="approved" className="mt-0">
+          <UserTable users={approvedUsers} isPending={false} />
         </TabsContent>
 
-        <TabsContent value="rejected" className="mt-6">
-          {rejectedUsers.length === 0 ? (
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center py-12">
-                <Users className="w-12 h-12 text-muted-foreground mb-4" />
-                <p className="text-muted-foreground">거부된 사용자가 없습니다</p>
-              </CardContent>
-            </Card>
-          ) : (
-            rejectedUsers.map((user) => (
-              <UserCard key={user.uid} user={user} showActions={true} />
-            ))
-          )}
+        <TabsContent value="rejected" className="mt-0">
+          <UserTable users={rejectedUsers} isPending={false} />
         </TabsContent>
       </Tabs>
     </div>
