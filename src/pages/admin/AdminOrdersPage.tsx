@@ -1,9 +1,7 @@
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Table,
   TableBody,
@@ -15,10 +13,6 @@ import {
 import {
   RefreshCw,
   ShoppingBag,
-  Calendar,
-  DollarSign,
-  User,
-  Ban,
   CheckCircle,
 } from "lucide-react";
 import {
@@ -89,7 +83,14 @@ const AdminOrdersPage = () => {
 
   const handleCancelClick = (order: OrderInfo) => {
     setSelectedOrder(order);
-    setCancelReason("");
+
+    // 이미 취소 요청된 경우, 요청 사유를 기본값으로 채워주면 좋음
+    if (order.status === 'cancel_requested' && order.cancelReason) {
+      setCancelReason(order.cancelReason);
+    } else {
+      setCancelReason("");
+    }
+
     setIsCancelDialogOpen(true);
   };
 
@@ -106,7 +107,6 @@ const AdminOrdersPage = () => {
     setCancelingOrderId(selectedOrder.orderId);
     try {
       // 1. Toss Payments 취소 (서버 경유 - 보안상 필요)
-      // Toss 취소 API는 Secret Key가 필요하므로 백엔드 호출 유지
       const API_URL = import.meta.env.VITE_API_URL || '';
       const token = localStorage.getItem('admin_token');
 
@@ -134,15 +134,14 @@ const AdminOrdersPage = () => {
             cancelReason: cancelReason,
             canceledAt: new Date().toISOString(),
           });
-          console.log('✅ Firestore order status updated to canceled');
         } catch (firestoreError) {
           console.error('⚠️ Firestore 업데이트 실패 (취소는 성공):', firestoreError);
         }
       }
 
       toast({
-        title: "결제 취소 완료",
-        description: `주문번호 ${selectedOrder.orderId}이(가) 취소되었습니다.`,
+        title: "환불 처리 완료",
+        description: `주문번호 ${selectedOrder.orderId}의 환불이 완료되었습니다.`,
       });
 
       setIsCancelDialogOpen(false);
@@ -182,13 +181,13 @@ const AdminOrdersPage = () => {
   const StatusBadge = ({ status }: { status: string }) => {
     switch (status) {
       case 'completed':
-        return <Badge className="bg-green-500 hover:bg-green-600"><CheckCircle className="w-3 h-3 mr-1" />결제 완료</Badge>;
+        return <Badge className="bg-emerald-500 hover:bg-emerald-600 font-normal">결제 완료</Badge>;
       case 'cancel_requested':
-        return <Badge className="bg-orange-500 hover:bg-orange-600"><Ban className="w-3 h-3 mr-1" />취소 요청됨</Badge>;
+        return <Badge className="bg-orange-500 hover:bg-orange-600 font-normal animate-pulse">취소 접수</Badge>;
       case 'canceled':
-        return <Badge variant="destructive"><Ban className="w-3 h-3 mr-1" />환불 완료</Badge>;
+        return <Badge variant="secondary" className="bg-slate-200 text-slate-600 hover:bg-slate-300 font-normal">환불 완료</Badge>;
       default:
-        return <Badge variant="secondary">{status}</Badge>;
+        return <Badge variant="outline" className="font-normal">{status}</Badge>;
     }
   };
 
@@ -207,210 +206,230 @@ const AdminOrdersPage = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">주문 관리</h1>
-          <p className="text-muted-foreground">
-            결제된 주문을 관리하고 환불 처리할 수 있습니다
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">주문 관리</h1>
+          <p className="text-muted-foreground text-sm mt-1">
+            전체 주문 내역을 확인하고 관리합니다.
           </p>
         </div>
-        <Button onClick={loadOrders} variant="outline">
+        <Button onClick={loadOrders} variant="outline" size="sm">
           <RefreshCw className="w-4 h-4 mr-2" />
           새로고침
         </Button>
       </div>
 
-      {/* 통계 카드 */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">총 주문</CardTitle>
-            <ShoppingBag className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{orders.length}</div>
-            <p className="text-xs text-muted-foreground">
-              전체 주문 건수
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">총 매출</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {orders.reduce((sum, order) => {
-                // completed 상태인 주문만 집계
-                if (order.status === 'completed') {
-                  return sum + (order.amount || 0);
-                }
-                return sum;
-              }, 0).toLocaleString()}원
-            </div>
-            <p className="text-xs text-muted-foreground">
-              총 결제 금액
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">취소 주문</CardTitle>
-            <Ban className="h-4 w-4 text-red-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {orders.filter(o => o.status === 'cancel_requested' || o.status === 'canceled').length}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              취소된 주문 건수
-            </p>
-          </CardContent>
-        </Card>
+      {/* 통계 카드 (간소화) */}
+      <div className="grid grid-cols-4 gap-4">
+        <div className="border border-slate-200 rounded-lg p-4 bg-white shadow-sm">
+          <div className="text-xs font-medium text-slate-500 mb-1 uppercase tracking-wider">총 주문</div>
+          <div className="text-2xl font-bold text-slate-900">{orders.length}</div>
+        </div>
+        <div className="border border-slate-200 rounded-lg p-4 bg-white shadow-sm">
+          <div className="text-xs font-medium text-slate-500 mb-1 uppercase tracking-wider">총 매출</div>
+          <div className="text-2xl font-bold text-blue-600">
+            {orders.reduce((sum, order) => {
+              if (order.status === 'completed') return sum + (order.amount || 0);
+              return sum;
+            }, 0).toLocaleString()}원
+          </div>
+        </div>
+        <div className="border border-slate-200 rounded-lg p-4 bg-white shadow-sm">
+          <div className="text-xs font-medium text-slate-500 mb-1 uppercase tracking-wider">취소 접수</div>
+          <div className="text-2xl font-bold text-orange-500">
+            {statusCounts.cancel_requested}
+          </div>
+        </div>
+        <div className="border border-slate-200 rounded-lg p-4 bg-white shadow-sm">
+          <div className="text-xs font-medium text-slate-500 mb-1 uppercase tracking-wider">환불 완료</div>
+          <div className="text-2xl font-bold text-slate-600">
+            {statusCounts.canceled}
+          </div>
+        </div>
       </div>
 
-      {/* 주문 목록 - Tabs */}
-      <Tabs value={statusFilter} onValueChange={setStatusFilter} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="all">
-            전체 ({statusCounts.all})
-          </TabsTrigger>
-          <TabsTrigger value="completed">
-            결제 완료 ({statusCounts.completed})
-          </TabsTrigger>
-          <TabsTrigger value="cancel_requested">
-            취소 요청 ({statusCounts.cancel_requested})
-          </TabsTrigger>
-          <TabsTrigger value="canceled">
-            환불 완료 ({statusCounts.canceled})
-          </TabsTrigger>
-        </TabsList>
+      <div className="border border-slate-200 rounded-lg shadow-sm bg-white overflow-hidden">
+        {/* 탭 헤더 */}
+        <div className="flex border-b border-slate-200 bg-slate-50/50 p-1 gap-1">
+          {[
+            { key: 'all', label: '전체 목록', count: statusCounts.all },
+            { key: 'completed', label: '결제 완료', count: statusCounts.completed },
+            { key: 'cancel_requested', label: '취소 접수', count: statusCounts.cancel_requested },
+            { key: 'canceled', label: '환불 완료', count: statusCounts.canceled }
+          ].map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => setStatusFilter(tab.key)}
+              className={`flex items-center px-4 py-2 text-sm font-medium rounded-md transition-all ${statusFilter === tab.key
+                  ? 'bg-white text-slate-900 shadow-sm ring-1 ring-slate-200'
+                  : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900'
+                }`}
+            >
+              {tab.label}
+              <span className={`ml-2 py-0.5 px-2 rounded-full text-xs ${statusFilter === tab.key ? 'bg-slate-100 text-slate-900 border border-slate-200' : 'bg-slate-200/50 text-slate-500'
+                }`}>
+                {tab.count}
+              </span>
+            </button>
+          ))}
+        </div>
 
-        <Card>
-          <CardContent className="p-0">
-            {filteredOrders.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12">
-                <ShoppingBag className="w-12 h-12 text-muted-foreground mb-4" />
-                <p className="text-muted-foreground mb-2">주문 내역이 없습니다</p>
-                <p className="text-xs text-muted-foreground text-center">
-                  {statusFilter === "all"
-                    ? "Firestore로 마이그레이션된 이후의 주문만 표시됩니다."
-                    : "해당 상태의 주문이 없습니다."}
-                </p>
-              </div>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[100px]">상태</TableHead>
-                    <TableHead>주문번호</TableHead>
-                    <TableHead>상품명</TableHead>
-                    <TableHead>고객명</TableHead>
-                    <TableHead>연락처</TableHead>
-                    <TableHead>금액</TableHead>
-                    <TableHead>주문일시</TableHead>
-                    <TableHead className="text-right">관리</TableHead>
+        <div className="p-0">
+          {filteredOrders.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20 text-center bg-white">
+              <ShoppingBag className="w-12 h-12 text-slate-200 mb-4" />
+              <p className="text-slate-500 font-medium">조회된 주문이 없습니다</p>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader className="bg-slate-100/80 sticky top-0">
+                <TableRow className="hover:bg-slate-100/80 border-b border-slate-200">
+                  <TableHead className="w-[100px] text-center font-bold text-slate-700 border-r border-slate-200 h-10">상태</TableHead>
+                  <TableHead className="text-center font-bold text-slate-700 border-r border-slate-200 h-10">주문번호</TableHead>
+                  <TableHead className="text-center font-bold text-slate-700 border-r border-slate-200 h-10">상품명</TableHead>
+                  <TableHead className="text-center font-bold text-slate-700 border-r border-slate-200 h-10">구매자</TableHead>
+                  <TableHead className="text-center font-bold text-slate-700 border-r border-slate-200 h-10">연락처</TableHead>
+                  <TableHead className="text-center font-bold text-slate-700 border-r border-slate-200 h-10">결제금액</TableHead>
+                  <TableHead className="text-center font-bold text-slate-700 border-r border-slate-200 h-10">주문일시</TableHead>
+                  <TableHead className="text-center font-bold text-slate-700 h-10">관리</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredOrders.map((order) => (
+                  <TableRow key={order.orderId} className="hover:bg-slate-50/80 border-b border-slate-100 last:border-0 transition-colors">
+                    <TableCell className="text-center border-r border-slate-100 p-2">
+                      <StatusBadge status={order.status} />
+                    </TableCell>
+                    <TableCell className="text-center border-r border-slate-100 p-2 font-mono text-xs text-slate-500">
+                      {order.orderId.replace('ORDER_', '')}
+                    </TableCell>
+                    <TableCell className="border-r border-slate-100 p-2">
+                      <div className="font-medium text-slate-900 text-sm truncate max-w-[200px] mx-auto text-center" title={order.productName}>
+                        {order.productName}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-center border-r border-slate-100 p-2">
+                      <div className="font-medium text-sm text-slate-900">{order.customerName}</div>
+                    </TableCell>
+                    <TableCell className="text-center border-r border-slate-100 p-2 text-xs text-slate-500">
+                      {order.customerPhone}
+                    </TableCell>
+                    <TableCell className="text-center border-r border-slate-100 p-2 font-bold text-slate-900 text-sm">
+                      {order.amount.toLocaleString()}원
+                    </TableCell>
+                    <TableCell className="text-center border-r border-slate-100 p-2 text-xs text-slate-500">
+                      <div className="flex flex-col items-center">
+                        <span>{order.createdAt && !isNaN(new Date(order.createdAt).getTime())
+                          ? format(new Date(order.createdAt), "yyyy.MM.dd", { locale: ko })
+                          : order.createdAt || '-'}</span>
+                        <span className="text-slate-400">{order.createdAt && !isNaN(new Date(order.createdAt).getTime())
+                          ? format(new Date(order.createdAt), "HH:mm", { locale: ko })
+                          : ''}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-center p-2">
+                      {order.status === 'cancel_requested' && (
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => handleCancelClick(order)}
+                          disabled={cancelingOrderId === order.orderId}
+                          className="h-7 text-xs px-3 shadow-sm bg-red-500 hover:bg-red-600"
+                        >
+                          {cancelingOrderId === order.orderId ? '처리중' : '환불 승인'}
+                        </Button>
+                      )}
+                      {order.status === 'completed' && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleCancelClick(order)}
+                          disabled={cancelingOrderId === order.orderId}
+                          className="h-7 text-xs px-3 text-slate-500 hover:text-red-600 hover:bg-red-50 border-slate-200"
+                        >
+                          환불
+                        </Button>
+                      )}
+                      {order.status === 'canceled' && (
+                        <span className="text-xs text-slate-400 flex items-center justify-center font-medium">
+                          <CheckCircle className="w-3 h-3 mr-1" /> 완료됨
+                        </span>
+                      )}
+                    </TableCell>
                   </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredOrders.map((order) => (
-                    <TableRow key={order.orderId}>
-                      <TableCell>
-                        <StatusBadge status={order.status} />
-                      </TableCell>
-                      <TableCell className="font-mono text-xs">
-                        {order.orderId.replace('ORDER_', '')}
-                      </TableCell>
-                      <TableCell className="font-medium">{order.productName}</TableCell>
-                      <TableCell>{order.customerName}</TableCell>
-                      <TableCell className="text-xs">{order.customerPhone}</TableCell>
-                      <TableCell className="font-semibold">{order.amount.toLocaleString()}원</TableCell>
-                      <TableCell className="text-xs">
-                        {order.createdAt && !isNaN(new Date(order.createdAt).getTime())
-                          ? format(new Date(order.createdAt), "yyyy.MM.dd HH:mm", { locale: ko })
-                          : order.createdAt || '-'}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {order.status === 'cancel_requested' && (
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            onClick={() => handleCancelClick(order)}
-                            disabled={cancelingOrderId === order.orderId}
-                          >
-                            <Ban className="w-4 h-4 mr-1" />
-                            {cancelingOrderId === order.orderId ? '처리중...' : '환불 처리'}
-                          </Button>
-                        )}
-                        {order.status === 'completed' && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleCancelClick(order)}
-                            disabled={cancelingOrderId === order.orderId}
-                          >
-                            <Ban className="w-4 h-4 mr-1" />
-                            {cancelingOrderId === order.orderId ? '처리중...' : '환불'}
-                          </Button>
-                        )}
-                        {order.status === 'canceled' && (
-                          <Badge variant="secondary">완료</Badge>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
-          </CardContent>
-        </Card>
-      </Tabs>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </div>
+      </div>
 
       {/* 취소 확인 다이얼로그 */}
       <Dialog open={isCancelDialogOpen} onOpenChange={setIsCancelDialogOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>결제 취소 확인</DialogTitle>
+            <DialogTitle>환불 처리 {selectedOrder?.status === 'cancel_requested' ? '(취소 승인)' : ''}</DialogTitle>
             <DialogDescription>
-              이 주문을 취소하시겠습니까? 취소 후에는 되돌릴 수 없습니다.
+              결제를 취소하고 환불을 진행합니다.
             </DialogDescription>
           </DialogHeader>
 
           {selectedOrder && (
-            <div className="py-4 space-y-4">
-              <div className="p-4 bg-muted rounded-lg space-y-2 text-sm">
-                <p><strong>주문번호:</strong> {selectedOrder.orderId}</p>
-                <p><strong>상품명:</strong> {selectedOrder.productName}</p>
-                <p><strong>금액:</strong> {selectedOrder.amount}</p>
-                <p><strong>고객명:</strong> {selectedOrder.customerName}</p>
+            <div className="py-2 space-y-4">
+              <div className="p-4 bg-slate-50 border border-slate-100 rounded-lg space-y-2 text-sm">
+                <div className="flex justify-between items-center text-slate-600">
+                  <span>주문번호</span>
+                  <span className="font-mono text-xs bg-white px-2 py-0.5 rounded border">{selectedOrder.orderId}</span>
+                </div>
+                <div className="flex justify-between items-center text-slate-600">
+                  <span>고객명</span>
+                  <span className="font-medium text-slate-900">{selectedOrder.customerName}</span>
+                </div>
+                <div className="flex justify-between items-center text-slate-600 pt-2 border-t border-slate-200 mt-2">
+                  <span>환불 예정 금액</span>
+                  <span className="font-bold text-red-600 text-lg">{selectedOrder.amount.toLocaleString()}원</span>
+                </div>
+
+                {/* 취소 사유 표시 */}
+                {selectedOrder.status === 'cancel_requested' && (
+                  <div className="pt-2 mt-2 border-t border-slate-200">
+                    <span className="text-orange-600 font-bold text-xs flex items-center mb-1">
+                      <div className="w-1.5 h-1.5 rounded-full bg-orange-500 mr-1"></div>
+                      고객 취소 사유
+                    </span>
+                    <p className="bg-white p-2.5 rounded border border-orange-100 text-slate-700 leading-relaxed text-sm">
+                      "{selectedOrder.cancelReason || '사유 없음'}"
+                    </p>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="cancelReason">취소 사유 *</Label>
+                <Label htmlFor="cancelReason" className="text-xs font-medium text-slate-500 uppercase">환불 사유 (관리자 기록)</Label>
                 <Input
                   id="cancelReason"
-                  placeholder="예: 고객 변심, 상품 불량 등"
+                  placeholder="예: 고객 요청 승인"
                   value={cancelReason}
                   onChange={(e) => setCancelReason(e.target.value)}
+                  className="h-9"
                 />
               </div>
             </div>
           )}
 
-          <DialogFooter>
+          <DialogFooter className="gap-2 sm:gap-0">
             <Button
               variant="outline"
               onClick={() => setIsCancelDialogOpen(false)}
+              className="h-9"
             >
-              취소
+              닫기
             </Button>
             <Button
               variant="destructive"
               onClick={handleCancelConfirm}
               disabled={!cancelReason.trim() || cancelingOrderId !== null}
+              className="h-9 bg-red-600 hover:bg-red-700"
             >
-              환불 처리
+              환불 실행하기
             </Button>
           </DialogFooter>
         </DialogContent>
