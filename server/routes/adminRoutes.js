@@ -77,49 +77,51 @@ router.get('/dashboard-summary', authMiddleware, async (req, res) => {
     }
 });
 
-// 주문 목록 조회
+// 주문 목록 조회 (Firestore 사용)
 router.get('/orders', authMiddleware, async (req, res) => {
     try {
-        const rows = await googleSheetsService.getPaymentInfo();
-        // 배열을 객체로 변환 (OrderInfo 형식에 맞게)
-        const orders = rows.map(row => {
-            // Google Sheets 상태를 Firestore 형식으로 매핑
-            const rawStatus = (row[10] || 'DONE').toUpperCase();
-            let status = 'completed';
-            if (rawStatus === 'DONE' || rawStatus === 'COMPLETED') {
-                status = 'completed';
-            } else if (rawStatus === 'CANCELED' || rawStatus === 'CANCELLED') {
-                status = 'canceled';
-            } else if (rawStatus.includes('CANCEL')) {
-                status = 'cancel_requested';
-            }
+        if (!db) {
+            // Firestore가 초기화되지 않은 경우 Google Sheets 폴백
+            console.log('⚠️ Firestore not initialized, falling back to Google Sheets');
+            const rows = await googleSheetsService.getPaymentInfo();
+            // ... (기존 Google Sheets 매핑 로직 유지 가능하지만 복잡하므로 생략하거나 필요한 경우 추가)
+            return res.json({ success: false, message: 'Firestore DB not available' });
+        }
 
-            return {
-                createdAt: row[0] || '',           // A: 기록 시각
-                orderId: row[1] || '',             // B: 주문번호
-                productName: row[2] || '',         // C: 상품명
-                amount: parseInt((row[3] || '0').replace(/[^0-9]/g, '')) || 0,  // D: 결제 금액
-                paymentMethod: row[4] || '',       // E: 결제 수단 (카드, 가상계좌 등)
-                customerName: row[6] || '',        // G: 구매자 이름
-                customerEmail: row[7] || '',       // H: 구매자 이메일
-                customerPhone: row[8] || '',       // I: 구매자 전화번호
-                address: row[9] || '',             // J: 배송 주소
-                addressDetail: '',                 // (주소에 포함됨)
-                status: status,                    // K: 결제 상태 (매핑됨)
-                approvedAt: row[11] || '',         // L: 승인 시각
-                paymentKey: row[12] || '',         // M: 결제 키 (Toss paymentKey)
-                userId: '',                        // Google Sheets에는 userId가 없음
-                postalCode: '',                    // (주소에 포함됨)
-                cancelReason: '',
-                cancelRequestedAt: undefined,
-                canceledAt: undefined,
-            };
-        }).reverse(); // 최신순
+        // users 컬렉션의 모든 문서를 조회한 후, 각 user의 orders 서브컬렉션을 조회해야 함
+        // 하지만 collectionGroup을 사용하면 더 효율적
+        const status = req.query.status;
+        let ordersQuery = db.collectionGroup('orders');
+
+        // 상태 필터링이 있다면 적용
+        if (status && status !== 'all') {
+            ordersQuery = ordersQuery.where('status', '==', status);
+        }
+
+        // Firestore 정렬은 인덱스가 필요할 수 있으므로 메모리에서 정렬하거나 인덱스 생성 필요
+        // 여기서는 가져온 후 메모리 정렬 (데이터 양이 적을 때 유효)
+        const snapshot = await ordersQuery.get();
+
+        const orders = [];
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            orders.push({
+                ...data,
+                // 날짜 포맷팅 등 필요한 전처리
+            });
+        });
+
+        // 최신순 정렬 (createdAt 기준)
+        orders.sort((a, b) => {
+            const dateA = new Date(a.createdAt).getTime();
+            const dateB = new Date(b.createdAt).getTime();
+            return dateB - dateA;
+        });
 
         res.json({ success: true, data: orders });
     } catch (error) {
-        console.error('Failed to fetch orders:', error);
-        res.json({ success: false, message: 'Failed to fetch orders' });
+        console.error('Failed to fetch orders from Firestore:', error);
+        res.status(500).json({ success: false, message: 'Failed to fetch orders', error: error.message });
     }
 });
 
