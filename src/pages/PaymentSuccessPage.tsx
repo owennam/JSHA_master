@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
@@ -14,11 +14,12 @@ const SERVER_URL = import.meta.env.VITE_SERVER_URL;
 const PaymentSuccessPage = () => {
 	const [searchParams] = useSearchParams();
 	const navigate = useNavigate();
-	const { user } = useAuth();
+	const { user, loading: authLoading } = useAuth();
 	const [isConfirming, setIsConfirming] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const [paymentInfo, setPaymentInfo] = useState<any>(null);
 	const [firestoreWarning, setFirestoreWarning] = useState(false);
+	const paymentConfirmed = useRef(false);
 
 	// URL 파라미터에서 결제 정보 가져오기
 	const paymentKey = searchParams.get("paymentKey");
@@ -34,6 +35,17 @@ const PaymentSuccessPage = () => {
 
 	useEffect(() => {
 		const confirmPayment = async () => {
+			// 이미 결제 확인이 완료되었으면 중복 실행 방지
+			if (paymentConfirmed.current) {
+				return;
+			}
+
+			// 인증 상태 로딩 중이면 대기
+			if (authLoading) {
+				console.log("🔍 [DEBUG] Waiting for auth to load...");
+				return;
+			}
+
 			if (!paymentKey || !orderId || !amount) {
 				setError("결제 정보가 올바르지 않습니다.");
 				setIsConfirming(false);
@@ -74,6 +86,9 @@ const PaymentSuccessPage = () => {
 				if (!response.ok || !result.success) {
 					throw new Error(result.message || "결제 승인에 실패했습니다.");
 				}
+
+				// 결제 확인 완료 플래그 설정 (중복 실행 방지)
+				paymentConfirmed.current = true;
 
 				console.log("결제 승인 성공:", result.data);
 				setPaymentInfo(result.data);
@@ -179,7 +194,7 @@ const PaymentSuccessPage = () => {
 		};
 
 		confirmPayment();
-	}, [paymentKey, orderId, amount, cartItems]);
+	}, [paymentKey, orderId, amount, cartItems, authLoading, user]);
 
 	if (isConfirming) {
 		return (
