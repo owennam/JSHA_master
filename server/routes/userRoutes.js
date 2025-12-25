@@ -1,0 +1,74 @@
+import express from 'express';
+import googleSheetsService from '../googleSheetsService.js';
+
+const router = express.Router();
+
+/**
+ * 사용자 주문 목록 조회 (이메일 기반)
+ * GET /api/user/orders?email=user@example.com
+ */
+router.get('/orders', async (req, res) => {
+    try {
+        const { email } = req.query;
+
+        if (!email) {
+            return res.status(400).json({
+                success: false,
+                message: 'Email is required'
+            });
+        }
+
+        // Google Sheets에서 모든 결제 정보 가져오기
+        const rows = await googleSheetsService.getPaymentInfo();
+
+        // 이메일로 필터링하여 사용자 주문만 추출
+        const userOrders = rows
+            .filter(row => {
+                const orderEmail = row[7] || ''; // H: 구매자 이메일
+                return orderEmail.toLowerCase() === email.toLowerCase();
+            })
+            .map(row => {
+                // 주소 파싱 (우편번호, 기본주소, 상세주소 분리)
+                const fullAddress = row[9] || ''; // J: 배송 주소
+                const addressParts = fullAddress.split(' ');
+                const postalCode = addressParts[0] || '';
+                const address = addressParts.slice(1, -1).join(' ') || '';
+                const addressDetail = addressParts[addressParts.length - 1] || '';
+
+                return {
+                    orderId: row[1] || '',
+                    userId: '',  // Google Sheets에는 userId가 없음
+                    paymentKey: row[12] || '',
+                    productName: row[2] || '',
+                    amount: parseInt((row[3] || '0').toString().replace(/[^0-9]/g, '')) || 0,
+                    customerName: row[6] || '',
+                    customerEmail: row[7] || '',
+                    customerPhone: row[8] || '',
+                    address: fullAddress,
+                    addressDetail: '',
+                    postalCode: '',
+                    status: row[10] || 'completed',
+                    createdAt: row[0] || '',
+                    cancelRequestedAt: undefined,
+                    canceledAt: undefined,
+                    cancelReason: '',
+                };
+            })
+            .reverse(); // 최신순 정렬
+
+        res.json({
+            success: true,
+            data: userOrders,
+            source: 'google_sheets' // 데이터 출처 표시
+        });
+    } catch (error) {
+        console.error('Failed to fetch user orders:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch user orders',
+            error: error.message
+        });
+    }
+});
+
+export default router;

@@ -4,7 +4,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, Loader2 } from "lucide-react";
+import { CheckCircle2, Loader2, AlertTriangle } from "lucide-react";
 import { logCustomEvent } from "@/lib/firebase";
 import { useAuth } from "@/contexts/AuthContext";
 import { createOrder, OrderInfo } from "@/lib/firestore";
@@ -18,6 +18,7 @@ const PaymentSuccessPage = () => {
 	const [isConfirming, setIsConfirming] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const [paymentInfo, setPaymentInfo] = useState<any>(null);
+	const [firestoreWarning, setFirestoreWarning] = useState(false);
 
 	// URL 파라미터에서 결제 정보 가져오기
 	const paymentKey = searchParams.get("paymentKey");
@@ -79,6 +80,13 @@ const PaymentSuccessPage = () => {
 
 				// Firestore에 주문 정보 저장
 				if (user) {
+					console.log("🔍 [DEBUG] Attempting to save order to Firestore...");
+					console.log("🔍 [DEBUG] User authenticated:", {
+						uid: user.uid,
+						email: user.email,
+						isAuthenticated: !!user
+					});
+
 					try {
 						const orderData: OrderInfo = {
 							orderId: result.data.orderId,
@@ -96,14 +104,47 @@ const PaymentSuccessPage = () => {
 							createdAt: new Date().toISOString(),
 						};
 
+						console.log("🔍 [DEBUG] Order data to save:", orderData);
 						await createOrder(orderData);
-						console.log("✅ Order saved to Firestore:", result.data.orderId);
-					} catch (firestoreError) {
-						console.error("⚠️ Firestore 저장 실패 (결제는 성공):", firestoreError);
+						console.log("✅ Order saved to Firestore successfully:", result.data.orderId);
+					} catch (firestoreError: any) {
+						console.error("❌ Firestore 저장 실패 (결제는 성공)");
+						console.error("🔍 [DEBUG] Error details:", {
+							name: firestoreError?.name,
+							code: firestoreError?.code,
+							message: firestoreError?.message,
+							stack: firestoreError?.stack
+						});
+
+						// 에러 타입 분석
+						if (firestoreError?.message?.includes('Missing or insufficient permissions')) {
+							console.error("🚫 Firestore 권한 문제 - Security Rules 확인 필요");
+						} else if (firestoreError?.message?.includes('not initialized')) {
+							console.error("🚫 Firestore 초기화 실패");
+						} else {
+							console.error("🚫 광고 차단기 또는 네트워크 문제일 가능성");
+						}
+
+						setFirestoreWarning(true);
 					}
+				} else {
+					console.warn("⚠️ User not authenticated - skipping Firestore save");
 				}
 
 				setIsConfirming(false);
+
+				// 다음 주문을 위해 고객 정보 저장 (자동 입력용)
+				if (customerName && customerEmail && customerPhone && address) {
+					const savedProfile = {
+						name: customerName,
+						email: customerEmail,
+						phone: customerPhone,
+						address: address,
+						addressDetail: addressDetail || "",
+						postalCode: postalCode || "",
+					};
+					localStorage.setItem("jsha_saved_customer_profile", JSON.stringify(savedProfile));
+				}
 
 				// 결제 성공 시 장바구니 및 폼 데이터 초기화
 				localStorage.removeItem("jsha_cart");
@@ -227,6 +268,20 @@ const PaymentSuccessPage = () => {
 											<span className="text-2xl font-bold text-primary">
 												{paymentInfo.totalAmount?.toLocaleString()}원
 											</span>
+										</div>
+									</div>
+								</div>
+							)}
+
+							{firestoreWarning && (
+								<div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 text-left">
+									<div className="flex items-start gap-3">
+										<AlertTriangle className="w-5 h-5 text-blue-600 mt-0.5" />
+										<div className="flex-1">
+											<h4 className="font-semibold text-blue-900 mb-1">알림</h4>
+											<p className="text-sm text-blue-800">
+												결제가 정상적으로 완료되었습니다. 주문 내역은 '내 주문' 페이지에서 확인하실 수 있습니다.
+											</p>
 										</div>
 									</div>
 								</div>

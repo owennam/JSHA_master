@@ -7,6 +7,7 @@ import smsService from './smsService.js';
 
 import cookieParser from 'cookie-parser';
 import adminRoutes from './routes/adminRoutes.js';
+import userRoutes from './routes/userRoutes.js';
 
 const app = express();
 const PORT = config.serverPort;
@@ -45,6 +46,9 @@ app.use(cookieParser());
 
 // Admin Routes
 app.use('/api/admin', adminRoutes);
+
+// User Routes
+app.use('/api/user', userRoutes);
 
 // 서버 상태 확인 엔드포인트
 app.get('/health', (req, res) => {

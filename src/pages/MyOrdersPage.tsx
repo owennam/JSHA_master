@@ -12,11 +12,14 @@ import { Loader2, Package, ShoppingBag, Clock, CheckCircle2, XCircle } from "luc
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
 
+const SERVER_URL = import.meta.env.VITE_SERVER_URL;
+
 const MyOrdersPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [orders, setOrders] = useState<OrderInfo[]>([]);
   const [loading, setLoading] = useState(true);
+  const [dataSource, setDataSource] = useState<'firestore' | 'backend'>('firestore');
 
   useEffect(() => {
     // 비로그인 사용자 리다이렉트
@@ -27,12 +30,43 @@ const MyOrdersPage = () => {
 
     const fetchOrders = async () => {
       try {
+        // 먼저 Firestore에서 주문 내역 가져오기 시도
         const userOrders = await getUserOrders(user.uid);
-        setOrders(userOrders);
+
+        if (userOrders && userOrders.length > 0) {
+          setOrders(userOrders);
+          setDataSource('firestore');
+        } else {
+          // Firestore가 비어있거나 차단된 경우 백엔드 API 사용 (광고 차단기 우회)
+          console.log("Firestore empty or blocked, trying backend API...");
+          await fetchOrdersFromBackend();
+        }
       } catch (error) {
-        console.error("Failed to fetch orders:", error);
+        console.error("Failed to fetch orders from Firestore:", error);
+        // Firestore 실패 시 백엔드 API로 폴백
+        await fetchOrdersFromBackend();
       } finally {
         setLoading(false);
+      }
+    };
+
+    const fetchOrdersFromBackend = async () => {
+      try {
+        if (!SERVER_URL || !user.email) {
+          console.error("Server URL or user email not available");
+          return;
+        }
+
+        const response = await fetch(`${SERVER_URL}/api/user/orders?email=${encodeURIComponent(user.email)}`);
+        const result = await response.json();
+
+        if (result.success && result.data) {
+          setOrders(result.data);
+          setDataSource('backend');
+          console.log(`✅ Loaded ${result.data.length} orders from backend API`);
+        }
+      } catch (error) {
+        console.error("Failed to fetch orders from backend:", error);
       }
     };
 

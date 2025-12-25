@@ -175,7 +175,7 @@ const ProductPage = () => {
 
     const savedCustomerInfo = localStorage.getItem("jsha_customer_info");
     if (savedCustomerInfo) {
-      // localStorage에 저장된 정보가 있으면 우선 사용
+      // 현재 세션 정보가 있으면 우선 사용
       try {
         const parsedInfo = JSON.parse(savedCustomerInfo);
         Object.keys(parsedInfo).forEach((key) => {
@@ -184,10 +184,25 @@ const ProductPage = () => {
       } catch (e) {
         console.error("Failed to parse customer info from localStorage", e);
       }
-    } else if (userProfile) {
-      // localStorage에 정보가 없으면 userProfile로 자동 입력
-      form.setValue("name", userProfile.directorName);
-      form.setValue("email", userProfile.email);
+    } else {
+      // 저장된 고객 프로필 로드 (이전 주문 정보)
+      const savedProfile = localStorage.getItem("jsha_saved_customer_profile");
+      if (savedProfile) {
+        try {
+          const parsedProfile = JSON.parse(savedProfile);
+          Object.keys(parsedProfile).forEach((key) => {
+            if (parsedProfile[key]) {
+              form.setValue(key as any, parsedProfile[key]);
+            }
+          });
+        } catch (e) {
+          console.error("Failed to parse saved customer profile", e);
+        }
+      } else if (userProfile) {
+        // 저장된 정보가 없으면 userProfile로 자동 입력
+        form.setValue("name", userProfile.directorName);
+        form.setValue("email", userProfile.email);
+      }
     }
   }, [form, userProfile]);
 
