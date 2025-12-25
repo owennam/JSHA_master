@@ -162,14 +162,44 @@ router.get('/orders', authMiddleware, async (req, res) => {
             finalOrders = finalOrders.filter(order => order.status === status);
         }
 
-        // 최신순 정렬 (createdAt 기준)
+        // 날짜 파싱 헬퍼 함수
+        const parseDate = (dateStr) => {
+            if (!dateStr) return 0;
+
+            // 1. ISO String 등 표준 포맷 시도
+            const time = new Date(dateStr).getTime();
+            if (!isNaN(time)) return time;
+
+            // 2. 구글 시트 한국어 포맷 등 처리 시도
+            try {
+                // 예: "2024. 12. 25. 오전 10:10:00" -> 숫자만 추출해서 문자열 비교용으로라도 변환?
+                // 혹은 정규식으로 년월일시분초 추출
+                const digits = dateStr.replace(/[^0-9]/g, '');
+                if (digits.length >= 8) {
+                    // YYYYMMDD... 형태일 때 앞 8자리라도 비교값으로 사용
+                    return parseInt(digits.padEnd(14, '0').substring(0, 14));
+                }
+            } catch (e) {
+                // ignore
+            }
+            return 0;
+        };
+
+        // 최신순 정렬 (createdAt 기준 내림차순)
         finalOrders.sort((a, b) => {
+            // ISO 포맷인 경우 Date 객체로 바로 비교가 가장 정확
             const dateA = new Date(a.createdAt).getTime();
             const dateB = new Date(b.createdAt).getTime();
-            // 날짜 파싱 실패 시(NaN) 처리
-            if (isNaN(dateA)) return 1;
-            if (isNaN(dateB)) return -1;
-            return dateB - dateA;
+
+            // 둘 다 유효한 타임스탬프라면 바로 비교
+            if (!isNaN(dateA) && !isNaN(dateB)) {
+                return dateB - dateA;
+            }
+
+            // 하나라도 파싱 안되면 문자열 자체로 역순 정렬 (최근 날짜가 문자열로도 더 큼 "2025..." > "2024...")
+            if (a.createdAt < b.createdAt) return 1;
+            if (a.createdAt > b.createdAt) return -1;
+            return 0;
         });
 
         res.json({ success: true, data: finalOrders });
