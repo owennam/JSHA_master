@@ -82,26 +82,39 @@ router.get('/orders', authMiddleware, async (req, res) => {
     try {
         const rows = await googleSheetsService.getPaymentInfo();
         // 배열을 객체로 변환 (OrderInfo 형식에 맞게)
-        const orders = rows.map(row => ({
-            createdAt: row[0] || '',           // A: 기록 시각
-            orderId: row[1] || '',             // B: 주문번호
-            productName: row[2] || '',         // C: 상품명
-            amount: parseInt((row[3] || '0').replace(/[^0-9]/g, '')) || 0,  // D: 결제 금액
-            paymentMethod: row[4] || '',       // E: 결제 수단 (카드, 가상계좌 등)
-            customerName: row[6] || '',        // G: 구매자 이름
-            customerEmail: row[7] || '',       // H: 구매자 이메일
-            customerPhone: row[8] || '',       // I: 구매자 전화번호
-            address: row[9] || '',             // J: 배송 주소
-            addressDetail: '',                 // (주소에 포함됨)
-            status: row[10] || 'completed',    // K: 결제 상태
-            approvedAt: row[11] || '',         // L: 승인 시각
-            paymentKey: row[12] || '',         // M: 결제 키 (Toss paymentKey)
-            userId: '',                        // Google Sheets에는 userId가 없음
-            postalCode: '',                    // (주소에 포함됨)
-            cancelReason: '',
-            cancelRequestedAt: undefined,
-            canceledAt: undefined,
-        })).reverse(); // 최신순
+        const orders = rows.map(row => {
+            // Google Sheets 상태를 Firestore 형식으로 매핑
+            const rawStatus = (row[10] || 'DONE').toUpperCase();
+            let status = 'completed';
+            if (rawStatus === 'DONE' || rawStatus === 'COMPLETED') {
+                status = 'completed';
+            } else if (rawStatus === 'CANCELED' || rawStatus === 'CANCELLED') {
+                status = 'canceled';
+            } else if (rawStatus.includes('CANCEL')) {
+                status = 'cancel_requested';
+            }
+
+            return {
+                createdAt: row[0] || '',           // A: 기록 시각
+                orderId: row[1] || '',             // B: 주문번호
+                productName: row[2] || '',         // C: 상품명
+                amount: parseInt((row[3] || '0').replace(/[^0-9]/g, '')) || 0,  // D: 결제 금액
+                paymentMethod: row[4] || '',       // E: 결제 수단 (카드, 가상계좌 등)
+                customerName: row[6] || '',        // G: 구매자 이름
+                customerEmail: row[7] || '',       // H: 구매자 이메일
+                customerPhone: row[8] || '',       // I: 구매자 전화번호
+                address: row[9] || '',             // J: 배송 주소
+                addressDetail: '',                 // (주소에 포함됨)
+                status: status,                    // K: 결제 상태 (매핑됨)
+                approvedAt: row[11] || '',         // L: 승인 시각
+                paymentKey: row[12] || '',         // M: 결제 키 (Toss paymentKey)
+                userId: '',                        // Google Sheets에는 userId가 없음
+                postalCode: '',                    // (주소에 포함됨)
+                cancelReason: '',
+                cancelRequestedAt: undefined,
+                canceledAt: undefined,
+            };
+        }).reverse(); // 최신순
 
         res.json({ success: true, data: orders });
     } catch (error) {
