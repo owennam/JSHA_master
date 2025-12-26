@@ -98,9 +98,12 @@ const AdminDashboard = () => {
 
                 const pendingOrderCancels = orders.filter(o => o.status === 'cancel_requested').length;
 
+                // 취소된 주문 제외한 총 주문 건수
+                const totalOrders = orders.filter(o => o.status !== 'canceled').length;
+
                 setData({
                     totalRevenue,
-                    totalOrders: orders.length,
+                    totalOrders,
                     masterCourseRegistrations: applications.length,
                     pendingUsers: pendingUsers.length,
                     pendingOrderCancels
