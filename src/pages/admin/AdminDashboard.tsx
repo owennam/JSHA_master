@@ -11,6 +11,19 @@ import {
     ShoppingBag,
     XCircle
 } from 'lucide-react';
+
+interface OrderInfo {
+    orderId: string;
+    amount: number;
+    status: string;
+    customerName: string;
+    customerEmail: string;
+    customerPhone: string;
+    productName: string;
+    createdAt: string;
+    paymentKey: string;
+}
+
 interface DashboardData {
     totalRevenue: number;
     totalOrders: number;
@@ -36,24 +49,62 @@ const AdminDashboard = () => {
                 const API_URL = import.meta.env.VITE_API_URL || '';
                 const token = localStorage.getItem('admin_token');
 
-                const response = await fetch(`${API_URL}/api/admin/dashboard-summary`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                });
+                // 주문 관리 페이지와 동일한 방식으로 데이터 가져오기
+                const [ordersResponse, applicationsResponse, usersResponse] = await Promise.all([
+                    fetch(`${API_URL}/api/admin/orders`, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                    }),
+                    fetch(`${API_URL}/api/admin/applications`, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                    }),
+                    fetch(`${API_URL}/api/admin/users?status=pending`, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                    })
+                ]);
 
-                if (!response.ok) {
+                if (!ordersResponse.ok || !applicationsResponse.ok || !usersResponse.ok) {
                     throw new Error('Failed to fetch dashboard data');
                 }
 
-                const result = await response.json();
-                if (!result.success) {
-                    throw new Error(result.message || 'Failed to load dashboard data');
+                const ordersResult = await ordersResponse.json();
+                const applicationsResult = await applicationsResponse.json();
+                const usersResult = await usersResponse.json();
+
+                if (!ordersResult.success || !applicationsResult.success || !usersResult.success) {
+                    throw new Error('Failed to load dashboard data');
                 }
 
-                setData(result.data);
+                const orders: OrderInfo[] = ordersResult.data || [];
+                const applications = applicationsResult.data || [];
+                const pendingUsers = usersResult.data || [];
+
+                // 주문 관리 페이지와 동일한 방식으로 통계 계산 (lines 283-300)
+                const totalRevenue = orders.reduce((sum, order) => {
+                    if (order.status === 'completed') return sum + (order.amount || 0);
+                    return sum;
+                }, 0);
+
+                const pendingOrderCancels = orders.filter(o => o.status === 'cancel_requested').length;
+
+                setData({
+                    totalRevenue,
+                    totalOrders: orders.length,
+                    masterCourseRegistrations: applications.length,
+                    pendingUsers: pendingUsers.length,
+                    pendingOrderCancels
+                });
             } catch (error) {
                 console.error('Failed to fetch dashboard data:', error);
             } finally {
