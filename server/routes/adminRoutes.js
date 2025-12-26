@@ -62,13 +62,35 @@ router.get('/dashboard-summary', authMiddleware, async (req, res) => {
             return sum + amount;
         }, 0);
 
+        // 승인 대기 중인 주문 카운트 (cancel_requested 상태)
+        const pendingOrderCancels = payments.reduce((count, row) => {
+            const rawStatus = (row[10] || 'DONE').toUpperCase();
+            // CANCEL을 포함하지만 CANCELED/CANCELLED이 아닌 경우 = cancel_requested
+            if (rawStatus.includes('CANCEL') && !rawStatus.includes('CANCELED') && !rawStatus.includes('CANCELLED')) {
+                return count + 1;
+            }
+            return count;
+        }, 0);
+
+        // Firestore에서 승인 대기 중인 회원 수 조회
+        let pendingUsers = 0;
+        if (db) {
+            try {
+                const usersSnapshot = await db.collection('users').where('status', '==', 'pending').get();
+                pendingUsers = usersSnapshot.size;
+            } catch (dbError) {
+                console.error('Failed to fetch pending users from Firestore:', dbError);
+            }
+        }
+
         res.json({
             success: true,
             data: {
                 totalRevenue,
                 totalOrders: payments.length,
-                newApplications: applications.length,
-                pendingConsultations: mastercare.length
+                masterCourseRegistrations: applications.length,
+                pendingUsers,
+                pendingOrderCancels
             }
         });
     } catch (error) {

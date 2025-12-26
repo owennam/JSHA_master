@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
@@ -31,10 +32,13 @@ import { ko } from "date-fns/locale";
 
 const AdminOrdersPage = () => {
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
   const [orders, setOrders] = useState<OrderInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [cancelingOrderId, setCancelingOrderId] = useState<string | null>(null);
-  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<string>(
+    searchParams.get("status") || "all"
+  );
 
   // 취소 다이얼로그 상태
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
