@@ -61,7 +61,7 @@ router.get('/dashboard-summary', authMiddleware, async (req, res) => {
         let pendingOrderCancels = 0;
 
         payments.forEach(row => {
-            const rawStatus = (row[10] || 'DONE').toUpperCase();
+            const rawStatus = (row[10] || '').toUpperCase().trim();
             const amount = parseInt(row[3]?.replace(/[^0-9]/g, '') || '0');
 
             // 상태 분류
@@ -73,7 +73,7 @@ router.get('/dashboard-summary', authMiddleware, async (req, res) => {
                 // 취소 요청 대기 중
                 pendingOrderCancels++;
             }
-            // CANCELED/CANCELLED 상태는 매출에서 제외
+            // CANCELED/CANCELLED 상태 또는 빈 값은 매출에서 제외
         });
 
         // Firestore에서 승인 대기 중인 회원 수 조회
