@@ -56,21 +56,25 @@ router.get('/dashboard-summary', authMiddleware, async (req, res) => {
         ]);
 
         // 간단한 통계 계산
-        const totalRevenue = payments.reduce((sum, row) => {
-            // 결제 금액 컬럼 (D열, 인덱스 3) 파싱
-            const amount = parseInt(row[3]?.replace(/[^0-9]/g, '') || '0');
-            return sum + amount;
-        }, 0);
+        let totalRevenue = 0;
+        let completedOrdersCount = 0;
+        let pendingOrderCancels = 0;
 
-        // 승인 대기 중인 주문 카운트 (cancel_requested 상태)
-        const pendingOrderCancels = payments.reduce((count, row) => {
+        payments.forEach(row => {
             const rawStatus = (row[10] || 'DONE').toUpperCase();
-            // CANCEL을 포함하지만 CANCELED/CANCELLED이 아닌 경우 = cancel_requested
-            if (rawStatus.includes('CANCEL') && !rawStatus.includes('CANCELED') && !rawStatus.includes('CANCELLED')) {
-                return count + 1;
+            const amount = parseInt(row[3]?.replace(/[^0-9]/g, '') || '0');
+
+            // 상태 분류
+            if (rawStatus === 'DONE' || rawStatus === 'COMPLETED') {
+                // 완료된 주문만 매출에 포함
+                totalRevenue += amount;
+                completedOrdersCount++;
+            } else if (rawStatus.includes('CANCEL') && !rawStatus.includes('CANCELED') && !rawStatus.includes('CANCELLED')) {
+                // 취소 요청 대기 중
+                pendingOrderCancels++;
             }
-            return count;
-        }, 0);
+            // CANCELED/CANCELLED 상태는 매출에서 제외
+        });
 
         // Firestore에서 승인 대기 중인 회원 수 조회
         let pendingUsers = 0;
