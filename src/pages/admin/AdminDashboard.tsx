@@ -46,7 +46,7 @@ const AdminDashboard = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const API_URL = import.meta.env.VITE_API_URL || '';
+                const API_URL = import.meta.env.VITE_API_URL || import.meta.env.VITE_SERVER_URL || '';
                 const token = localStorage.getItem('admin_token');
 
                 // 주문 관리 페이지와 동일한 방식으로 데이터 가져오기
