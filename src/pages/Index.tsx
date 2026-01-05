@@ -27,7 +27,7 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <UrgencyBanner
         deadline={new Date("2026-03-01")}
-        remainingSeats={3}
+        remainingSeats={2}
         totalSeats={10}
         cohortName="2026년 1기"
       />
