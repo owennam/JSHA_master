@@ -10,7 +10,7 @@ interface UrgencyBannerProps {
 
 export const UrgencyBanner = ({
   deadline = new Date("2026-03-01"), // 기본값: 2026년 3월 1일
-  remainingSeats = 2,
+  remainingSeats = 1,
   totalSeats = 10,
   cohortName = "2026년 1기"
 }: UrgencyBannerProps) => {
