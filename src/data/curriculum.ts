@@ -71,7 +71,7 @@ export const curriculum: Module[] = [
         topics: [
           "수강생 임상 적용 사례 공유",
           "1:1 테스트 및 피드백",
-          "JSST 및 JS Insole 검사 실습",
+          "JSST 및 DTR, BIT 검사 실습",
         ],
       },
       {
@@ -80,16 +80,16 @@ export const curriculum: Module[] = [
         duration: 420, // 7시간
         title: "DTR & STR 마스터",
         topics: [
-          "DTR (Dural Tension Release) 실습",
           "STR (Segmental Tension Release) 이론 및 실습",
-          "호흡 및 발가락락 기능 재활 교육 이론 및 실습",
-          "JS core routine 1,2 시연 및 실습",
+          "호흡 기능 재활 교육 이론",
+          "DTR, STR, 호흡 기능 재활 실습",
+          "JS Advance 1 시연 및 실습",
         ],
       },
     ],
     highlights: [
       "DTR & STR 완전 마스터",
-      "호흡/발가락 기능 재활 교육 기법",
+      "호흡 기능 재활 교육 기법",
       "1:1 테스트 및 피드백"
     ],
     specialNote: "비밀 유지 서약서 작성 필수",
@@ -119,15 +119,14 @@ export const curriculum: Module[] = [
         title: "Advance Technique (고급 기법)",
         topics: [
           "PTR (Peripheral Tension Release) 시연 및 실습",
-          "주요 부위별 치료 프로토콜 (상지/하지)",,
-          "PTR 및 호흡/발가락 기능 재활 교육 실습",
-          "한 단계 더 나아간 JSHA 치료 테크닉 (비기)",
+          "JS Neurocosmetics 시연",
+          "JS Advance 2,3 시연 및 실습",
         ],
       },
     ],
     highlights: [
       "PTR 완전 마스터",
-      "JSHA 비기 전수",
+      "JS Advance 완전 마스터",
     ],
   },
   {
@@ -144,8 +143,7 @@ export const curriculum: Module[] = [
         topics: [
           "1:1 테스트 및 피드백",
           "DTR, STR, PTR 실습",
-          "호흡 및 발가락 재활 실습",
-          "JS core routine 실습"
+          "최종 실기 통합 테스트"
         ],
       },
       {
@@ -155,9 +153,9 @@ export const curriculum: Module[] = [
         title: "JS 증례 발표 및 토론",
         topics: [
           "JSHA 완전 마스터",
+          "최종 Q&A 세션",
           "환자 증례 발표 (참가자)",
           "종합 토론 및 피드백",
-          "최종 Q&A 세션",
           "수료식 및 네트워킹"
         ],
       },

@@ -7,29 +7,29 @@ export const ScheduleSection = () => {
     {
       module: 1,
       period: "2026년 3월",
-      date: "추후 공지",
-      title: "JSHA 핵심 철학 및 통합 진단",
+      date: "3월 7일 (토) ~ 8일 (일)",
+      title: "JSHA 핵심 철학 및 JSST/DTR 기초",
       color: "bg-primary",
     },
     {
       module: 2,
       period: "2026년 3월",
-      date: "추후 공지",
-      title: "중추 및 분절 신경계 치료 (DTR & STR)",
+      date: "3월 28일 (토) ~ 29일 (일)",
+      title: "STR 및 호흡 기능 재활",
       color: "bg-primary",
     },
     {
       module: 3,
       period: "2026년 4월",
-      date: "추후 공지",
-      title: "Advance Course (심화)",
+      date: "4월 18일 (토) ~ 19일 (일)",
+      title: "PTR 및 JS Advance Course",
       color: "bg-primary",
     },
     {
       module: 4,
       period: "2026년 5월",
-      date: "추후 공지",
-      title: "임상 통합 및 증례 발표",
+      date: "5월 16일 (토) ~ 17일 (일)",
+      title: "최종 테스트, 증례 발표 및 수료식",
       color: "bg-primary",
     },
   ];
@@ -86,11 +86,11 @@ export const ScheduleSection = () => {
                 <div className="space-y-2 text-sm text-muted-foreground">
                   <div>
                     <strong className="text-black">토요일 (1일차):</strong> 3시간
-                    <div className="text-sm ml-4">시간: 추후 공지</div>
+                    <div className="text-sm ml-4">18:00 ~ 21:00</div>
                   </div>
                   <div>
                     <strong className="text-black">일요일 (2일차):</strong> 7시간
-                    <div className="text-sm ml-4">시간: 추후 공지</div>
+                    <div className="text-sm ml-4">10:00 ~ 17:00 (점심 포함)</div>
                   </div>
                   <div className="pt-2 border-t border-border">
                     <strong className="text-black">총 교육 시간:</strong> 40시간 (10시간 × 4회)
