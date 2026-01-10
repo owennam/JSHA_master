@@ -31,7 +31,8 @@
       "Bash(find:*)",
       "Bash(nslookup:*)",
       "Bash(git pull:*)",
-      "WebFetch(domain:firebase.google.com)"
+      "WebFetch(domain:firebase.google.com)",
+      "WebFetch(domain:byeol-dev.tistory.com)"
     ],
     "deny": [],
     "ask": []
