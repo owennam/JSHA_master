@@ -9,7 +9,7 @@
 
 - 다시보기 회원가입/로그인 (Firebase Auth)
 - 관리자 승인 시스템 (Firestore)
-- 비디오 관리 페이지 (CRUD)
+- 비디오 관리 페이지 (CRUD + 삭제)
 - 모달 비디오 플레이어 (자동 재생)
 - YouTube/Vimeo 썸네일 자동 추출
 - Vimeo 비밀 해시 링크 지원
@@ -25,28 +25,19 @@
 - **해결**: Firestore로 마이그레이션
 - **교훈**: 프로토타입에는 Firestore가 더 적합
 
-### 2. Firebase 익명 인증 제한
-- **문제**: `auth/admin-restricted-operation` 에러
-- **해결**: 개발 환경에서 Firestore 규칙 임시 개방
-- **교훈**: 프로덕션 전 규칙 강화 필수
-
-### 3. Vimeo 프라이버시 설정
+### 2. Vimeo 프라이버시 설정
 - **"비공개"**: 로그인 필요 → 임베드 불가 ❌
-- **"일부 공개"**: 비밀 해시 필요 (URL에 /hash 포함)
 - **"숨기기"**: 도메인 제한 임베드 가능 ✅ (권장)
 
-### 4. Vimeo 비밀 해시 처리
-- 형식: `vimeo.com/VIDEO_ID/HASH`
-- embed URL: `player.vimeo.com/video/VIDEO_ID?h=HASH`
-
-### 5. Vimeo 플랜별 보안 기능
+### 3. Vimeo 플랜별 보안 기능
 - **Starter (₩12,600/월)**: 도메인 제한, 숨기기 가능
 - **Standard (₩45,938/월)**: Vimeo 로고 숨기기 가능
 - **권장**: Starter + 숨기기 + 도메인 제한
 
-### 6. embed HTML 처리
-- 문제: Vimeo에서 복사한 embed 코드가 URL 대신 저장됨
-- 해결: `extractVimeoFromEmbed()` 함수로 자동 URL 추출
+### 4. Firestore 삭제 함수
+- **문제**: `setDoc`으로 비공개 처리만 됨
+- **해결**: `deleteDoc` import 후 실제 삭제 구현
+- **교훈**: CRUD 구현 시 delete 기능 꼭 테스트
 
 ---
 
