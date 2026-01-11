@@ -46,10 +46,14 @@ const getEmbedUrl = (url: string): string => {
     return `https://www.youtube.com/embed/${youtubeMatch[1]}?autoplay=1&rel=0`;
   }
 
-  // Vimeo embed URL 변환
-  const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
+  // Vimeo embed URL 변환 (비밀 해시 포함, 공유/제목/작성자 숨김)
+  // vimeo.com/VIDEO_ID 또는 vimeo.com/VIDEO_ID/HASH 형식 지원
+  const vimeoMatch = url.match(/vimeo\.com\/(\d+)(?:\/([a-zA-Z0-9]+))?/);
   if (vimeoMatch) {
-    return `https://player.vimeo.com/video/${vimeoMatch[1]}?autoplay=1`;
+    const videoId = vimeoMatch[1];
+    const hash = vimeoMatch[2];
+    const hashParam = hash ? `&h=${hash}` : '';
+    return `https://player.vimeo.com/video/${videoId}?autoplay=1&title=0&byline=0&portrait=0${hashParam}`;
   }
 
   return url;
