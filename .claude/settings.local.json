@@ -36,7 +36,9 @@
       "Bash(ping:*)",
       "Bash(powershell -Command \"Stop-Process -Id 17500 -Force\")",
       "Bash(powershell -Command:*)",
-      "Bash(firebase:*)"
+      "Bash(firebase:*)",
+      "Bash(test:*)",
+      "WebSearch"
     ],
     "deny": [],
     "ask": []

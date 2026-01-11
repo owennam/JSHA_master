@@ -58,9 +58,9 @@ service cloud.firestore {
       // 회원가입 시 새 등록 정보 생성 가능
       allow create: if isSignedIn() && isOwner(userId);
 
-      // 본인의 등록 정보 업데이트 가능 (단, status 필드는 제외)
+      // 본인의 등록 정보 업데이트 가능 (단, status와 accessLevel 필드는 관리자만 변경 가능)
       allow update: if isOwner(userId) &&
-                      !request.resource.data.diff(resource.data).affectedKeys().hasAny(['status']);
+                      !request.resource.data.diff(resource.data).affectedKeys().hasAny(['status', 'accessLevel']);
 
       // ⚠️ 개발 환경: 모든 접근 허용 (프로덕션에서는 isAdmin()으로 변경 필요)
       allow read, write: if true;
@@ -71,6 +71,9 @@ service cloud.firestore {
     // ============================================
     match /recapVideos/{videoId} {
       // ⚠️ 개발 환경: 모든 접근 허용 (프로덕션에서는 isAdmin()으로 변경 필요)
+      // 프로덕션 환경에서는 다음과 같이 설정 권장:
+      // - 읽기: 승인된 사용자만 (accessLevel 기반 필터링은 클라이언트에서 처리)
+      // - 쓰기: 관리자만
       allow read, write: if true;
     }
 

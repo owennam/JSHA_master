@@ -4,11 +4,12 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PlayCircle, CheckCircle, Video, LogOut, Clock, XCircle, X } from "lucide-react";
+import { PlayCircle, CheckCircle, Video, LogOut, Clock, XCircle, X, Lock, Shield } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged, signOut, User } from "firebase/auth";
-import { getRecapRegistrant, RecapRegistrant, getAllRecapVideos, RecapVideo } from "@/lib/firestore";
+import { getRecapRegistrant, RecapRegistrant, getAllRecapVideos, RecapVideo, AccessLevel, canAccessLevel } from "@/lib/firestore";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -16,18 +17,49 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
+// embed HTML에서 Vimeo URL 추출
+const extractVimeoFromEmbed = (input: string): string => {
+  if (!input) return "";
+
+  // 이미 일반 URL이면 그대로 반환
+  if (input.startsWith('http') && !input.includes('<')) {
+    return input;
+  }
+
+  // embed HTML에서 player.vimeo.com URL 추출
+  const playerMatch = input.match(/player\.vimeo\.com\/video\/(\d+)(?:\?h=([a-zA-Z0-9]+))?/);
+  if (playerMatch) {
+    const videoId = playerMatch[1];
+    const hash = playerMatch[2];
+    return hash ? `https://vimeo.com/${videoId}/${hash}` : `https://vimeo.com/${videoId}`;
+  }
+
+  // iframe src에서 일반 vimeo.com URL 추출
+  const vimeoMatch = input.match(/vimeo\.com\/(\d+)(?:\/([a-zA-Z0-9]+))?/);
+  if (vimeoMatch) {
+    const videoId = vimeoMatch[1];
+    const hash = vimeoMatch[2];
+    return hash ? `https://vimeo.com/${videoId}/${hash}` : `https://vimeo.com/${videoId}`;
+  }
+
+  return input;
+};
+
 // 비디오 URL에서 썸네일 자동 추출
 const getVideoThumbnail = (url: string, fallback?: string): string => {
   if (!url) return fallback || "https://placehold.co/400x225/2F6FED/FFFFFF/png?text=Video";
 
+  // embed HTML에서 URL 추출
+  const cleanUrl = extractVimeoFromEmbed(url);
+
   // YouTube 썸네일 추출
-  const youtubeMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  const youtubeMatch = cleanUrl.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
   if (youtubeMatch) {
     return `https://img.youtube.com/vi/${youtubeMatch[1]}/hqdefault.jpg`;
   }
 
   // Vimeo 썸네일 (vumbnail 서비스 사용)
-  const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
+  const vimeoMatch = cleanUrl.match(/vimeo\.com\/(\d+)/);
   if (vimeoMatch) {
     return `https://vumbnail.com/${vimeoMatch[1]}.jpg`;
   }
@@ -40,15 +72,17 @@ const getVideoThumbnail = (url: string, fallback?: string): string => {
 const getEmbedUrl = (url: string): string => {
   if (!url) return "";
 
+  // embed HTML에서 URL 추출
+  const cleanUrl = extractVimeoFromEmbed(url).split('?')[0];
+
   // YouTube embed URL 변환
-  const youtubeMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  const youtubeMatch = cleanUrl.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
   if (youtubeMatch) {
     return `https://www.youtube.com/embed/${youtubeMatch[1]}?autoplay=1&rel=0`;
   }
 
   // Vimeo embed URL 변환 (비밀 해시 포함, 공유/제목/작성자 숨김)
-  // vimeo.com/VIDEO_ID 또는 vimeo.com/VIDEO_ID/HASH 형식 지원
-  const vimeoMatch = url.match(/vimeo\.com\/(\d+)(?:\/([a-zA-Z0-9]+))?/);
+  const vimeoMatch = cleanUrl.match(/vimeo\.com\/(\d+)(?:\/([a-zA-Z0-9]+))?/);
   if (vimeoMatch) {
     const videoId = vimeoMatch[1];
     const hash = vimeoMatch[2];
@@ -57,6 +91,25 @@ const getEmbedUrl = (url: string): string => {
   }
 
   return url;
+};
+
+// 접근 등급 레이블 및 색상
+const getAccessLevelLabel = (level: AccessLevel): string => {
+  const labels: Record<AccessLevel, string> = {
+    'preview': '맛보기',
+    'session1': '세션 1',
+    'graduate': '수료자',
+  };
+  return labels[level];
+};
+
+const getAccessLevelColor = (level: AccessLevel): string => {
+  const colors: Record<AccessLevel, string> = {
+    'preview': 'bg-gray-100 text-gray-700 border-gray-300',
+    'session1': 'bg-blue-100 text-blue-700 border-blue-300',
+    'graduate': 'bg-green-100 text-green-700 border-green-300',
+  };
+  return colors[level];
 };
 
 type AccessStatus = 'loading' | 'not_authenticated' | 'pending' | 'rejected' | 'approved';
@@ -323,6 +376,15 @@ const RecapPage = () => {
             {user?.email || "인증된 사용자"}
           </span>
         </div>
+        {registrantData?.accessLevel && (
+          <>
+            <div className="h-4 w-px bg-gray-300"></div>
+            <Badge variant="outline" className={`text-xs ${getAccessLevelColor(registrantData.accessLevel)}`}>
+              <Shield className="w-3 h-3 mr-1" />
+              {getAccessLevelLabel(registrantData.accessLevel)}
+            </Badge>
+          </>
+        )}
         <div className="h-4 w-px bg-gray-300"></div>
         <Button
           onClick={handleLogout}
@@ -368,42 +430,77 @@ const RecapPage = () => {
             </div>
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {videos.map((video) => (
-                <div
-                  key={video.id}
-                  onClick={() => setSelectedVideo(video)}
-                  className="block cursor-pointer"
-                >
-                  <Card
-                    className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border-2"
+              {videos.map((video) => {
+                const canAccess = registrantData?.accessLevel
+                  ? canAccessLevel(registrantData.accessLevel, video.accessLevel)
+                  : false;
+
+                return (
+                  <div
+                    key={video.id}
+                    onClick={() => canAccess && setSelectedVideo(video)}
+                    className={`block ${canAccess ? 'cursor-pointer' : 'cursor-not-allowed'}`}
                   >
-                    <CardHeader className="p-0">
-                      <div className="relative overflow-hidden rounded-t-xl">
-                        <img
-                          src={getVideoThumbnail(video.vimeoUrl, video.thumbnail)}
-                          alt={video.title}
-                          className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                          <PlayCircle className="w-16 h-16 text-white" />
+                    <Card
+                      className={`group transition-all duration-300 border-2 ${canAccess
+                        ? 'hover:shadow-xl hover:-translate-y-1'
+                        : 'opacity-75'
+                        }`}
+                    >
+                      <CardHeader className="p-0">
+                        <div className="relative overflow-hidden rounded-t-xl">
+                          <img
+                            src={getVideoThumbnail(video.vimeoUrl, video.thumbnail)}
+                            alt={video.title}
+                            className={`w-full h-48 object-cover transition-transform duration-300 ${canAccess ? 'group-hover:scale-105' : 'filter grayscale'
+                              }`}
+                          />
+
+                          {/* 잠금 오버레이 (접근 불가) */}
+                          {!canAccess && (
+                            <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center">
+                              <Lock className="w-12 h-12 text-white mb-2" />
+                              <Badge variant="outline" className={`${getAccessLevelColor(video.accessLevel)} border-white`}>
+                                {getAccessLevelLabel(video.accessLevel)} 이상 필요
+                              </Badge>
+                            </div>
+                          )}
+
+                          {/* 재생 아이콘 (접근 가능) */}
+                          {canAccess && (
+                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                              <PlayCircle className="w-16 h-16 text-white" />
+                            </div>
+                          )}
+
+                          <div className="absolute top-2 left-2 bg-primary text-primary-foreground px-3 py-1 rounded-full text-xs font-semibold">
+                            {video.module}
+                          </div>
+                          <div className="absolute top-2 right-2 bg-black/70 text-white px-2 py-1 rounded text-xs">
+                            {video.duration}
+                          </div>
+
+                          {/* 접근 등급 뱃지 */}
+                          {canAccess && (
+                            <div className="absolute bottom-2 right-2">
+                              <Badge variant="outline" className={`text-xs ${getAccessLevelColor(video.accessLevel)}`}>
+                                {getAccessLevelLabel(video.accessLevel)}
+                              </Badge>
+                            </div>
+                          )}
                         </div>
-                        <div className="absolute top-2 left-2 bg-primary text-primary-foreground px-3 py-1 rounded-full text-xs font-semibold">
-                          {video.module}
-                        </div>
-                        <div className="absolute top-2 right-2 bg-black/70 text-white px-2 py-1 rounded text-xs">
-                          {video.duration}
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="p-4">
-                      <CardTitle className="text-lg mb-2 group-hover:text-primary transition-colors">
-                        {video.title}
-                      </CardTitle>
-                      <p className="text-sm text-muted-foreground">{video.description}</p>
-                    </CardContent>
-                  </Card>
-                </div>
-              ))}
+                      </CardHeader>
+                      <CardContent className="p-4">
+                        <CardTitle className={`text-lg mb-2 transition-colors ${canAccess ? 'group-hover:text-primary' : 'text-muted-foreground'
+                          }`}>
+                          {video.title}
+                        </CardTitle>
+                        <p className="text-sm text-muted-foreground">{video.description}</p>
+                      </CardContent>
+                    </Card>
+                  </div>
+                );
+              })}
             </div>
           )}
 

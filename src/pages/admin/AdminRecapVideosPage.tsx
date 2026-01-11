@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import {
   RecapVideo,
+  AccessLevel,
   getAllRecapVideos,
   createRecapVideo,
   updateRecapVideo,
@@ -20,6 +21,7 @@ import {
   RefreshCw,
   Eye,
   EyeOff,
+  Shield,
 } from "lucide-react";
 import {
   Dialog,
@@ -39,6 +41,13 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const AdminRecapVideosPage = () => {
   const { toast } = useToast();
@@ -57,6 +66,7 @@ const AdminRecapVideosPage = () => {
     thumbnail: "",
     order: 1,
     isPublished: true,
+    accessLevel: 'preview' as AccessLevel,
   });
 
   const loadVideos = async () => {
@@ -92,6 +102,7 @@ const AdminRecapVideosPage = () => {
         thumbnail: video.thumbnail,
         order: video.order,
         isPublished: video.isPublished,
+        accessLevel: video.accessLevel,
       });
     } else {
       setEditingVideo(null);
@@ -104,6 +115,7 @@ const AdminRecapVideosPage = () => {
         thumbnail: "",
         order: videos.length + 1,
         isPublished: true,
+        accessLevel: 'preview',
       });
     }
     setIsDialogOpen(true);
@@ -121,6 +133,7 @@ const AdminRecapVideosPage = () => {
       thumbnail: "",
       order: 1,
       isPublished: true,
+      accessLevel: 'preview',
     });
   };
 
@@ -268,76 +281,102 @@ const AdminRecapVideosPage = () => {
           <TableHeader className="bg-muted/50">
             <TableRow>
               <TableHead className="w-[50px]">순서</TableHead>
-              <TableHead className="w-[200px]">제목</TableHead>
-              <TableHead className="w-[100px]">모듈</TableHead>
-              <TableHead className="w-[80px]">길이</TableHead>
-              <TableHead className="w-[300px]">Vimeo URL</TableHead>
-              <TableHead className="w-[100px]">상태</TableHead>
-              <TableHead className="text-right w-[150px]">관리</TableHead>
+              <TableHead className="w-[180px]">제목</TableHead>
+              <TableHead className="w-[90px]">모듈</TableHead>
+              <TableHead className="w-[110px]">접근 등급</TableHead>
+              <TableHead className="w-[70px]">길이</TableHead>
+              <TableHead className="w-[250px]">Vimeo URL</TableHead>
+              <TableHead className="w-[90px]">상태</TableHead>
+              <TableHead className="text-right w-[130px]">관리</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {videos.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-12 text-muted-foreground">
+                <TableCell colSpan={8} className="text-center py-12 text-muted-foreground">
                   등록된 비디오가 없습니다
                 </TableCell>
               </TableRow>
             ) : (
-              videos.map((video) => (
-                <TableRow key={video.id} className="group hover:bg-muted/5">
-                  <TableCell className="font-medium text-center">{video.order}</TableCell>
-                  <TableCell className="font-medium">{video.title}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className="font-normal text-xs">
-                      {video.module}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-xs text-muted-foreground">{video.duration}</TableCell>
-                  <TableCell className="text-xs font-mono text-muted-foreground truncate max-w-[300px]">
-                    {video.vimeoUrl}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Switch
-                        checked={video.isPublished}
-                        onCheckedChange={() => handleTogglePublish(video)}
-                        className="h-5 w-9"
-                      />
-                      <Badge
-                        variant={video.isPublished ? "default" : "secondary"}
-                        className={
-                          video.isPublished
-                            ? "bg-green-100 text-green-700 hover:bg-green-100"
-                            : "bg-gray-100 text-gray-700 hover:bg-gray-100"
-                        }
-                      >
-                        {video.isPublished ? "공개" : "비공개"}
+              videos.map((video) => {
+                const getAccessLevelLabel = (level: AccessLevel): string => {
+                  const labels: Record<AccessLevel, string> = {
+                    'preview': '맛보기',
+                    'session1': '세션 1',
+                    'graduate': '수료자',
+                  };
+                  return labels[level];
+                };
+
+                const getAccessLevelColor = (level: AccessLevel): string => {
+                  const colors: Record<AccessLevel, string> = {
+                    'preview': 'bg-gray-100 text-gray-700',
+                    'session1': 'bg-blue-100 text-blue-700',
+                    'graduate': 'bg-green-100 text-green-700',
+                  };
+                  return colors[level];
+                };
+
+                return (
+                  <TableRow key={video.id} className="group hover:bg-muted/5">
+                    <TableCell className="font-medium text-center">{video.order}</TableCell>
+                    <TableCell className="font-medium">{video.title}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className="font-normal text-xs">
+                        {video.module}
                       </Badge>
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="h-8 px-2"
-                        onClick={() => handleOpenDialog(video)}
-                      >
-                        <Edit className="w-3.5 h-3.5" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="h-8 px-2 text-red-600 hover:text-red-700 hover:bg-red-50"
-                        onClick={() => handleDelete(video)}
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className={`font-normal text-xs ${getAccessLevelColor(video.accessLevel)}`}>
+                        {getAccessLevelLabel(video.accessLevel)}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-xs text-muted-foreground">{video.duration}</TableCell>
+                    <TableCell className="text-xs font-mono text-muted-foreground truncate max-w-[250px]">
+                      {video.vimeoUrl}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Switch
+                          checked={video.isPublished}
+                          onCheckedChange={() => handleTogglePublish(video)}
+                          className="h-5 w-9"
+                        />
+                        <Badge
+                          variant={video.isPublished ? "default" : "secondary"}
+                          className={
+                            video.isPublished
+                              ? "bg-green-100 text-green-700 hover:bg-green-100"
+                              : "bg-gray-100 text-gray-700 hover:bg-gray-100"
+                          }
+                        >
+                          {video.isPublished ? "공개" : "비공개"}
+                        </Badge>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-8 px-2"
+                          onClick={() => handleOpenDialog(video)}
+                        >
+                          <Edit className="w-3.5 h-3.5" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-8 px-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+                          onClick={() => handleDelete(video)}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
             )}
           </TableBody>
         </Table>
@@ -445,6 +484,41 @@ const AdminRecapVideosPage = () => {
                 className="col-span-3"
                 min={1}
               />
+            </div>
+
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="accessLevel" className="text-right flex items-center gap-1">
+                <Shield className="w-3.5 h-3.5" />
+                접근 등급
+              </Label>
+              <Select
+                value={formData.accessLevel}
+                onValueChange={(value) => setFormData({ ...formData, accessLevel: value as AccessLevel })}
+              >
+                <SelectTrigger id="accessLevel" className="col-span-3">
+                  <SelectValue placeholder="접근 등급 선택" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="preview">
+                    <div className="flex flex-col items-start">
+                      <span className="font-medium">맛보기</span>
+                      <span className="text-xs text-muted-foreground">누구나 시청 가능</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="session1">
+                    <div className="flex flex-col items-start">
+                      <span className="font-medium">세션 1</span>
+                      <span className="text-xs text-muted-foreground">세션 1 참가자 이상</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="graduate">
+                    <div className="flex flex-col items-start">
+                      <span className="font-medium">수료자</span>
+                      <span className="text-xs text-muted-foreground">수료자만 시청 가능</span>
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="grid grid-cols-4 items-center gap-4">

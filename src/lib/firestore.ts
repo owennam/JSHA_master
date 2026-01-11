@@ -19,6 +19,9 @@ export { db };
 // 사용자 승인 상태
 export type UserStatus = 'pending' | 'approved' | 'rejected';
 
+// 접근 등급 (영상 접근 레벨)
+export type AccessLevel = 'preview' | 'session1' | 'graduate';
+
 // 주문 상태
 export type OrderStatus = 'completed' | 'cancel_requested' | 'canceled';
 
@@ -205,6 +208,7 @@ export interface RecapRegistrant {
   name: string;
   batch?: string; // 수료 기수
   status: UserStatus; // 승인 상태 (pending, approved, rejected)
+  accessLevel: AccessLevel; // 영상 접근 등급
   createdAt: string;
   updatedAt: string;
 }
@@ -217,7 +221,8 @@ export const createRecapRegistrant = async (
   email: string,
   name: string,
   batch?: string,
-  status: UserStatus = 'pending'
+  status: UserStatus = 'pending',
+  accessLevel: AccessLevel = 'preview'
 ): Promise<void> => {
   if (!db) {
     throw new Error('Firestore is not initialized');
@@ -229,12 +234,13 @@ export const createRecapRegistrant = async (
     name,
     batch,
     status,
+    accessLevel,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
 
   await setDoc(doc(db, 'recapRegistrants', uid), registrant);
-  console.log('✅ Recap registrant created:', uid, 'status:', status);
+  console.log('✅ Recap registrant created:', uid, 'status:', status, 'accessLevel:', accessLevel);
 };
 
 /**
@@ -341,6 +347,7 @@ export interface RecapVideo {
   thumbnail: string;
   order: number;
   isPublished: boolean;
+  accessLevel: AccessLevel; // 영상 접근 등급
   createdAt: string;
   updatedAt: string;
 }
@@ -541,4 +548,60 @@ export const getAllOrders = async (): Promise<OrderInfo[]> => {
   const querySnapshot = await getDocs(ordersQuery);
 
   return querySnapshot.docs.map(doc => doc.data() as OrderInfo);
+};
+
+// ============================================
+// 접근 등급 관련 함수들
+// ============================================
+
+/**
+ * 접근 등급 계층 정의 (낮은 순서 -> 높은 순서)
+ */
+const ACCESS_LEVEL_HIERARCHY: AccessLevel[] = ['preview', 'session1', 'graduate'];
+
+/**
+ * 접근 등급 비교 함수
+ * @returns userLevel이 requiredLevel 이상이면 true
+ */
+export const canAccessLevel = (userLevel: AccessLevel, requiredLevel: AccessLevel): boolean => {
+  const userIndex = ACCESS_LEVEL_HIERARCHY.indexOf(userLevel);
+  const requiredIndex = ACCESS_LEVEL_HIERARCHY.indexOf(requiredLevel);
+  return userIndex >= requiredIndex;
+};
+
+/**
+ * 다시보기 등록자의 접근 등급 업데이트
+ */
+export const updateRecapRegistrantAccessLevel = async (
+  uid: string,
+  accessLevel: AccessLevel
+): Promise<void> => {
+  if (!db) {
+    throw new Error('Firestore is not initialized');
+  }
+
+  await setDoc(
+    doc(db, 'recapRegistrants', uid),
+    {
+      accessLevel,
+      updatedAt: new Date().toISOString(),
+    },
+    { merge: true }
+  );
+  console.log('✅ Recap registrant access level updated:', uid, 'new level:', accessLevel);
+};
+
+/**
+ * 사용자의 접근 등급에 따라 접근 가능한 비디오만 조회
+ */
+export const getAccessibleVideos = async (userAccessLevel: AccessLevel): Promise<RecapVideo[]> => {
+  if (!db) {
+    throw new Error('Firestore is not initialized');
+  }
+
+  // 모든 공개된 비디오 가져오기
+  const allVideos = await getAllRecapVideos(true);
+
+  // 사용자의 접근 등급에 따라 필터링
+  return allVideos.filter(video => canAccessLevel(userAccessLevel, video.accessLevel));
 };

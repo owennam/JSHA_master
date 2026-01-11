@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- SEO Meta Tags -->
+    <title>Page Title - Brand Name</title>
+    <meta name="description" content="Page description">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://example.com/">
+    <meta property="og:title" content="Page Title">
+    <meta property="og:description" content="Page description">
+    <meta property="og:image" content="https://example.com/image.jpg">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://example.com/">
+    <meta property="twitter:title" content="Page Title">
+    <meta property="twitter:description" content="Page description">
+    <meta property="twitter:image" content="https://example.com/image.jpg">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="favicon.png">
+    
+    <!-- Preconnect for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <style>
+        /* ===== CSS Variables (Design Tokens) ===== */
+        :root {
+            /* Colors */
+            --color-primary: #0066cc;
+            --color-secondary: #6c757d;
+            --color-accent: #ff6b35;
+            --color-text: #1a1a1a;
+            --color-text-light: #666666;
+            --color-bg: #ffffff;
+            --color-bg-light: #f8f9fa;
+            
+            /* Typography */
+            --font-primary: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+            --font-heading: var(--font-primary);
+            
+            /* Font Sizes */
+            --text-xs: 0.75rem;
+            --text-sm: 0.875rem;
+            --text-base: 1rem;
+            --text-lg: 1.125rem;
+            --text-xl: 1.25rem;
+            --text-2xl: 1.5rem;
+            --text-3xl: 1.875rem;
+            --text-4xl: 2.25rem;
+            --text-5xl: 3rem;
+            
+            /* Spacing */
+            --spacing-xs: 0.25rem;
+            --spacing-sm: 0.5rem;
+            --spacing-md: 1rem;
+            --spacing-lg: 1.5rem;
+            --spacing-xl: 2rem;
+            --spacing-2xl: 3rem;
+            --spacing-3xl: 4rem;
+            
+            /* Shadows */
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+            
+            /* Border Radius */
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --radius-full: 9999px;
+            
+            /* Transitions */
+            --transition-fast: 150ms ease-in-out;
+            --transition-base: 250ms ease-in-out;
+        }
+        
+        /* ===== CSS Reset ===== */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        html {
+            font-size: 16px;
+            scroll-behavior: smooth;
+        }
+        
+        body {
+            font-family: var(--font-primary);
+            font-size: var(--text-base);
+            line-height: 1.6;
+            color: var(--color-text);
+            background-color: var(--color-bg);
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        img, picture, video {
+            display: block;
+            max-width: 100%;
+            height: auto;
+        }
+        
+        button, input, textarea, select {
+            font: inherit;
+        }
+        
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+        
+        :focus-visible {
+            outline: 2px solid var(--color-primary);
+            outline-offset: 2px;
+        }
+        
+        /* ===== Layout Utilities ===== */
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+            padding-left: var(--spacing-lg);
+            padding-right: var(--spacing-lg);
+        }
+        
+        .section {
+            padding-top: var(--spacing-3xl);
+            padding-bottom: var(--spacing-3xl);
+        }
+        
+        /* ===== Typography ===== */
+        h1, h2, h3, h4, h5, h6 {
+            font-family: var(--font-heading);
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: var(--spacing-md);
+        }
+        
+        h1 { font-size: var(--text-5xl); }
+        h2 { font-size: var(--text-4xl); }
+        h3 { font-size: var(--text-3xl); }
+        h4 { font-size: var(--text-2xl); }
+        
+        p {
+            margin-bottom: var(--spacing-md);
+        }
+        
+        /* ===== Header & Navigation ===== */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            box-shadow: var(--shadow-sm);
+            z-index: 1000;
+        }
+        
+        nav {
+            padding: var(--spacing-md) 0;
+        }
+        
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: var(--text-xl);
+            font-weight: 700;
+            color: var(--color-primary);
+        }
+        
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            gap: var(--spacing-xl);
+        }
+        
+        .nav-menu a {
+            color: var(--color-text);
+            transition: color var(--transition-fast);
+        }
+        
+        .nav-menu a:hover {
+            color: var(--color-primary);
+        }
+        
+        .nav-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: var(--text-2xl);
+            cursor: pointer;
+            color: var(--color-text);
+        }
+        
+        /* ===== Buttons ===== */
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            text-align: center;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            border: none;
+        }
+        
+        .btn-primary {
+            background-color: var(--color-primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #0052a3;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--color-primary);
+            border: 2px solid var(--color-primary);
+        }
+        
+        .btn-secondary:hover {
+            background-color: var(--color-primary);
+            color: white;
+        }
+        
+        /* ===== Hero Section ===== */
+        .hero {
+            margin-top: 80px;
+            padding: var(--spacing-3xl) 0;
+            text-align: center;
+        }
+        
+        .hero h1 {
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .hero p {
+            font-size: var(--text-lg);
+            color: var(--color-text-light);
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            margin-bottom: var(--spacing-xl);
+        }
+        
+        /* ===== Grid Layout ===== */
+        .grid {
+            display: grid;
+            gap: var(--spacing-xl);
+        }
+        
+        .grid-cols-3 {
+            grid-template-columns: repeat(3, 1fr);
+        }
+        
+        /* ===== Cards ===== */
+        .card {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-xl);
+            box-shadow: var(--shadow-sm);
+            transition: all var(--transition-base);
+        }
+        
+        .card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-4px);
+        }
+        
+        .card h3 {
+            color: var(--color-primary);
+        }
+        
+        /* ===== Forms ===== */
+        .form-group {
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: var(--spacing-sm);
+            font-weight: 500;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #ddd;
+            border-radius: var(--radius-md);
+            transition: border-color var(--transition-fast);
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+        }
+        
+        /* ===== Footer ===== */
+        footer {
+            background-color: var(--color-bg-light);
+            padding: var(--spacing-2xl) 0;
+            text-align: center;
+            color: var(--color-text-light);
+        }
+        
+        /* ===== Responsive Design ===== */
+        @media (max-width: 768px) {
+            .container {
+                padding-left: var(--spacing-md);
+                padding-right: var(--spacing-md);
+            }
+            
+            .section {
+                padding-top: var(--spacing-2xl);
+                padding-bottom: var(--spacing-2xl);
+            }
+            
+            h1 { font-size: var(--text-3xl); }
+            h2 { font-size: var(--text-2xl); }
+            
+            .nav-menu {
+                position: fixed;
+                top: 60px;
+                left: 0;
+                right: 0;
+                background: white;
+                flex-direction: column;
+                padding: var(--spacing-xl);
+                box-shadow: var(--shadow-lg);
+                transform: translateX(-100%);
+                transition: transform var(--transition-base);
+            }
+            
+            .nav-menu.active {
+                transform: translateX(0);
+            }
+            
+            .nav-toggle {
+                display: block;
+            }
+            
+            .grid-cols-3 {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <nav>
+            <div class="container">
+                <div class="nav-container">
+                    <a href="/" class="logo">Brand Name</a>
+                    <ul class="nav-menu" id="navMenu">
+                        <li><a href="#features">Features</a></li>
+                        <li><a href="#about">About</a></li>
+                        <li><a href="#contact">Contact</a></li>
+                    </ul>
+                    <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
+                        ☰
+                    </button>
+                </div>
+            </div>
+        </nav>
+    </header>
+    
+    <!-- Main Content -->
+    <main>
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="container">
+                <h1>Welcome to Your Website</h1>
+                <p>Create something amazing with our powerful and easy-to-use platform</p>
+                <a href="#contact" class="btn btn-primary">Get Started</a>
+            </div>
+        </section>
+        
+        <!-- Features Section -->
+        <section id="features" class="section" style="background-color: var(--color-bg-light);">
+            <div class="container">
+                <h2 style="text-align: center; margin-bottom: var(--spacing-2xl);">Features</h2>
+                <div class="grid grid-cols-3">
+                    <div class="card">
+                        <h3>Feature One</h3>
+                        <p>Description of your first amazing feature that solves a problem.</p>
+                    </div>
+                    <div class="card">
+                        <h3>Feature Two</h3>
+                        <p>Description of your second amazing feature that provides value.</p>
+                    </div>
+                    <div class="card">
+                        <h3>Feature Three</h3>
+                        <p>Description of your third amazing feature that delights users.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- About Section -->
+        <section id="about" class="section">
+            <div class="container">
+                <h2 style="text-align: center;">About Us</h2>
+                <p style="text-align: center; max-width: 800px; margin: 0 auto;">
+                    We are passionate about helping you achieve your goals. Our platform is designed 
+                    with you in mind, providing the tools and support you need to succeed.
+                </p>
+            </div>
+        </section>
+        
+        <!-- Contact Section -->
+        <section id="contact" class="section" style="background-color: var(--color-bg-light);">
+            <div class="container">
+                <h2 style="text-align: center; margin-bottom: var(--spacing-2xl);">Get In Touch</h2>
+                <form style="max-width: 600px; margin: 0 auto;">
+                    <div class="form-group">
+                        <label for="name" class="form-label">Name</label>
+                        <input type="text" id="name" name="name" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" id="email" name="email" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="message" class="form-label">Message</label>
+                        <textarea id="message" name="message" class="form-input" rows="5" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Send Message</button>
+                </form>
+            </div>
+        </section>
+    </main>
+    
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 Brand Name. All rights reserved.</p>
+        </div>
+    </footer>
+    
+    <!-- JavaScript -->
+    <script>
+        // Mobile Navigation Toggle
+        const navToggle = document.getElementById('navToggle');
+        const navMenu = document.getElementById('navMenu');
+        
+        navToggle.addEventListener('click', () => {
+            navMenu.classList.toggle('active');
+            const isOpen = navMenu.classList.contains('active');
+            navToggle.setAttribute('aria-expanded', isOpen);
+        });
+        
+        // Close menu when clicking a link
+        const navLinks = navMenu.querySelectorAll('a');
+        navLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                navMenu.classList.remove('active');
+                navToggle.setAttribute('aria-expanded', 'false');
+            });
+        });
+        
+        // Form validation
+        const form = document.querySelector('form');
+        if (form) {
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                // Basic validation
+                const name = document.getElementById('name').value.trim();
+                const email = document.getElementById('email').value.trim();
+                const message = document.getElementById('message').value.trim();
+                
+                if (!name || !email || !message) {
+                    alert('Please fill in all fields');
+                    return;
+                }
+                
+                // Email validation
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(email)) {
+                    alert('Please enter a valid email address');
+                    return;
+                }
+                
+                // Success message (replace with actual form submission)
+                alert('Thank you for your message! We will get back to you soon.');
+                form.reset();
+            });
+        }
+        
+        // Smooth scroll offset for fixed header
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    const offsetTop = target.offsetTop - 80;
+                    window.scrollTo({
+                        top: offsetTop,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
