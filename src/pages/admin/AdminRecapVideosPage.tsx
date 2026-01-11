@@ -191,21 +191,21 @@ const AdminRecapVideosPage = () => {
   };
 
   const handleDelete = async (video: RecapVideo) => {
-    if (!confirm(`"${video.title}" 비디오를 정말 비공개 처리하시겠습니까?`)) {
+    if (!confirm(`"${video.title}" 비디오를 정말 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.`)) {
       return;
     }
 
     try {
       await deleteRecapVideo(video.id);
       toast({
-        title: "비공개 처리 완료",
-        description: "비디오가 비공개 처리되었습니다.",
+        title: "삭제 완료",
+        description: "비디오가 삭제되었습니다.",
       });
       await loadVideos();
     } catch (error: any) {
       toast({
-        title: "처리 실패",
-        description: error.message || "비공개 처리에 실패했습니다.",
+        title: "삭제 실패",
+        description: error.message || "비디오 삭제에 실패했습니다.",
         variant: "destructive",
       });
     }

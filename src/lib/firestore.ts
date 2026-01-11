@@ -1,4 +1,4 @@
-import { getFirestore, doc, setDoc, getDoc, collection, query, where, getDocs, orderBy, Timestamp, collectionGroup } from 'firebase/firestore';
+import { getFirestore, doc, setDoc, getDoc, collection, query, where, getDocs, orderBy, Timestamp, collectionGroup, deleteDoc } from 'firebase/firestore';
 import { auth } from './firebase';
 
 // Firestore 인스턴스 (firebase.ts에서 app이 초기화된 경우에만 사용 가능)
@@ -438,8 +438,8 @@ export const deleteRecapVideo = async (videoId: string): Promise<void> => {
     throw new Error('Firestore is not initialized');
   }
 
-  await setDoc(doc(db, 'recapVideos', videoId), { isPublished: false }, { merge: true });
-  console.log('✅ Recap video unpublished:', videoId);
+  await deleteDoc(doc(db, 'recapVideos', videoId));
+  console.log('✅ Recap video deleted:', videoId);
 };
 
 // ============================================
