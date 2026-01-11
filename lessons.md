@@ -5,14 +5,14 @@
 
 ---
 
-## 🎯 구현 내용
+## 🎯 구현된 기능
 
-### 핵심 기능
-- 다시보기 등록/인증 시스템 (Firebase Auth)
+- 다시보기 회원가입/로그인 (Firebase Auth)
 - 관리자 승인 시스템 (Firestore)
 - 비디오 관리 페이지 (CRUD)
 - 모달 비디오 플레이어 (자동 재생)
 - YouTube/Vimeo 썸네일 자동 추출
+- Vimeo 비밀 해시 링크 지원
 
 ---
 
@@ -20,29 +20,39 @@
 
 ### 1. Google Sheets → Firestore 마이그레이션
 - **문제**: 서비스 계정 권한 설정 복잡 (403 PERMISSION_DENIED)
-- **해결**: Firestore로 마이그레이션하여 프론트엔드에서 직접 접근
-- **교훈**: Firestore가 프로토타입에 더 적합
+- **해결**: Firestore로 마이그레이션
+- **교훈**: 프로토타입에는 Firestore가 더 적합
 
 ### 2. Firebase 익명 인증 제한
 - **문제**: `auth/admin-restricted-operation` 에러
-- **해결**: 개발 환경에서 Firestore 규칙 임시 개방 (`allow read, write: if true`)
-- **교훈**: 프로덕션 전 반드시 규칙 강화 필요
+- **해결**: 개발 환경에서 Firestore 규칙 임시 개방
+- **교훈**: 프로덕션 전 규칙 강화 필수
 
-### 3. 비디오 보안
-- **YouTube**: 링크만 있으면 누구나 시청 가능 (보안 약함)
-- **Vimeo Pro**: 도메인 제한, 다운로드 차단, 비밀번호 보호 가능 (권장)
+### 3. Vimeo 프라이버시 설정
+- **"비공개"**: 로그인 필요 → 임베드 불가 ❌
+- **"일부 공개"**: 비밀 해시 필요 (URL에 /hash 포함)
+- **"숨기기"**: 도메인 제한 임베드 가능 ✅ (권장)
+
+### 4. Vimeo 비밀 해시 처리
+- 형식: `vimeo.com/VIDEO_ID/HASH`
+- embed URL: `player.vimeo.com/video/VIDEO_ID?h=HASH`
+
+### 5. 비공개 영상 썸네일
+- 자동 추출 불가 (vumbnail.com 접근 제한)
+- 수동으로 썸네일 URL 입력 필요
 
 ---
 
 ## ⚠️ 프로덕션 배포 전 필수 작업
 
-1. Firestore 규칙에서 `if true` → `if isAdmin()` 변경
-2. Vimeo Pro에서 도메인 제한 설정
-3. Firebase Auth 관리자 인증 구현
+1. Firestore 규칙: `if true` → `if isAdmin()`
+2. Vimeo 프라이버시: "숨기기" 설정
+3. Vimeo 도메인 제한: 프로덕션 도메인만 허용
+4. 비공개 영상: 수동 썸네일 URL 입력
 
 ---
 
 ## 🔧 기술 스택
 - Frontend: React + TypeScript + Vite + Shadcn UI
 - Backend: Firebase (Auth + Firestore)
-- Video: YouTube/Vimeo embed + 자동 썸네일 추출
+- Video: YouTube/Vimeo embed (모달 플레이어)
