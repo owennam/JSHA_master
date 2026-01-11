@@ -4,22 +4,68 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PlayCircle, CheckCircle, Video, LogOut, Clock, XCircle } from "lucide-react";
+import { PlayCircle, CheckCircle, Video, LogOut, Clock, XCircle, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged, signOut, User } from "firebase/auth";
 import { getRecapRegistrant, RecapRegistrant, getAllRecapVideos, RecapVideo } from "@/lib/firestore";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+
+// 비디오 URL에서 썸네일 자동 추출
+const getVideoThumbnail = (url: string, fallback?: string): string => {
+  if (!url) return fallback || "https://placehold.co/400x225/2F6FED/FFFFFF/png?text=Video";
+
+  // YouTube 썸네일 추출
+  const youtubeMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  if (youtubeMatch) {
+    return `https://img.youtube.com/vi/${youtubeMatch[1]}/hqdefault.jpg`;
+  }
+
+  // Vimeo 썸네일 (vumbnail 서비스 사용)
+  const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
+  if (vimeoMatch) {
+    return `https://vumbnail.com/${vimeoMatch[1]}.jpg`;
+  }
+
+  // 기존 썸네일이 있으면 사용, 없으면 기본 이미지
+  return fallback || "https://placehold.co/400x225/2F6FED/FFFFFF/png?text=Video";
+};
+
+// 비디오 URL을 embed URL로 변환
+const getEmbedUrl = (url: string): string => {
+  if (!url) return "";
+
+  // YouTube embed URL 변환
+  const youtubeMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  if (youtubeMatch) {
+    return `https://www.youtube.com/embed/${youtubeMatch[1]}?autoplay=1&rel=0`;
+  }
+
+  // Vimeo embed URL 변환
+  const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
+  if (vimeoMatch) {
+    return `https://player.vimeo.com/video/${vimeoMatch[1]}?autoplay=1`;
+  }
+
+  return url;
+};
 
 type AccessStatus = 'loading' | 'not_authenticated' | 'pending' | 'rejected' | 'approved';
 
 const RecapPage = () => {
-  const { toast} = useToast();
+  const { toast } = useToast();
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
   const [accessStatus, setAccessStatus] = useState<AccessStatus>('loading');
   const [registrantData, setRegistrantData] = useState<RecapRegistrant | null>(null);
   const [videos, setVideos] = useState<RecapVideo[]>([]);
   const [videosLoading, setVideosLoading] = useState(true);
+  const [selectedVideo, setSelectedVideo] = useState<RecapVideo | null>(null);
 
   // Firebase 인증 상태 감지
   useEffect(() => {
@@ -319,41 +365,63 @@ const RecapPage = () => {
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {videos.map((video) => (
-                <Card
+                <div
                   key={video.id}
-                  className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border-2 cursor-pointer"
-                  onClick={() => {
-                    window.open(video.vimeoUrl, '_blank');
-                  }}
+                  onClick={() => setSelectedVideo(video)}
+                  className="block cursor-pointer"
                 >
-                <CardHeader className="p-0">
-                  <div className="relative overflow-hidden rounded-t-xl">
-                    <img
-                      src={video.thumbnail}
-                      alt={video.title}
-                      className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                      <PlayCircle className="w-16 h-16 text-white" />
-                    </div>
-                    <div className="absolute top-2 left-2 bg-primary text-primary-foreground px-3 py-1 rounded-full text-xs font-semibold">
-                      {video.module}
-                    </div>
-                    <div className="absolute top-2 right-2 bg-black/70 text-white px-2 py-1 rounded text-xs">
-                      {video.duration}
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="p-4">
-                  <CardTitle className="text-lg mb-2 group-hover:text-primary transition-colors">
-                    {video.title}
-                  </CardTitle>
-                  <p className="text-sm text-muted-foreground">{video.description}</p>
-                </CardContent>
-              </Card>
+                  <Card
+                    className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border-2"
+                  >
+                    <CardHeader className="p-0">
+                      <div className="relative overflow-hidden rounded-t-xl">
+                        <img
+                          src={getVideoThumbnail(video.vimeoUrl, video.thumbnail)}
+                          alt={video.title}
+                          className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                          <PlayCircle className="w-16 h-16 text-white" />
+                        </div>
+                        <div className="absolute top-2 left-2 bg-primary text-primary-foreground px-3 py-1 rounded-full text-xs font-semibold">
+                          {video.module}
+                        </div>
+                        <div className="absolute top-2 right-2 bg-black/70 text-white px-2 py-1 rounded text-xs">
+                          {video.duration}
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="p-4">
+                      <CardTitle className="text-lg mb-2 group-hover:text-primary transition-colors">
+                        {video.title}
+                      </CardTitle>
+                      <p className="text-sm text-muted-foreground">{video.description}</p>
+                    </CardContent>
+                  </Card>
+                </div>
               ))}
             </div>
           )}
+
+          {/* 비디오 플레이어 모달 */}
+          <Dialog open={!!selectedVideo} onOpenChange={(open) => !open && setSelectedVideo(null)}>
+            <DialogContent className="max-w-5xl w-full p-0 overflow-hidden">
+              <DialogHeader className="p-4 pb-2">
+                <DialogTitle className="pr-8">{selectedVideo?.title}</DialogTitle>
+              </DialogHeader>
+              <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+                {selectedVideo && (
+                  <iframe
+                    src={getEmbedUrl(selectedVideo.vimeoUrl)}
+                    className="absolute inset-0 w-full h-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    title={selectedVideo.title}
+                  />
+                )}
+              </div>
+            </DialogContent>
+          </Dialog>
 
           {/* 안내 메시지 */}
           <div className="mt-12 max-w-4xl mx-auto">

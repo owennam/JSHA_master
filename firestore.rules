@@ -62,21 +62,16 @@ service cloud.firestore {
       allow update: if isOwner(userId) &&
                       !request.resource.data.diff(resource.data).affectedKeys().hasAny(['status']);
 
-      // 개발 환경: 인증된 모든 사용자가 조회 및 업데이트 가능 (임시)
-      // TODO: 프로덕션에서는 isAdmin()으로 변경 필요
-      allow read, write, list: if isSignedIn();
+      // ⚠️ 개발 환경: 모든 접근 허용 (프로덕션에서는 isAdmin()으로 변경 필요)
+      allow read, write: if true;
     }
 
     // ============================================
     // 다시보기 비디오 컬렉션 (recapVideos)
     // ============================================
     match /recapVideos/{videoId} {
-      // 승인된 사용자는 공개된 비디오를 볼 수 있음
-      allow read: if isSignedIn() && resource.data.isPublished == true;
-
-      // 관리자는 모든 비디오 CRUD 가능 (개발 환경: 모든 인증된 사용자)
-      // TODO: 프로덕션에서는 isAdmin()으로 변경 필요
-      allow read, write, list: if isSignedIn();
+      // ⚠️ 개발 환경: 모든 접근 허용 (프로덕션에서는 isAdmin()으로 변경 필요)
+      allow read, write: if true;
     }
 
     // 기타 모든 문서는 기본적으로 접근 불가

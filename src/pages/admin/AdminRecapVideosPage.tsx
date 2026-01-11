@@ -39,8 +39,6 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { auth } from "@/lib/firebase";
-import { onAuthStateChanged, signInAnonymously } from "firebase/auth";
 
 const AdminRecapVideosPage = () => {
   const { toast } = useToast();
@@ -48,7 +46,6 @@ const AdminRecapVideosPage = () => {
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingVideo, setEditingVideo] = useState<RecapVideo | null>(null);
-  const [authChecked, setAuthChecked] = useState(false);
 
   // 폼 상태
   const [formData, setFormData] = useState({
@@ -62,37 +59,7 @@ const AdminRecapVideosPage = () => {
     isPublished: true,
   });
 
-  // Firebase Auth 상태 확인
-  useEffect(() => {
-    if (!auth) {
-      setAuthChecked(true);
-      return;
-    }
-
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        try {
-          console.log("Admin videos page not authenticated, signing in anonymously...");
-          await signInAnonymously(auth);
-          console.log("✅ Anonymous sign-in successful");
-        } catch (error) {
-          console.error("Anonymous sign-in failed:", error);
-          toast({
-            title: "인증 오류",
-            description: "Firebase 인증에 실패했습니다.",
-            variant: "destructive",
-          });
-        }
-      }
-      setAuthChecked(true);
-    });
-
-    return () => unsubscribe();
-  }, [toast]);
-
   const loadVideos = async () => {
-    if (!authChecked) return;
-
     setLoading(true);
     try {
       const videoList = await getAllRecapVideos(false); // 모든 비디오 (미공개 포함)
@@ -111,7 +78,7 @@ const AdminRecapVideosPage = () => {
 
   useEffect(() => {
     loadVideos();
-  }, [authChecked]);
+  }, []);
 
   const handleOpenDialog = (video?: RecapVideo) => {
     if (video) {
