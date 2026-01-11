@@ -1,98 +1,128 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PlayCircle, CheckCircle, Video, LogOut } from "lucide-react";
+import { PlayCircle, CheckCircle, Video, LogOut, Clock, XCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { auth, googleProvider } from "@/lib/firebase";
-import { signInWithPopup, onAuthStateChanged, signOut } from "firebase/auth";
+import { auth } from "@/lib/firebase";
+import { onAuthStateChanged, signOut, User } from "firebase/auth";
+import { getRecapRegistrant, RecapRegistrant, getAllRecapVideos, RecapVideo } from "@/lib/firestore";
 
-// 임시 영상 데이터 (나중에 추가할 영상들)
-const recapVideos = [
-  {
-    id: 1,
-    title: "세션 1-1: 통증의 이해",
-    description: "통증의 기본 원리와 JSHA 접근법",
-    vimeoUrl: "https://vimeo.com/placeholder",
-    duration: "45분",
-    module: "세션 1",
-    thumbnail: "https://placehold.co/400x225/2F6FED/FFFFFF/png?text=Module+1-1",
-  },
-  {
-    id: 2,
-    title: "세션 1-2: 구조적 불균형 진단",
-    description: "실전 진단 기법과 임상 적용",
-    vimeoUrl: "https://vimeo.com/placeholder",
-    duration: "50분",
-    module: "세션 1",
-    thumbnail: "https://placehold.co/400x225/2F6FED/FFFFFF/png?text=Module+1-2",
-  },
-  // 더 많은 영상들...
-];
+type AccessStatus = 'loading' | 'not_authenticated' | 'pending' | 'rejected' | 'approved';
 
 const RecapPage = () => {
-  const { toast } = useToast();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isAuthorized, setIsAuthorized] = useState(false);
-  const [userEmail, setUserEmail] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const { toast} = useToast();
+  const navigate = useNavigate();
+  const [user, setUser] = useState<User | null>(null);
+  const [accessStatus, setAccessStatus] = useState<AccessStatus>('loading');
+  const [registrantData, setRegistrantData] = useState<RecapRegistrant | null>(null);
+  const [videos, setVideos] = useState<RecapVideo[]>([]);
+  const [videosLoading, setVideosLoading] = useState(true);
 
   // Firebase 인증 상태 감지
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setIsCheckingAuth(true);
-      if (user && user.email) {
-        setIsAuthenticated(true);
-        setUserEmail(user.email);
-        // 수료자 확인
-        await checkAuthorization(user.email);
+    if (!auth) {
+      navigate('/recap/auth');
+      return;
+    }
+
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        setUser(firebaseUser);
+        // 로그인된 경우에만 접근 권한 확인
+        await checkRecapAccess(firebaseUser.uid);
       } else {
-        setIsAuthenticated(false);
-        setIsAuthorized(false);
-        setUserEmail("");
+        // 로그인 안 되어 있으면 바로 인증 페이지로 이동
+        navigate('/recap/auth');
       }
-      setIsCheckingAuth(false);
-      setIsLoading(false);
     });
 
     return () => unsubscribe();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Google 로그인 처리
-  const handleGoogleLogin = async () => {
-    setIsLoading(true);
+  // 접근 권한 확인 (Firestore에서 등록자 상태 조회)
+  const checkRecapAccess = async (uid: string) => {
     try {
-      const result = await signInWithPopup(auth, googleProvider);
-      const user = result.user;
+      // Firestore에서 다시보기 등록자 조회
+      const registrant = await getRecapRegistrant(uid);
 
-      if (user.email) {
+      if (!registrant) {
+        // 등록되지 않은 사용자 - 로그아웃 후 등록 페이지로 이동
+        console.log("Not registered, logging out and redirecting to auth page");
+        await signOut(auth!);
         toast({
-          title: "로그인 성공",
-          description: `${user.email}로 로그인되었습니다.`,
+          title: "등록이 필요합니다",
+          description: "다시보기 서비스를 이용하려면 먼저 등록해주세요.",
+          variant: "destructive",
         });
-        // 인증 상태는 onAuthStateChanged에서 자동 처리
+        navigate('/recap/auth');
+        return;
       }
-    } catch (error: any) {
-      console.error("로그인 에러:", error);
+
+      // 등록자 데이터 저장
+      setRegistrantData(registrant);
+
+      // 상태에 따라 처리
+      if (registrant.status === 'approved') {
+        setAccessStatus('approved');
+      } else if (registrant.status === 'pending') {
+        setAccessStatus('pending');
+      } else if (registrant.status === 'rejected') {
+        setAccessStatus('rejected');
+      } else {
+        // 기타 상태 - 로그아웃 후 등록 페이지로 이동
+        await signOut(auth!);
+        navigate('/recap/auth');
+      }
+    } catch (error) {
+      console.error("Access check failed:", error);
+      // 에러 발생 시 로그아웃 후 등록 페이지로 이동
+      await signOut(auth!);
       toast({
-        title: "로그인 실패",
-        description: error.message || "다시 시도해주세요.",
+        title: "접근 오류",
+        description: "접근 권한 확인 중 오류가 발생했습니다.",
         variant: "destructive",
       });
-      setIsLoading(false);
+      navigate('/recap/auth');
     }
   };
+
+  // 비디오 목록 로드
+  useEffect(() => {
+    const loadVideos = async () => {
+      if (accessStatus === 'approved') {
+        try {
+          setVideosLoading(true);
+          const videoList = await getAllRecapVideos(true);
+          setVideos(videoList);
+        } catch (error) {
+          console.error("Failed to load videos:", error);
+          toast({
+            title: "비디오 로드 실패",
+            description: "비디오 목록을 불러올 수 없습니다.",
+            variant: "destructive",
+          });
+        } finally {
+          setVideosLoading(false);
+        }
+      }
+    };
+
+    loadVideos();
+  }, [accessStatus, toast]);
 
   // 로그아웃 처리
   const handleLogout = async () => {
     try {
-      await signOut(auth);
+      await signOut(auth!);
       toast({
         title: "로그아웃 완료",
         description: "안전하게 로그아웃되었습니다.",
       });
+      navigate('/recap/auth');
     } catch (error: any) {
       toast({
         title: "로그아웃 실패",
@@ -102,126 +132,65 @@ const RecapPage = () => {
     }
   };
 
-  // 이메일 승인 확인 (백엔드 API 호출)
-  const checkAuthorization = async (email: string) => {
-    try {
-      const SERVER_URL = import.meta.env.VITE_SERVER_URL || "http://localhost:3001";
-      const response = await fetch(`${SERVER_URL}/check-graduate`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email }),
-      });
-
-      const result = await response.json();
-      setIsAuthorized(result.authorized);
-    } catch (error) {
-      console.error("Authorization check failed:", error);
-      setIsAuthorized(false);
-    }
-  };
-
-  // 초기 로딩 중
-  if (isCheckingAuth) {
+  // 로딩 중
+  if (accessStatus === 'loading') {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-muted-foreground">인증 확인 중...</p>
+          <p className="text-muted-foreground">접근 권한 확인 중...</p>
         </div>
       </div>
     );
   }
 
-  // 로그인 안 된 경우
-  if (!isAuthenticated) {
+  // 승인 대기 중
+  if (accessStatus === 'pending') {
     return (
       <div className="min-h-screen bg-background">
         <Header />
-        <main className="pt-40 pb-20 px-4 bg-gradient-to-br from-primary/7 via-background to-secondary/7 min-h-[calc(100vh-80px)]">
-          <div className="container mx-auto max-w-2xl">
-            <Card className="border-2 shadow-xl">
-              <CardHeader className="text-center">
-                <CardTitle className="text-3xl mb-4 text-black">수료자 전용 영상</CardTitle>
-                <p className="text-muted-foreground">
-                  JSHA 마스터 코스 수료자만 접근할 수 있습니다.
-                  <br />
-                  Google 계정으로 로그인하여 인증해주세요.
-                </p>
-              </CardHeader>
-              <CardContent className="flex flex-col items-center gap-4">
-                <Button
-                  onClick={handleGoogleLogin}
-                  disabled={isLoading}
-                  size="lg"
-                  className="bg-primary hover:bg-primary/90 text-white px-8"
-                >
-                  {isLoading ? "로그인 중..." : "Google로 로그인"}
-                </Button>
-                <p className="text-sm text-muted-foreground text-center">
-                  수료증에 등록된 이메일 계정으로 로그인하세요.
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </main>
-        <Footer />
-      </div>
-    );
-  }
 
-  // 로그인 했지만 승인 안 된 경우
-  if (isAuthenticated && !isAuthorized) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Header />
+        {/* 우측 상단 사용자 정보 */}
+        <div className="fixed top-24 right-4 z-40 flex items-center gap-3 bg-white/95 backdrop-blur-sm px-4 py-2 rounded-full shadow-md border border-gray-200">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 bg-amber-100 rounded-full flex items-center justify-center">
+              <Clock className="w-4 h-4 text-amber-600" />
+            </div>
+            <span className="text-sm font-medium text-foreground max-w-[150px] truncate">
+              {user?.email || "인증된 사용자"}
+            </span>
+          </div>
+          <div className="h-4 w-px bg-gray-300"></div>
+          <Button
+            onClick={handleLogout}
+            variant="ghost"
+            size="sm"
+            className="h-7 px-2 text-xs"
+          >
+            <LogOut className="w-3 h-3 mr-1" />
+            로그아웃
+          </Button>
+        </div>
+
         <main className="pt-40 pb-20 px-4 bg-gradient-to-br from-primary/7 via-background to-secondary/7 min-h-[calc(100vh-80px)]">
           <div className="container mx-auto max-w-2xl">
             <Card className="border-2 border-amber-500/20 bg-amber-500/5">
               <CardHeader className="text-center">
-                <CardTitle className="text-3xl mb-4">접근 권한 없음</CardTitle>
+                <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Clock className="w-8 h-8 text-amber-600" />
+                </div>
+                <CardTitle className="text-3xl mb-4">승인 대기 중</CardTitle>
                 <p className="text-muted-foreground">
-                  로그인한 계정 ({userEmail})은
+                  관리자가 등록 신청을 검토 중입니다.
                   <br />
-                  수료자 명단에 등록되어 있지 않습니다.
+                  승인 완료 후 영상을 시청하실 수 있습니다.
                 </p>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="bg-card p-4 rounded-lg border">
-                  <h4 className="font-semibold mb-2">접근 방법:</h4>
-                  <ul className="text-sm text-muted-foreground space-y-2">
-                    <li className="flex items-start gap-2">
-                      <span>•</span>
-                      <span>JSHA 마스터 코스를 수료하신 경우, 관리자에게 문의하세요.</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span>•</span>
-                      <span>수료증에 등록된 이메일 계정으로 로그인하세요.</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span>•</span>
-                      <span>다른 계정으로 다시 시도하려면 로그아웃하세요.</span>
-                    </li>
-                  </ul>
-                </div>
-                <div className="space-y-3">
-                  <div className="text-center">
-                    <a
-                      href="mailto:jshaworkshop@gmail.com"
-                      className="text-primary hover:underline font-medium"
-                    >
-                      jshaworkshop@gmail.com
-                    </a>
-                  </div>
-                  <Button
-                    onClick={handleLogout}
-                    variant="outline"
-                    className="w-full"
-                  >
-                    <LogOut className="w-4 h-4 mr-2" />
-                    로그아웃
-                  </Button>
+                <div className="text-center space-y-3">
+                  <p className="text-sm text-muted-foreground">
+                    문의: <a href="mailto:jshaworkshop@gmail.com" className="text-primary hover:underline">jshaworkshop@gmail.com</a>
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -232,17 +201,99 @@ const RecapPage = () => {
     );
   }
 
-  // 로그인 + 승인된 경우: 영상 목록 표시
+  // 거부된 경우
+  if (accessStatus === 'rejected') {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+
+        {/* 우측 상단 사용자 정보 */}
+        <div className="fixed top-24 right-4 z-40 flex items-center gap-3 bg-white/95 backdrop-blur-sm px-4 py-2 rounded-full shadow-md border border-gray-200">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 bg-red-100 rounded-full flex items-center justify-center">
+              <XCircle className="w-4 h-4 text-red-600" />
+            </div>
+            <span className="text-sm font-medium text-foreground max-w-[150px] truncate">
+              {user?.email || "인증된 사용자"}
+            </span>
+          </div>
+          <div className="h-4 w-px bg-gray-300"></div>
+          <Button
+            onClick={handleLogout}
+            variant="ghost"
+            size="sm"
+            className="h-7 px-2 text-xs"
+          >
+            <LogOut className="w-3 h-3 mr-1" />
+            로그아웃
+          </Button>
+        </div>
+
+        <main className="pt-40 pb-20 px-4 bg-gradient-to-br from-primary/7 via-background to-secondary/7 min-h-[calc(100vh-80px)]">
+          <div className="container mx-auto max-w-2xl">
+            <Card className="border-2 border-red-500/20 bg-red-500/5">
+              <CardHeader className="text-center">
+                <CardTitle className="text-3xl mb-4">접근이 거부되었습니다</CardTitle>
+                <p className="text-muted-foreground">
+                  등록 신청이 거부되었습니다.
+                  <br />
+                  문의사항이 있으시면 관리자에게 연락해주세요.
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="text-center space-y-3">
+                  <a
+                    href="mailto:jshaworkshop@gmail.com"
+                    className="text-primary hover:underline font-medium"
+                  >
+                    jshaworkshop@gmail.com
+                  </a>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  // 승인된 경우: 영상 목록 표시
   return (
     <div className="min-h-screen bg-background">
       <Header />
+
+      {/* 우측 상단 사용자 정보 */}
+      <div className="fixed top-24 right-4 z-40 flex items-center gap-3 bg-white/95 backdrop-blur-sm px-4 py-2 rounded-full shadow-md border border-gray-200">
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 bg-primary/10 rounded-full flex items-center justify-center">
+            <CheckCircle className="w-4 h-4 text-primary" />
+          </div>
+          <span className="text-sm font-medium text-foreground max-w-[150px] truncate">
+            {user?.email || "인증된 사용자"}
+          </span>
+        </div>
+        <div className="h-4 w-px bg-gray-300"></div>
+        <Button
+          onClick={handleLogout}
+          variant="ghost"
+          size="sm"
+          className="h-7 px-2 text-xs"
+        >
+          <LogOut className="w-3 h-3 mr-1" />
+          로그아웃
+        </Button>
+      </div>
+
       <main className="pt-40 pb-20 px-4">
         <div className="container mx-auto max-w-7xl">
           {/* 헤더 */}
           <div className="text-center mb-12 animate-fade-in">
             <div className="inline-flex items-center gap-2 mb-4 px-4 py-2 bg-primary/10 rounded-full">
               <CheckCircle className="w-5 h-5 text-primary" />
-              <span className="text-sm font-semibold text-primary">인증 완료</span>
+              <span className="text-sm font-semibold text-primary">
+                {registrantData?.batch ? '수료자 인증 완료' : '접근 승인됨'}
+              </span>
             </div>
             <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
               마스터 코스 다시보기
@@ -254,50 +305,27 @@ const RecapPage = () => {
             </p>
           </div>
 
-          {/* 사용자 정보 */}
-          <div className="mb-8 max-w-4xl mx-auto">
-            <Card className="bg-primary/5 border-primary/20">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-                      <CheckCircle className="w-6 h-6 text-primary" />
-                    </div>
-                    <div>
-                      <div className="font-semibold text-foreground">
-                        {userEmail || "인증된 사용자"}
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        JSHA 마스터 코스 수료자
-                      </div>
-                    </div>
-                  </div>
-                  <Button
-                    onClick={handleLogout}
-                    variant="outline"
-                    size="sm"
-                  >
-                    <LogOut className="w-4 h-4 mr-2" />
-                    로그아웃
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
           {/* 영상 목록 */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {recapVideos.map((video) => (
-              <Card
-                key={video.id}
-                className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border-2 cursor-pointer"
-                onClick={() => {
-                  toast({
-                    title: "영상 준비 중",
-                    description: "수업 영상은 순차적으로 업로드될 예정입니다.",
-                  });
-                }}
-              >
+          {videosLoading ? (
+            <div className="flex items-center justify-center py-20">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+            </div>
+          ) : videos.length === 0 ? (
+            <div className="text-center py-20">
+              <Video className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-20" />
+              <p className="text-lg text-muted-foreground">아직 등록된 영상이 없습니다.</p>
+              <p className="text-sm text-muted-foreground mt-2">영상이 추가되면 이메일로 알려드리겠습니다.</p>
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {videos.map((video) => (
+                <Card
+                  key={video.id}
+                  className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border-2 cursor-pointer"
+                  onClick={() => {
+                    window.open(video.vimeoUrl, '_blank');
+                  }}
+                >
                 <CardHeader className="p-0">
                   <div className="relative overflow-hidden rounded-t-xl">
                     <img
@@ -323,8 +351,9 @@ const RecapPage = () => {
                   <p className="text-sm text-muted-foreground">{video.description}</p>
                 </CardContent>
               </Card>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
 
           {/* 안내 메시지 */}
           <div className="mt-12 max-w-4xl mx-auto">

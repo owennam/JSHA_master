@@ -195,6 +195,247 @@ export const getUsersByStatus = async (status: UserStatus): Promise<UserProfile[
 };
 
 // ============================================
+// 다시보기 등록자 관련 타입 및 함수들
+// ============================================
+
+// 다시보기 등록자 정보 타입
+export interface RecapRegistrant {
+  uid: string;
+  email: string;
+  name: string;
+  batch?: string; // 수료 기수
+  status: UserStatus; // 승인 상태 (pending, approved, rejected)
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * Firestore에 다시보기 등록자 저장
+ */
+export const createRecapRegistrant = async (
+  uid: string,
+  email: string,
+  name: string,
+  batch?: string,
+  status: UserStatus = 'pending'
+): Promise<void> => {
+  if (!db) {
+    throw new Error('Firestore is not initialized');
+  }
+
+  const registrant: RecapRegistrant = {
+    uid,
+    email,
+    name,
+    batch,
+    status,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+
+  await setDoc(doc(db, 'recapRegistrants', uid), registrant);
+  console.log('✅ Recap registrant created:', uid, 'status:', status);
+};
+
+/**
+ * Firestore에서 다시보기 등록자 조회
+ */
+export const getRecapRegistrant = async (uid: string): Promise<RecapRegistrant | null> => {
+  if (!db) {
+    throw new Error('Firestore is not initialized');
+  }
+
+  const registrantDoc = await getDoc(doc(db, 'recapRegistrants', uid));
+
+  if (registrantDoc.exists()) {
+    return registrantDoc.data() as RecapRegistrant;
+  }
+
+  return null;
+};
+
+/**
+ * 이메일로 다시보기 등록자 조회
+ */
+export const getRecapRegistrantByEmail = async (email: string): Promise<RecapRegistrant | null> => {
+  if (!db) {
+    throw new Error('Firestore is not initialized');
+  }
+
+  const registrantsRef = collection(db, 'recapRegistrants');
+  const q = query(registrantsRef, where('email', '==', email));
+  const querySnapshot = await getDocs(q);
+
+  if (!querySnapshot.empty) {
+    const registrantDoc = querySnapshot.docs[0];
+    return registrantDoc.data() as RecapRegistrant;
+  }
+
+  return null;
+};
+
+/**
+ * 특정 상태의 다시보기 등록자 조회
+ */
+export const getRecapRegistrantsByStatus = async (status: UserStatus): Promise<RecapRegistrant[]> => {
+  if (!db) {
+    throw new Error('Firestore is not initialized');
+  }
+
+  const registrantsRef = collection(db, 'recapRegistrants');
+  const q = query(registrantsRef, where('status', '==', status), orderBy('createdAt', 'desc'));
+  const querySnapshot = await getDocs(q);
+
+  return querySnapshot.docs.map(doc => doc.data() as RecapRegistrant);
+};
+
+/**
+ * 다시보기 등록자 상태 업데이트
+ */
+export const updateRecapRegistrantStatus = async (
+  uid: string,
+  status: UserStatus
+): Promise<void> => {
+  if (!db) {
+    throw new Error('Firestore is not initialized');
+  }
+
+  await setDoc(
+    doc(db, 'recapRegistrants', uid),
+    {
+      status,
+      updatedAt: new Date().toISOString(),
+    },
+    { merge: true }
+  );
+  console.log('✅ Recap registrant status updated:', uid, 'new status:', status);
+};
+
+/**
+ * 모든 다시보기 등록자 조회 (Admin용)
+ */
+export const getAllRecapRegistrants = async (): Promise<RecapRegistrant[]> => {
+  if (!db) {
+    throw new Error('Firestore is not initialized');
+  }
+
+  const registrantsRef = collection(db, 'recapRegistrants');
+  const q = query(registrantsRef, orderBy('createdAt', 'desc'));
+  const querySnapshot = await getDocs(q);
+
+  return querySnapshot.docs.map(doc => doc.data() as RecapRegistrant);
+};
+
+// ============================================
+// 다시보기 비디오 관련 타입 및 함수들
+// ============================================
+
+// 다시보기 비디오 정보 타입
+export interface RecapVideo {
+  id: string;
+  title: string;
+  description: string;
+  vimeoUrl: string;
+  duration: string;
+  module: string;
+  thumbnail: string;
+  order: number;
+  isPublished: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * Firestore에 다시보기 비디오 생성
+ */
+export const createRecapVideo = async (videoData: Omit<RecapVideo, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> => {
+  if (!db) {
+    throw new Error('Firestore is not initialized');
+  }
+
+  const videosRef = collection(db, 'recapVideos');
+  const newVideoRef = doc(videosRef);
+
+  const video: RecapVideo = {
+    id: newVideoRef.id,
+    ...videoData,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+
+  await setDoc(newVideoRef, video);
+  console.log('✅ Recap video created:', video.id);
+  return video.id;
+};
+
+/**
+ * 모든 다시보기 비디오 조회 (order 순서대로)
+ */
+export const getAllRecapVideos = async (publishedOnly: boolean = true): Promise<RecapVideo[]> => {
+  if (!db) {
+    throw new Error('Firestore is not initialized');
+  }
+
+  const videosRef = collection(db, 'recapVideos');
+  let q = query(videosRef, orderBy('order', 'asc'));
+
+  if (publishedOnly) {
+    q = query(videosRef, where('isPublished', '==', true), orderBy('order', 'asc'));
+  }
+
+  const querySnapshot = await getDocs(q);
+  return querySnapshot.docs.map(doc => doc.data() as RecapVideo);
+};
+
+/**
+ * 특정 비디오 조회
+ */
+export const getRecapVideo = async (videoId: string): Promise<RecapVideo | null> => {
+  if (!db) {
+    throw new Error('Firestore is not initialized');
+  }
+
+  const videoDoc = await getDoc(doc(db, 'recapVideos', videoId));
+
+  if (videoDoc.exists()) {
+    return videoDoc.data() as RecapVideo;
+  }
+
+  return null;
+};
+
+/**
+ * 다시보기 비디오 업데이트
+ */
+export const updateRecapVideo = async (videoId: string, updates: Partial<Omit<RecapVideo, 'id' | 'createdAt'>>): Promise<void> => {
+  if (!db) {
+    throw new Error('Firestore is not initialized');
+  }
+
+  await setDoc(
+    doc(db, 'recapVideos', videoId),
+    {
+      ...updates,
+      updatedAt: new Date().toISOString(),
+    },
+    { merge: true }
+  );
+  console.log('✅ Recap video updated:', videoId);
+};
+
+/**
+ * 다시보기 비디오 삭제
+ */
+export const deleteRecapVideo = async (videoId: string): Promise<void> => {
+  if (!db) {
+    throw new Error('Firestore is not initialized');
+  }
+
+  await setDoc(doc(db, 'recapVideos', videoId), { isPublished: false }, { merge: true });
+  console.log('✅ Recap video unpublished:', videoId);
+};
+
+// ============================================
 // 주문 관련 함수들
 // ============================================
 

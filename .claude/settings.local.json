@@ -32,7 +32,11 @@
       "Bash(nslookup:*)",
       "Bash(git pull:*)",
       "WebFetch(domain:firebase.google.com)",
-      "WebFetch(domain:byeol-dev.tistory.com)"
+      "WebFetch(domain:byeol-dev.tistory.com)",
+      "Bash(ping:*)",
+      "Bash(powershell -Command \"Stop-Process -Id 17500 -Force\")",
+      "Bash(powershell -Command:*)",
+      "Bash(firebase:*)"
     ],
     "deny": [],
     "ask": []

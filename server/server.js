@@ -351,6 +351,136 @@ app.post('/check-graduate', async (req, res) => {
   }
 });
 
+// ============================================
+// 다시보기 관련 엔드포인트 (더 이상 사용하지 않음 - Firestore로 마이그레이션됨)
+// ============================================
+/*
+// 다시보기 접근 권한 확인 엔드포인트
+// 수료자 OR 승인된 등록자만 접근 가능
+app.post('/check-recap-access', async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({
+      success: false,
+      accessGranted: false,
+      message: 'email is required'
+    });
+  }
+
+  try {
+    console.log('다시보기 접근 권한 확인:', email);
+
+    // 1. 먼저 수료자 명단 확인 (수료자는 자동 승인)
+    const isGraduate = await googleSheetsService.checkGraduateEmail(email);
+    if (isGraduate) {
+      console.log('✅ 수료자 확인됨:', email);
+      return res.json({
+        success: true,
+        accessGranted: true,
+        isGraduate: true,
+        status: 'approved',
+        message: '수료자로 확인되었습니다.'
+      });
+    }
+
+    // 2. 등록자 명단 확인
+    const registrant = await googleSheetsService.checkRecapRegistrant(email);
+    if (registrant.exists) {
+      const accessGranted = registrant.status === 'approved';
+      console.log(`📋 등록자 확인됨: ${email}, 상태: ${registrant.status}`);
+      return res.json({
+        success: true,
+        accessGranted,
+        isGraduate: false,
+        status: registrant.status,
+        message: accessGranted
+          ? '접근이 승인되었습니다.'
+          : '관리자 승인 대기 중입니다.'
+      });
+    }
+
+    // 3. 어디에도 없음
+    console.log('❌ 미등록 사용자:', email);
+    return res.json({
+      success: true,
+      accessGranted: false,
+      isGraduate: false,
+      status: 'not_registered',
+      message: '등록되지 않은 사용자입니다.'
+    });
+
+  } catch (error) {
+    console.error('다시보기 접근 확인 중 오류:', error);
+    res.status(500).json({
+      success: false,
+      accessGranted: false,
+      error: 'INTERNAL_SERVER_ERROR',
+      message: '접근 권한 확인 중 서버 오류가 발생했습니다.'
+    });
+  }
+});
+
+// 다시보기 등록 신청 엔드포인트
+app.post('/register-recap', async (req, res) => {
+  const { name, email, batch } = req.body;
+
+  if (!name || !email) {
+    return res.status(400).json({
+      success: false,
+      message: 'name and email are required'
+    });
+  }
+
+  try {
+    console.log('다시보기 등록 신청:', { name, email, batch });
+
+    // 이미 등록되어 있는지 확인
+    const existing = await googleSheetsService.checkRecapRegistrant(email);
+    if (existing.exists) {
+      return res.json({
+        success: true,
+        alreadyRegistered: true,
+        status: existing.status,
+        message: '이미 등록된 이메일입니다.'
+      });
+    }
+
+    // 수료자인지 확인 (수료자면 자동 승인)
+    const isGraduate = await googleSheetsService.checkGraduateEmail(email);
+    const status = isGraduate ? 'approved' : 'pending';
+
+    // 등록자 추가
+    await googleSheetsService.addRecapRegistrant({ name, email, batch });
+
+    // 수료자면 상태를 approved로 업데이트
+    if (isGraduate) {
+      await googleSheetsService.updateRecapRegistrantStatus(email, 'approved');
+    }
+
+    console.log(`✅ 다시보기 등록 완료: ${email}, 상태: ${status}`);
+    res.json({
+      success: true,
+      alreadyRegistered: false,
+      status,
+      isGraduate,
+      message: isGraduate
+        ? '수료자로 확인되어 바로 이용 가능합니다.'
+        : '등록이 완료되었습니다. 관리자 승인 후 이용 가능합니다.'
+    });
+
+  } catch (error) {
+    console.error('다시보기 등록 중 오류:', error);
+    res.status(500).json({
+      success: false,
+      error: 'INTERNAL_SERVER_ERROR',
+      message: '등록 처리 중 서버 오류가 발생했습니다.'
+    });
+  }
+});
+*/
+// ============================================
+
 // Master Care 신청 엔드포인트
 app.post('/submit-mastercare', async (req, res) => {
   const {

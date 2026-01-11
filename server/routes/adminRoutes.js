@@ -466,4 +466,65 @@ router.patch('/users/:uid/status', authMiddleware, async (req, res) => {
     }
 });
 
+// ============================================
+// 다시보기 등록자 관리 (더 이상 사용하지 않음 - Firestore로 마이그레이션됨)
+// ============================================
+/*
+// 다시보기 등록자 목록 조회
+router.get('/recap-registrants', authMiddleware, async (req, res) => {
+    try {
+        const rows = await googleSheetsService.getRecapRegistrants();
+        const registrants = rows.map(row => ({
+            timestamp: row[0],
+            name: row[1],
+            email: row[2],
+            batch: row[3],
+            status: row[4] || 'pending'
+        }));
+
+        // 상태별 필터링
+        const { status } = req.query;
+        let filtered = registrants;
+        if (status && status !== 'all') {
+            filtered = registrants.filter(r => r.status === status);
+        }
+
+        // 최신순 정렬
+        filtered.reverse();
+
+        res.json({ success: true, data: filtered });
+    } catch (error) {
+        console.error('Failed to fetch recap registrants:', error);
+        res.status(500).json({ success: false, message: 'Failed to fetch recap registrants' });
+    }
+});
+
+// 다시보기 등록자 상태 업데이트
+router.patch('/recap-registrants/:email/status', authMiddleware, async (req, res) => {
+    const { email } = req.params;
+    const { status } = req.body;
+
+    if (!status || !['pending', 'approved', 'rejected'].includes(status)) {
+        return res.status(400).json({
+            success: false,
+            message: 'Invalid status. Must be: pending, approved, or rejected'
+        });
+    }
+
+    try {
+        await googleSheetsService.updateRecapRegistrantStatus(decodeURIComponent(email), status);
+        res.json({
+            success: true,
+            message: `Registrant status updated to ${status}`
+        });
+    } catch (error) {
+        console.error('Failed to update recap registrant status:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to update registrant status'
+        });
+    }
+});
+*/
+
 export default router;
