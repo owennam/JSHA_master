@@ -109,7 +109,7 @@ const AdminRecapPage = () => {
     }
   };
 
-  // Firebase Auth 상태 확인 및 자동 로그인
+  // Firebase Auth 상태 확인
   useEffect(() => {
     if (!auth) {
       setAuthChecked(true);
@@ -117,28 +117,16 @@ const AdminRecapPage = () => {
     }
 
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        // 로그인되어 있지 않으면 익명 로그인
-        try {
-          console.log("Admin not authenticated, signing in anonymously...");
-          await signInAnonymously(auth);
-          console.log("✅ Anonymous sign-in successful");
-        } catch (error) {
-          console.error("Anonymous sign-in failed:", error);
-          toast({
-            title: "인증 오류",
-            description: "Firebase 인증에 실패했습니다.",
-            variant: "destructive",
-          });
-        }
-      } else {
+      if (user) {
         console.log("✅ Admin authenticated:", user.uid);
+      } else {
+        console.log("⚠️ No user authenticated - some features may be limited");
       }
       setAuthChecked(true);
     });
 
     return () => unsubscribe();
-  }, [toast]);
+  }, []);
 
   const loadRegistrants = async () => {
     setLoading(true);
