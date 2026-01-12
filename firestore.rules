@@ -37,15 +37,14 @@ service cloud.firestore {
     // 다시보기 등록자 컬렉션 (recapRegistrants)
     // ============================================
     match /recapRegistrants/{userId} {
-      // 본인의 등록 정보는 읽을 수 있음
-      allow read: if isOwner(userId);
+      // 로그인된 사용자는 모든 등록 정보 읽기 가능 (관리자 기능용)
+      allow read: if isSignedIn();
 
       // 회원가입 시 본인 UID로 새 등록 정보 생성 가능
       allow create: if isOwner(userId);
 
-      // 본인의 등록 정보 업데이트 가능 (단, status/accessLevel은 변경 불가)
-      allow update: if isOwner(userId) &&
-                      !request.resource.data.diff(resource.data).affectedKeys().hasAny(['status', 'accessLevel']);
+      // 로그인된 사용자는 수정 가능 (관리자 승인 기능용)
+      allow update: if isSignedIn();
     }
 
     // ============================================
