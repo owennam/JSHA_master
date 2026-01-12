@@ -36,7 +36,7 @@ try {
   console.error('❌ Firebase initialization failed:', error);
 }
 
-export { auth, googleProvider };
+export { app, auth, googleProvider };
 
 // Analytics 초기화 (브라우저 환경에서만)
 let analytics: ReturnType<typeof getAnalytics> | null = null;

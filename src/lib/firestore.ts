@@ -1,13 +1,13 @@
 import { getFirestore, doc, setDoc, getDoc, collection, query, where, getDocs, orderBy, Timestamp, collectionGroup, deleteDoc } from 'firebase/firestore';
-import { auth } from './firebase';
+import { app } from './firebase';
 
 // Firestore 인스턴스 (firebase.ts에서 app이 초기화된 경우에만 사용 가능)
 let db: ReturnType<typeof getFirestore> | null = null;
 
 try {
-  if (auth) {
-    // auth가 초기화되었다면 같은 app 인스턴스를 사용
-    db = getFirestore();
+  if (app) {
+    // app이 초기화되었다면 명시적으로 전달
+    db = getFirestore(app);
     console.log('✅ Firestore initialized');
   }
 } catch (error) {
