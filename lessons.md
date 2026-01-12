@@ -56,6 +56,77 @@
 - Video: YouTube/Vimeo embed (모달 플레이어)
 
 ---
+
+# 회원가입 및 Firestore 동기화 이슈 해결
+
+## 📅 작업 날짜
+2026-01-12
+
+---
+
+## 🐛 발생한 문제
+
+### 1. 회원가입 시 Firestore 문서 미생성
+- **증상**: Firebase Auth에 사용자 생성되지만 Firestore에 문서 없음
+- **결과**: 관리자 승인 페이지에 새 사용자 미표시
+
+### 2. 관리자 페이지 권한 오류
+- **증상**: `Missing or insufficient permissions` 오류
+- **원인**: Firestore 보안 규칙이 본인 문서만 읽기 허용
+
+### 3. Anonymous Sign-in 오류
+- **증상**: `auth/admin-restricted-operation` 오류
+- **원인**: Firebase에서 익명 인증 비활성화됨
+
+---
+
+## ✅ 해결 방법
+
+### 1. Firestore 초기화 수정
+```typescript
+// Before (문제)
+db = getFirestore();  // app 인스턴스 없이 호출
+
+// After (해결)
+import { app } from './firebase';
+db = getFirestore(app);  // 명시적 app 전달
+```
+
+### 2. Firestore 보안 규칙 수정
+```javascript
+// recapRegistrants 컬렉션
+allow read: if isSignedIn();    // 관리자 목록 조회용
+allow create: if isOwner(userId);  // 본인만 생성
+allow update: if isSignedIn();  // 관리자 승인 기능용
+```
+
+### 3. 관리자 페이지 익명 인증 제거
+- 불필요한 `signInAnonymously()` 호출 제거
+- 기존 인증 상태만 확인하도록 변경
+
+### 4. 수동 사용자 등록 기능 추가
+- 관리자 페이지에 "수동 등록" 버튼 추가
+- UID, 이메일, 이름 입력으로 직접 등록 가능
+- Firebase Auth에만 있는 사용자도 등록 가능
+
+---
+
+## 📚 배운 점
+
+1. **Firestore 초기화**: `getFirestore()`는 반드시 `app` 인스턴스를 전달해야 함
+2. **보안 규칙 테스트**: 규칙 변경 후 반드시 `firebase deploy --only firestore:rules` 실행
+3. **관리자 권한**: 컬렉션 전체 조회가 필요한 관리자 기능은 별도 규칙 필요
+4. **에러 핸들링**: Firebase 함수 실패 시 명확한 콘솔 로그 필수
+
+---
+
+## 🔧 추가된 기능
+
+- **수동 사용자 등록 API** (`POST /api/admin/manual-register`)
+- **관리자 페이지 수동 등록 UI** (다이얼로그)
+- **ProductPage 사용자 배지** (로그아웃 버튼 포함)
+
+---
 ---
 
 # Website Builder 시스템 분석 및 JSHA 프로젝트 개선 방안
