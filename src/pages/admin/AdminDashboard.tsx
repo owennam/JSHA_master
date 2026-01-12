@@ -9,8 +9,13 @@ import {
     ArrowUpRight,
     UserCheck,
     ShoppingBag,
-    XCircle
+    XCircle,
+    Video,
+    Clock
 } from 'lucide-react';
+import { auth } from '@/lib/firebase';
+import { onAuthStateChanged, signInAnonymously } from 'firebase/auth';
+import { getRecapRegistrantsByStatus } from '@/lib/firestore';
 
 interface OrderInfo {
     orderId: string;
@@ -30,6 +35,8 @@ interface DashboardData {
     masterCourseRegistrations: number;
     pendingUsers: number;
     pendingOrderCancels: number;
+    recapPending: number;
+    recapApproved: number;
 }
 
 const AdminDashboard = () => {
@@ -39,18 +46,46 @@ const AdminDashboard = () => {
         totalOrders: 0,
         masterCourseRegistrations: 0,
         pendingUsers: 0,
-        pendingOrderCancels: 0
+        pendingOrderCancels: 0,
+        recapPending: 0,
+        recapApproved: 0
     });
     const [isLoading, setIsLoading] = useState(true);
+    const [authChecked, setAuthChecked] = useState(false);
+
+    // Firebase Auth 상태 확인 및 자동 로그인
+    useEffect(() => {
+        if (!auth) {
+            setAuthChecked(true);
+            return;
+        }
+
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                try {
+                    console.log("Dashboard not authenticated, signing in anonymously...");
+                    await signInAnonymously(auth);
+                    console.log("✅ Dashboard anonymous sign-in successful");
+                } catch (error) {
+                    console.error("Dashboard anonymous sign-in failed:", error);
+                }
+            }
+            setAuthChecked(true);
+        });
+
+        return () => unsubscribe();
+    }, []);
 
     useEffect(() => {
         const fetchData = async () => {
+            if (!authChecked) return;
+
             try {
                 const API_URL = import.meta.env.VITE_API_URL || import.meta.env.VITE_SERVER_URL || '';
                 const token = localStorage.getItem('admin_token');
 
-                // 주문 관리 페이지와 동일한 방식으로 데이터 가져오기
-                const [ordersResponse, applicationsResponse, usersResponse] = await Promise.all([
+                // 주문 관리 페이지와 동일한 방식으로 데이터 가져오기 + 다시보기 데이터 추가
+                const [ordersResponse, applicationsResponse, usersResponse, recapPendingData, recapApprovedData] = await Promise.all([
                     fetch(`${API_URL}/api/admin/orders`, {
                         method: 'GET',
                         headers: {
@@ -71,7 +106,10 @@ const AdminDashboard = () => {
                             'Content-Type': 'application/json',
                             'Authorization': `Bearer ${token}`
                         },
-                    })
+                    }),
+                    // Firestore에서 다시보기 등록자 데이터 가져오기
+                    getRecapRegistrantsByStatus('pending'),
+                    getRecapRegistrantsByStatus('approved')
                 ]);
 
                 if (!ordersResponse.ok || !applicationsResponse.ok || !usersResponse.ok) {
@@ -106,7 +144,9 @@ const AdminDashboard = () => {
                     totalOrders,
                     masterCourseRegistrations: applications.length,
                     pendingUsers: pendingUsers.length,
-                    pendingOrderCancels
+                    pendingOrderCancels,
+                    recapPending: recapPendingData.length,
+                    recapApproved: recapApprovedData.length
                 });
             } catch (error) {
                 console.error('Failed to fetch dashboard data:', error);
@@ -116,7 +156,7 @@ const AdminDashboard = () => {
         };
 
         fetchData();
-    }, []);
+    }, [authChecked]);
 
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('ko-KR', { style: 'currency', currency: 'KRW' }).format(amount);
@@ -161,6 +201,26 @@ const AdminDashboard = () => {
             onClick: () => navigate('/admin/users?status=pending')
         },
         {
+            title: "다시보기 승인 대기",
+            value: `${data.recapPending}명`,
+            icon: Clock,
+            description: "승인 대기 중",
+            color: "text-orange-600",
+            bg: "bg-orange-100",
+            clickable: true,
+            onClick: () => navigate('/admin/recap')
+        },
+        {
+            title: "다시보기 승인됨",
+            value: `${data.recapApproved}명`,
+            icon: Video,
+            description: "접근 승인 완료",
+            color: "text-teal-600",
+            bg: "bg-teal-100",
+            clickable: true,
+            onClick: () => navigate('/admin/recap')
+        },
+        {
             title: "주문 취소 승인 대기",
             value: `${data.pendingOrderCancels}건`,
             icon: XCircle,
@@ -187,7 +247,7 @@ const AdminDashboard = () => {
                 </p>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 {stats.map((stat, index) => (
                     <Card
                         key={index}

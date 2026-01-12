@@ -525,6 +525,145 @@ class GoogleSheetsService {
       throw error;
     }
   }
+
+  // ============================================
+  // 다시보기 등록자 관리
+  // ============================================
+
+  /**
+   * 다시보기 등록자 추가
+   * @param {Object} data - { name, email, batch }
+   */
+  async addRecapRegistrant(data) {
+    if (!this.initialized) {
+      await this.initialize();
+    }
+
+    try {
+      const { name, email, batch } = data;
+      const now = this.getCurrentKSTString();
+      const rowData = [now, name, email, batch || '', 'pending'];
+      const sheetName = '다시보기등록자';
+
+      await this.sheets.spreadsheets.values.append({
+        spreadsheetId: this.spreadsheetId,
+        range: `'${sheetName}'!A:E`,
+        valueInputOption: 'USER_ENTERED',
+        requestBody: { values: [rowData] },
+      });
+
+      console.log('✅ Recap registrant added:', email);
+      return true;
+    } catch (error) {
+      console.error('❌ Failed to add recap registrant:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * 다시보기 등록자 이메일 확인 (상태 포함 반환)
+   * @param {string} email - 확인할 이메일
+   * @returns {Promise<{exists: boolean, status: string|null}>}
+   */
+  async checkRecapRegistrant(email) {
+    if (!this.initialized) {
+      await this.initialize();
+    }
+
+    try {
+      const sheetName = '다시보기등록자';
+      const range = `'${sheetName}'!A:E`;
+
+      const response = await this.sheets.spreadsheets.values.get({
+        spreadsheetId: this.spreadsheetId,
+        range: range,
+      });
+
+      const rows = response.data.values;
+      if (!rows || rows.length <= 1) {
+        return { exists: false, status: null };
+      }
+
+      // 첫 번째 행은 헤더
+      const dataRows = rows.slice(1);
+      const found = dataRows.find(row =>
+        row[2] && row[2].toLowerCase().trim() === email.toLowerCase().trim()
+      );
+
+      if (found) {
+        return { exists: true, status: found[4] || 'pending' };
+      }
+      return { exists: false, status: null };
+
+    } catch (error) {
+      if (error.message && error.message.includes('Unable to parse range')) {
+        console.warn('⚠️ "다시보기등록자" 시트를 찾을 수 없습니다.');
+        return { exists: false, status: null };
+      }
+      console.error('❌ Failed to check recap registrant:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * 다시보기 등록자 전체 조회
+   */
+  async getRecapRegistrants() {
+    return this.getAllRows('다시보기등록자');
+  }
+
+  /**
+   * 다시보기 등록자 상태 업데이트
+   * @param {string} email - 이메일
+   * @param {string} newStatus - approved | rejected | pending
+   */
+  async updateRecapRegistrantStatus(email, newStatus) {
+    if (!this.initialized) {
+      await this.initialize();
+    }
+
+    try {
+      const sheetName = '다시보기등록자';
+      const range = `'${sheetName}'!A:E`;
+
+      const response = await this.sheets.spreadsheets.values.get({
+        spreadsheetId: this.spreadsheetId,
+        range: range,
+      });
+
+      const rows = response.data.values;
+      if (!rows || rows.length <= 1) {
+        throw new Error('No data found');
+      }
+
+      // 이메일이 있는 행 찾기 (2행부터 시작, 인덱스 1부터)
+      let rowIndex = -1;
+      for (let i = 1; i < rows.length; i++) {
+        if (rows[i][2] && rows[i][2].toLowerCase().trim() === email.toLowerCase().trim()) {
+          rowIndex = i + 1; // 스프레드시트는 1-indexed
+          break;
+        }
+      }
+
+      if (rowIndex === -1) {
+        throw new Error('Registrant not found');
+      }
+
+      // 상태 컬럼(E열) 업데이트
+      await this.sheets.spreadsheets.values.update({
+        spreadsheetId: this.spreadsheetId,
+        range: `'${sheetName}'!E${rowIndex}`,
+        valueInputOption: 'USER_ENTERED',
+        requestBody: { values: [[newStatus]] },
+      });
+
+      console.log('✅ Recap registrant status updated:', email, '->', newStatus);
+      return true;
+    } catch (error) {
+      console.error('❌ Failed to update recap registrant status:', error);
+      throw error;
+    }
+  }
 }
 
 // 싱글톤 인스턴스

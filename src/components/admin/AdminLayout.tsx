@@ -8,7 +8,8 @@ import {
     Users,
     LogOut,
     Menu,
-    X
+    X,
+    Video
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -58,6 +59,8 @@ export const AdminLayout = () => {
         { icon: Users, label: '사용자 관리', path: '/admin/users' },
         { icon: ShoppingBag, label: '주문 관리', path: '/admin/orders' },
         { icon: GraduationCap, label: '마스터 코스', path: '/admin/applications' },
+        { icon: Video, label: '다시보기 등록자', path: '/admin/recap' },
+        { icon: Video, label: '다시보기 비디오', path: '/admin/recap-videos' },
         { icon: Stethoscope, label: 'Master Care', path: '/admin/mastercare' },
     ];
 

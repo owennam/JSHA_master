@@ -24,6 +24,7 @@ import PaymentFailPage from "./pages/PaymentFailPage";
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 import TermsOfServicePage from "./pages/TermsOfServicePage";
 import RecapPage from "./pages/RecapPage";
+import RecapAuthPage from "./pages/RecapAuthPage";
 import MasterCarePage from "./pages/MasterCarePage";
 import MyOrdersPage from "./pages/MyOrdersPage";
 import NotFound from "./pages/NotFound";
@@ -36,6 +37,8 @@ import AdminOrdersPage from "@/pages/admin/AdminOrdersPage";
 import AdminApplicationsPage from "@/pages/admin/AdminApplicationsPage";
 import AdminMasterCarePage from "@/pages/admin/AdminMasterCarePage";
 import AdminUsersPage from "@/pages/admin/AdminUsersPage";
+import AdminRecapPage from "@/pages/admin/AdminRecapPage";
+import AdminRecapVideosPage from "@/pages/admin/AdminRecapVideosPage";
 
 const queryClient = new QueryClient();
 
@@ -79,6 +82,7 @@ const App = () => (
             <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
             <Route path="/terms-of-service" element={<TermsOfServicePage />} />
             <Route path="/recap" element={<RecapPage />} />
+            <Route path="/recap/auth" element={<RecapAuthPage />} />
             <Route path="/mastercare" element={<MasterCarePage />} />
             <Route path="/my-orders" element={<MyOrdersPage />} />
 
@@ -91,6 +95,8 @@ const App = () => (
               <Route path="applications" element={<AdminApplicationsPage />} />
               <Route path="mastercare" element={<AdminMasterCarePage />} />
               <Route path="users" element={<AdminUsersPage />} />
+              <Route path="recap" element={<AdminRecapPage />} />
+              <Route path="recap-videos" element={<AdminRecapVideosPage />} />
             </Route>
 
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

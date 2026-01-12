@@ -1,0 +1,535 @@
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
+import {
+  RecapRegistrant,
+  UserStatus,
+  AccessLevel,
+  getRecapRegistrantsByStatus,
+  updateRecapRegistrantStatus,
+  updateRecapRegistrantAccessLevel,
+} from "@/lib/firestore";
+import {
+  Users,
+  CheckCircle,
+  XCircle,
+  Clock,
+  RefreshCw,
+  Shield,
+  RotateCcw,
+} from "lucide-react";
+import { auth } from "@/lib/firebase";
+import { onAuthStateChanged, signInAnonymously } from "firebase/auth";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+
+const AdminRecapPage = () => {
+  const { toast } = useToast();
+  const [pendingRegistrants, setPendingRegistrants] = useState<RecapRegistrant[]>([]);
+  const [approvedRegistrants, setApprovedRegistrants] = useState<RecapRegistrant[]>([]);
+  const [rejectedRegistrants, setRejectedRegistrants] = useState<RecapRegistrant[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [updatingUid, setUpdatingUid] = useState<string | null>(null);
+  const [authChecked, setAuthChecked] = useState(false);
+
+  // 승인 다이얼로그 상태
+  const [approvalDialogOpen, setApprovalDialogOpen] = useState(false);
+  const [selectedRegistrant, setSelectedRegistrant] = useState<RecapRegistrant | null>(null);
+  const [selectedAccessLevel, setSelectedAccessLevel] = useState<AccessLevel>('preview');
+
+  // Firebase Auth 상태 확인 및 자동 로그인
+  useEffect(() => {
+    if (!auth) {
+      setAuthChecked(true);
+      return;
+    }
+
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        // 로그인되어 있지 않으면 익명 로그인
+        try {
+          console.log("Admin not authenticated, signing in anonymously...");
+          await signInAnonymously(auth);
+          console.log("✅ Anonymous sign-in successful");
+        } catch (error) {
+          console.error("Anonymous sign-in failed:", error);
+          toast({
+            title: "인증 오류",
+            description: "Firebase 인증에 실패했습니다.",
+            variant: "destructive",
+          });
+        }
+      } else {
+        console.log("✅ Admin authenticated:", user.uid);
+      }
+      setAuthChecked(true);
+    });
+
+    return () => unsubscribe();
+  }, [toast]);
+
+  const loadRegistrants = async () => {
+    setLoading(true);
+    try {
+      // Firestore에서 직접 조회
+      const [pending, approved, rejected] = await Promise.all([
+        getRecapRegistrantsByStatus('pending'),
+        getRecapRegistrantsByStatus('approved'),
+        getRecapRegistrantsByStatus('rejected'),
+      ]);
+
+      setPendingRegistrants(pending);
+      setApprovedRegistrants(approved);
+      setRejectedRegistrants(rejected);
+
+    } catch (error) {
+      console.error("Failed to load registrants:", error);
+      toast({
+        title: "로드 실패",
+        description: "등록자 목록을 불러오지 못했습니다.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (authChecked) {
+      loadRegistrants();
+    }
+  }, [authChecked]);
+
+  // 승인 다이얼로그 열기
+  const openApprovalDialog = (registrant: RecapRegistrant) => {
+    setSelectedRegistrant(registrant);
+    setSelectedAccessLevel(registrant.accessLevel || 'preview');
+    setApprovalDialogOpen(true);
+  };
+
+  // 승인 처리 (접근 등급 포함)
+  const handleApprove = async () => {
+    if (!selectedRegistrant) return;
+
+    setUpdatingUid(selectedRegistrant.uid);
+    try {
+      // 상태와 접근 등급을 동시에 업데이트
+      await updateRecapRegistrantStatus(selectedRegistrant.uid, 'approved');
+      await updateRecapRegistrantAccessLevel(selectedRegistrant.uid, selectedAccessLevel);
+
+      toast({
+        title: "승인 완료",
+        description: `${selectedRegistrant.name}님이 ${getAccessLevelLabel(selectedAccessLevel)} 등급으로 승인되었습니다.`,
+      });
+
+      setApprovalDialogOpen(false);
+      setSelectedRegistrant(null);
+      await loadRegistrants();
+    } catch (error: any) {
+      console.error("Failed to approve:", error);
+      toast({
+        title: "승인 실패",
+        description: error.message || "승인 처리에 실패했습니다.",
+        variant: "destructive",
+      });
+    } finally {
+      setUpdatingUid(null);
+    }
+  };
+
+  // 거부 처리
+  const handleReject = async (uid: string) => {
+    setUpdatingUid(uid);
+    try {
+      await updateRecapRegistrantStatus(uid, 'rejected');
+
+      toast({
+        title: "거부 완료",
+        description: "등록자가 거부되었습니다.",
+      });
+
+      await loadRegistrants();
+    } catch (error: any) {
+      console.error("Failed to reject:", error);
+      toast({
+        title: "거부 실패",
+        description: error.message || "거부 처리에 실패했습니다.",
+        variant: "destructive",
+      });
+    } finally {
+      setUpdatingUid(null);
+    }
+  };
+
+  // 승인 취소 (approved -> pending)
+  const handleRevokeApproval = async (uid: string) => {
+    setUpdatingUid(uid);
+    try {
+      await updateRecapRegistrantStatus(uid, 'pending');
+
+      toast({
+        title: "승인 취소",
+        description: "승인이 취소되어 대기 상태로 변경되었습니다.",
+      });
+
+      await loadRegistrants();
+    } catch (error: any) {
+      console.error("Failed to revoke approval:", error);
+      toast({
+        title: "취소 실패",
+        description: error.message || "승인 취소에 실패했습니다.",
+        variant: "destructive",
+      });
+    } finally {
+      setUpdatingUid(null);
+    }
+  };
+
+  // 접근 등급 업데이트 (approved 상태인 사용자)
+  const handleUpdateAccessLevel = async (uid: string, newAccessLevel: AccessLevel) => {
+    setUpdatingUid(uid);
+    try {
+      await updateRecapRegistrantAccessLevel(uid, newAccessLevel);
+
+      toast({
+        title: "등급 변경 완료",
+        description: `접근 등급이 ${getAccessLevelLabel(newAccessLevel)}(으)로 변경되었습니다.`,
+      });
+
+      await loadRegistrants();
+    } catch (error: any) {
+      console.error("Failed to update access level:", error);
+      toast({
+        title: "등급 변경 실패",
+        description: error.message || "등급 변경에 실패했습니다.",
+        variant: "destructive",
+      });
+    } finally {
+      setUpdatingUid(null);
+    }
+  };
+
+  // 접근 등급 라벨 가져오기
+  const getAccessLevelLabel = (level: AccessLevel): string => {
+    const labels: Record<AccessLevel, string> = {
+      'preview': '맛보기',
+      'session1': '세션 1',
+      'graduate': '수료자',
+    };
+    return labels[level];
+  };
+
+  // 접근 등급 뱃지 색상
+  const getAccessLevelColor = (level: AccessLevel): string => {
+    const colors: Record<AccessLevel, string> = {
+      'preview': 'bg-gray-100 text-gray-700',
+      'session1': 'bg-blue-100 text-blue-700',
+      'graduate': 'bg-green-100 text-green-700',
+    };
+    return colors[level];
+  };
+
+  // 등록자 테이블 컴포넌트
+  const RegistrantTable = ({ registrants, isPending, isApproved }: {
+    registrants: RecapRegistrant[],
+    isPending: boolean,
+    isApproved?: boolean
+  }) => {
+    if (registrants.length === 0) {
+      return (
+        <div className="flex flex-col items-center justify-center py-12 border rounded-md bg-white">
+          <Users className="w-10 h-10 text-muted-foreground mb-3 opacity-20" />
+          <p className="text-muted-foreground text-sm">해당되는 등록자가 없습니다</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="rounded-md border bg-white overflow-hidden">
+        <Table>
+          <TableHeader className="bg-muted/50">
+            <TableRow>
+              <TableHead className="w-[180px]">이름</TableHead>
+              <TableHead>이메일</TableHead>
+              <TableHead className="w-[90px]">기수</TableHead>
+              {isApproved && <TableHead className="w-[130px]">접근 등급</TableHead>}
+              <TableHead className="w-[110px]">신청일</TableHead>
+              <TableHead className="text-right w-[200px]">{isPending ? '관리' : isApproved ? '관리' : '상태'}</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {registrants.map((registrant) => (
+              <TableRow key={registrant.uid} className="group hover:bg-muted/5">
+                <TableCell className="font-medium">
+                  <span className="text-sm font-bold text-slate-800">{registrant.name}</span>
+                </TableCell>
+                <TableCell className="text-sm text-slate-600 font-mono">{registrant.email}</TableCell>
+                <TableCell>
+                  {registrant.batch ? (
+                    <Badge variant="outline" className="font-normal text-xs text-slate-600">
+                      {registrant.batch}
+                    </Badge>
+                  ) : (
+                    <span className="text-xs text-muted-foreground">-</span>
+                  )}
+                </TableCell>
+                {isApproved && (
+                  <TableCell>
+                    <Select
+                      value={registrant.accessLevel}
+                      onValueChange={(value) => handleUpdateAccessLevel(registrant.uid, value as AccessLevel)}
+                      disabled={updatingUid === registrant.uid}
+                    >
+                      <SelectTrigger className="h-8 w-[110px] text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="preview" className="text-xs">맛보기</SelectItem>
+                        <SelectItem value="session1" className="text-xs">세션 1</SelectItem>
+                        <SelectItem value="graduate" className="text-xs">수료자</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </TableCell>
+                )}
+                <TableCell className="text-xs text-muted-foreground">
+                  {new Date(registrant.createdAt).toLocaleDateString('ko-KR')}
+                </TableCell>
+                <TableCell className="text-right">
+                  {isPending ? (
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        size="sm"
+                        className="h-8 px-3 text-xs bg-green-600 hover:bg-green-700"
+                        onClick={() => openApprovalDialog(registrant)}
+                        disabled={updatingUid === registrant.uid}
+                      >
+                        {updatingUid === registrant.uid ? '처리중...' : '승인'}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-8 px-3 text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
+                        onClick={() => handleReject(registrant.uid)}
+                        disabled={updatingUid === registrant.uid}
+                      >
+                        거부
+                      </Button>
+                    </div>
+                  ) : isApproved ? (
+                    <div className="flex justify-end gap-2">
+                      <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100 shadow-none">
+                        승인완료
+                      </Badge>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-8 px-2 text-xs text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+                        onClick={() => handleRevokeApproval(registrant.uid)}
+                        disabled={updatingUid === registrant.uid}
+                        title="승인 취소"
+                      >
+                        <RotateCcw className="w-3.5 h-3.5" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <Badge className="bg-red-100 text-red-700 hover:bg-red-100 shadow-none">
+                      거부됨
+                    </Badge>
+                  )}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    );
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <RefreshCw className="w-8 h-8 animate-spin text-primary opacity-20" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6 max-w-7xl mx-auto">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">다시보기 등록자 관리</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            다시보기 서비스 등록자 승인 및 현황 관리
+          </p>
+        </div>
+        <Button onClick={loadRegistrants} variant="outline" size="sm" className="h-9">
+          <RefreshCw className="w-3.5 h-3.5 mr-2" />
+          새로고침
+        </Button>
+      </div>
+
+      {/* 요약 카드 */}
+      <div className="grid grid-cols-3 gap-4">
+        <Card className="shadow-sm">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-4 pt-4">
+            <CardTitle className="text-sm font-medium text-muted-foreground">승인 대기</CardTitle>
+            <Clock className="h-4 w-4 text-orange-500" />
+          </CardHeader>
+          <CardContent className="px-4 pb-4">
+            <div className="text-2xl font-bold text-slate-800">{pendingRegistrants.length}</div>
+          </CardContent>
+        </Card>
+        <Card className="shadow-sm">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-4 pt-4">
+            <CardTitle className="text-sm font-medium text-muted-foreground">승인됨</CardTitle>
+            <CheckCircle className="h-4 w-4 text-blue-500" />
+          </CardHeader>
+          <CardContent className="px-4 pb-4">
+            <div className="text-2xl font-bold text-slate-800">{approvedRegistrants.length}</div>
+          </CardContent>
+        </Card>
+        <Card className="shadow-sm">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-4 pt-4">
+            <CardTitle className="text-sm font-medium text-muted-foreground">거부됨</CardTitle>
+            <XCircle className="h-4 w-4 text-red-500" />
+          </CardHeader>
+          <CardContent className="px-4 pb-4">
+            <div className="text-2xl font-bold text-slate-800">{rejectedRegistrants.length}</div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Tabs defaultValue="pending" className="w-full">
+        <TabsList className="grid w-full max-w-md grid-cols-3 mb-6 bg-slate-100 p-1">
+          <TabsTrigger value="pending" className="text-xs">승인 대기 ({pendingRegistrants.length})</TabsTrigger>
+          <TabsTrigger value="approved" className="text-xs">승인됨 ({approvedRegistrants.length})</TabsTrigger>
+          <TabsTrigger value="rejected" className="text-xs">거부됨 ({rejectedRegistrants.length})</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="pending" className="mt-0">
+          <RegistrantTable registrants={pendingRegistrants} isPending={true} isApproved={false} />
+        </TabsContent>
+
+        <TabsContent value="approved" className="mt-0">
+          <RegistrantTable registrants={approvedRegistrants} isPending={false} isApproved={true} />
+        </TabsContent>
+
+        <TabsContent value="rejected" className="mt-0">
+          <RegistrantTable registrants={rejectedRegistrants} isPending={false} isApproved={false} />
+        </TabsContent>
+      </Tabs>
+
+      {/* 승인 다이얼로그 */}
+      <Dialog open={approvalDialogOpen} onOpenChange={setApprovalDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>등록자 승인</DialogTitle>
+            <DialogDescription>
+              승인 시 사용자가 접근할 수 있는 영상 범위를 설정하세요.
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedRegistrant && (
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">등록자 정보</Label>
+                <div className="p-3 bg-slate-50 rounded-md space-y-1">
+                  <p className="text-sm font-bold">{selectedRegistrant.name}</p>
+                  <p className="text-xs text-muted-foreground">{selectedRegistrant.email}</p>
+                  {selectedRegistrant.batch && (
+                    <Badge variant="outline" className="text-xs mt-1">
+                      {selectedRegistrant.batch}
+                    </Badge>
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="accessLevel" className="text-sm font-medium flex items-center gap-2">
+                  <Shield className="w-4 h-4" />
+                  접근 등급
+                </Label>
+                <Select value={selectedAccessLevel} onValueChange={(value) => setSelectedAccessLevel(value as AccessLevel)}>
+                  <SelectTrigger id="accessLevel" className="w-full">
+                    <SelectValue placeholder="접근 등급 선택" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="preview">
+                      <div className="flex flex-col items-start">
+                        <span className="font-medium">맛보기</span>
+                        <span className="text-xs text-muted-foreground">맛보기 영상만 시청 가능</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="session1">
+                      <div className="flex flex-col items-start">
+                        <span className="font-medium">세션 1</span>
+                        <span className="text-xs text-muted-foreground">맛보기 + 세션 1 영상 시청 가능</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="graduate">
+                      <div className="flex flex-col items-start">
+                        <span className="font-medium">수료자</span>
+                        <span className="text-xs text-muted-foreground">모든 영상 시청 가능</span>
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter className="gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setApprovalDialogOpen(false)}
+              disabled={updatingUid !== null}
+            >
+              취소
+            </Button>
+            <Button
+              type="button"
+              onClick={handleApprove}
+              disabled={updatingUid !== null}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              {updatingUid !== null ? '처리중...' : '승인'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
+
+export default AdminRecapPage;
