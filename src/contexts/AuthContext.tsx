@@ -8,7 +8,7 @@ import {
   sendPasswordResetEmail,
 } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { getUserProfile, createUserProfile, UserProfile, UserStatus } from '@/lib/firestore';
+import { getUserProfile, createUserProfile, UserProfile, UserStatus, checkExistingServices, addInsoleServiceToExistingUser } from '@/lib/firestore';
 
 interface AuthContextType {
   user: User | null;
@@ -84,11 +84,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
 
     try {
-      // Firebase Authentication에 사용자 생성
+      // 1. Firebase Authentication에 사용자 생성
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const newUser = userCredential.user;
 
-      // Firestore에 사용자 프로필 저장 (status 포함)
+      // 2. Firestore에 사용자 프로필 저장 (status 포함)
       await createUserProfile(newUser.uid, email, clinicName, directorName, location, status);
 
       // 프로필 다시 가져오기
@@ -98,6 +98,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       console.log('✅ User signed up successfully with status:', status);
     } catch (error: any) {
       console.error('❌ Sign up failed:', error);
+
+      // Firebase Auth에러 중 email-already-in-use인 경우 친절한 메시지
+      if (error.code === 'auth/email-already-in-use') {
+        throw new Error('이미 등록된 이메일입니다. 로그인 후 서비스를 신청해주세요.');
+      }
+
       throw new Error(getAuthErrorMessage(error.code));
     }
   };

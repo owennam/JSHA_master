@@ -605,3 +605,64 @@ export const getAccessibleVideos = async (userAccessLevel: AccessLevel): Promise
   // 사용자의 접근 등급에 따라 필터링
   return allVideos.filter(video => canAccessLevel(userAccessLevel, video.accessLevel));
 };
+
+// ============================================
+// 통합 계정 시스템 관련 함수들
+// ============================================
+
+/**
+ * 이메일로 어떤 서비스에 이미 등록되어 있는지 확인
+ * @returns { hasInsole: boolean, hasRecap: boolean, insoleUser?: UserProfile, recapUser?: RecapRegistrant }
+ */
+export const checkExistingServices = async (email: string): Promise<{
+  hasInsole: boolean;
+  hasRecap: boolean;
+  insoleUser?: UserProfile;
+  recapUser?: RecapRegistrant;
+}> => {
+  const [insoleUser, recapUser] = await Promise.all([
+    getUserProfileByEmail(email),
+    getRecapRegistrantByEmail(email),
+  ]);
+
+  return {
+    hasInsole: !!insoleUser,
+    hasRecap: !!recapUser,
+    insoleUser: insoleUser || undefined,
+    recapUser: recapUser || undefined,
+  };
+};
+
+/**
+ * 기존 인솔 사용자에게 다시보기 서비스 추가
+ * (이미 Firebase Auth 계정이 있는 경우)
+ */
+export const addRecapServiceToExistingUser = async (
+  uid: string,
+  email: string,
+  name: string,
+  batch?: string,
+  status: UserStatus = 'pending',
+  accessLevel: AccessLevel = 'preview'
+): Promise<void> => {
+  // recapRegistrants 컬렉션에 새로운 문서 생성
+  await createRecapRegistrant(uid, email, name, batch, status, accessLevel);
+  console.log('✅ Recap service added to existing user:', uid);
+};
+
+/**
+ * 기존 다시보기 사용자에게 인솔 서비스 추가
+ * (이미 Firebase Auth 계정이 있는 경우)
+ */
+export const addInsoleServiceToExistingUser = async (
+  uid: string,
+  email: string,
+  clinicName: string,
+  directorName: string,
+  location: string,
+  status: UserStatus = 'pending'
+): Promise<void> => {
+  // users 컬렉션에 새로운 문서 생성
+  await createUserProfile(uid, email, clinicName, directorName, location, status);
+  console.log('✅ Insole service added to existing user:', uid);
+};

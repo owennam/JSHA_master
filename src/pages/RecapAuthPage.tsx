@@ -26,9 +26,9 @@ import {
     sendPasswordResetEmail,
     User,
 } from "firebase/auth";
-import { AlertCircle, Loader2, Video } from "lucide-react";
+import { AlertCircle, Loader2, Video, Info } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { createRecapRegistrant } from "@/lib/firestore";
+import { createRecapRegistrant, checkExistingServices, addRecapServiceToExistingUser } from "@/lib/firestore";
 
 const RecapAuthPage = () => {
     const navigate = useNavigate();
@@ -190,7 +190,9 @@ const RecapAuthPage = () => {
             console.error("Signup failed:", error);
 
             // Firebase Auth 에러인 경우
-            if (error.code) {
+            if (error.code === "auth/email-already-in-use") {
+                setSignupError("이미 등록된 이메일입니다. 로그인 후 다시보기 서비스를 신청해주세요.");
+            } else if (error.code) {
                 setSignupError(getAuthErrorMessage(error.code));
             } else {
                 setSignupError(error.message || "회원가입 중 오류가 발생했습니다.");

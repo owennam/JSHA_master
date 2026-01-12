@@ -4,11 +4,11 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PlayCircle, CheckCircle, Video, LogOut, Clock, XCircle, X, Lock, Shield } from "lucide-react";
+import { PlayCircle, CheckCircle, Video, LogOut, Clock, XCircle, X, Lock, Shield, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged, signOut, User } from "firebase/auth";
-import { getRecapRegistrant, RecapRegistrant, getAllRecapVideos, RecapVideo, AccessLevel, canAccessLevel } from "@/lib/firestore";
+import { getRecapRegistrant, RecapRegistrant, getAllRecapVideos, RecapVideo, AccessLevel, canAccessLevel, getUserProfile, addRecapServiceToExistingUser } from "@/lib/firestore";
 import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
@@ -112,7 +112,7 @@ const getAccessLevelColor = (level: AccessLevel): string => {
   return colors[level];
 };
 
-type AccessStatus = 'loading' | 'not_authenticated' | 'pending' | 'rejected' | 'approved';
+type AccessStatus = 'loading' | 'not_authenticated' | 'not_registered' | 'pending' | 'rejected' | 'approved';
 
 const RecapPage = () => {
   const { toast } = useToast();
@@ -153,15 +153,25 @@ const RecapPage = () => {
       const registrant = await getRecapRegistrant(uid);
 
       if (!registrant) {
-        // 등록되지 않은 사용자 - 로그아웃 후 등록 페이지로 이동
-        console.log("Not registered, logging out and redirecting to auth page");
-        await signOut(auth!);
-        toast({
-          title: "등록이 필요합니다",
-          description: "다시보기 서비스를 이용하려면 먼저 등록해주세요.",
-          variant: "destructive",
-        });
-        navigate('/recap/auth');
+        // 다시보기에 등록되지 않은 사용자
+        // 인솔 사용자인지 확인
+        const insoleProfile = await getUserProfile(uid);
+
+        if (insoleProfile) {
+          // 인솔 사용자 - 다시보기 서비스 신청 화면 표시
+          setAccessStatus('not_registered');
+          console.log("Insole user, showing recap service request UI");
+        } else {
+          // 어떤 서비스에도 등록되지 않은 사용자 - 로그아웃 후 등록 페이지로 이동
+          console.log("Not registered in any service, logging out and redirecting to auth page");
+          await signOut(auth!);
+          toast({
+            title: "등록이 필요합니다",
+            description: "다시보기 서비스를 이용하려면 먼저 등록해주세요.",
+            variant: "destructive",
+          });
+          navigate('/recap/auth');
+        }
         return;
       }
 
@@ -235,6 +245,49 @@ const RecapPage = () => {
     }
   };
 
+  // 다시보기 서비스 신청 처리
+  const handleRequestRecapService = async () => {
+    if (!user) return;
+
+    try {
+      // 인솔 사용자 정보 가져오기
+      const insoleProfile = await getUserProfile(user.uid);
+      if (!insoleProfile) {
+        toast({
+          title: "오류",
+          description: "사용자 정보를 찾을 수 없습니다.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // 다시보기 서비스 신청 (insole 사용자의 directorName을 이름으로 사용)
+      await addRecapServiceToExistingUser(
+        user.uid,
+        user.email || insoleProfile.email,
+        insoleProfile.directorName,
+        undefined, // batch
+        'pending',
+        'preview'
+      );
+
+      toast({
+        title: "신청 완료",
+        description: "다시보기 서비스 신청이 완료되었습니다. 관리자 승인 후 이용 가능합니다.",
+      });
+
+      // 상태를 pending으로 변경
+      setAccessStatus('pending');
+    } catch (error: any) {
+      console.error("Failed to request recap service:", error);
+      toast({
+        title: "신청 실패",
+        description: error.message || "다시 시도해주세요.",
+        variant: "destructive",
+      });
+    }
+  };
+
   // 로딩 중
   if (accessStatus === 'loading') {
     return (
@@ -243,6 +296,78 @@ const RecapPage = () => {
           <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-muted-foreground">접근 권한 확인 중...</p>
         </div>
+      </div>
+    );
+  }
+
+  // 다시보기 서비스 미등록 (인솔 사용자)
+  if (accessStatus === 'not_registered') {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+
+        {/* 우측 상단 사용자 정보 */}
+        <div className="fixed top-24 right-4 z-40 flex items-center gap-3 bg-white/95 backdrop-blur-sm px-4 py-2 rounded-full shadow-md border border-gray-200">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 bg-blue-100 rounded-full flex items-center justify-center">
+              <Plus className="w-4 h-4 text-blue-600" />
+            </div>
+            <span className="text-sm font-medium text-foreground max-w-[150px] truncate">
+              {user?.email || "인증된 사용자"}
+            </span>
+          </div>
+          <div className="h-4 w-px bg-gray-300"></div>
+          <Button
+            onClick={handleLogout}
+            variant="ghost"
+            size="sm"
+            className="h-7 px-2 text-xs"
+          >
+            <LogOut className="w-3 h-3 mr-1" />
+            로그아웃
+          </Button>
+        </div>
+
+        <main className="pt-40 pb-20 px-4 bg-gradient-to-br from-primary/7 via-background to-secondary/7 min-h-[calc(100vh-80px)]">
+          <div className="container mx-auto max-w-2xl">
+            <Card className="border-2 border-blue-500/20 bg-blue-500/5">
+              <CardHeader className="text-center">
+                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Video className="w-8 h-8 text-blue-600" />
+                </div>
+                <CardTitle className="text-3xl mb-4">다시보기 서비스 신청</CardTitle>
+                <p className="text-muted-foreground">
+                  안녕하세요! 인솔 구매 회원님이시군요.
+                  <br />
+                  마스터 코스 다시보기 서비스를 이용하시려면 신청이 필요합니다.
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="bg-white/50 rounded-lg p-4 text-sm text-muted-foreground">
+                  <p className="font-medium text-foreground mb-2">안내사항</p>
+                  <ul className="space-y-1">
+                    <li>• 다시보기 서비스는 마스터 코스 수료자 및 등록자를 위한 서비스입니다.</li>
+                    <li>• 신청 후 관리자 승인이 완료되면 영상을 시청하실 수 있습니다.</li>
+                  </ul>
+                </div>
+
+                <Button
+                  onClick={handleRequestRecapService}
+                  className="w-full"
+                  size="lg"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  다시보기 서비스 신청하기
+                </Button>
+
+                <p className="text-sm text-muted-foreground text-center">
+                  문의: <a href="mailto:jshaworkshop@gmail.com" className="text-primary hover:underline">jshaworkshop@gmail.com</a>
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </main>
+        <Footer />
       </div>
     );
   }
