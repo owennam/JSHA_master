@@ -650,4 +650,57 @@ router.post('/sync-auth-users', authMiddleware, async (req, res) => {
     }
 });
 
+// 수동 사용자 등록 (Auth API 의존성 제거)
+router.post('/manual-register', authMiddleware, async (req, res) => {
+    if (!db) {
+        return res.status(503).json({
+            success: false,
+            message: 'Firebase Admin is not initialized'
+        });
+    }
+
+    const { uid, email, name, collection = 'recapRegistrants' } = req.body;
+
+    if (!uid || !email || !name) {
+        return res.status(400).json({
+            success: false,
+            message: 'uid, email, and name are required'
+        });
+    }
+
+    try {
+        const docData = {
+            uid,
+            email,
+            name,
+            status: 'pending',
+            accessLevel: 'preview',
+            createdAt: new Date().toISOString(),
+            manualRegistered: true
+        };
+
+        if (collection === 'users') {
+            docData.clinicName = '미입력';
+            docData.directorName = name;
+            docData.location = '기타';
+            delete docData.accessLevel;
+        }
+
+        await db.collection(collection).doc(uid).set(docData);
+
+        res.json({
+            success: true,
+            message: `User ${email} manually registered`,
+            data: docData
+        });
+    } catch (error) {
+        console.error('Failed to manually register user:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to manually register user',
+            error: error.message
+        });
+    }
+});
+
 export default router;

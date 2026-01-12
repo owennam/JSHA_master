@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input"; // Added Input
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -19,6 +20,7 @@ import {
   RefreshCw,
   Shield,
   RotateCcw,
+  Plus, // Added Plus
 } from "lucide-react";
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged, signInAnonymously } from "firebase/auth";
@@ -66,6 +68,46 @@ const AdminRecapPage = () => {
   const [approvalDialogOpen, setApprovalDialogOpen] = useState(false);
   const [selectedRegistrant, setSelectedRegistrant] = useState<RecapRegistrant | null>(null);
   const [selectedAccessLevel, setSelectedAccessLevel] = useState<AccessLevel>('preview');
+
+  // 수동 등록 상태
+  const [manualRegisterOpen, setManualRegisterOpen] = useState(false);
+  const [manualUid, setManualUid] = useState("");
+  const [manualEmail, setManualEmail] = useState("");
+  const [manualName, setManualName] = useState("");
+  const [manualLoading, setManualLoading] = useState(false);
+
+  const handleManualRegister = async () => {
+    if (!manualUid || !manualEmail || !manualName) {
+      toast({ title: "입력 오류", description: "모든 필드를 입력해주세요.", variant: "destructive" });
+      return;
+    }
+    setManualLoading(true);
+    try {
+      const token = localStorage.getItem('admin_token');
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+
+      const response = await fetch(`${API_URL}/api/admin/manual-register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ uid: manualUid, email: manualEmail, name: manualName })
+      });
+
+      const data = await response.json();
+      if (!data.success) throw new Error(data.message);
+
+      toast({ title: "등록 완료", description: "사용자가 수동으로 등록되었습니다." });
+      setManualRegisterOpen(false);
+      setManualUid(""); setManualEmail(""); setManualName("");
+      loadRegistrants();
+    } catch (error: any) {
+      toast({ title: "등록 실패", description: error.message, variant: "destructive" });
+    } finally {
+      setManualLoading(false);
+    }
+  };
 
   // Firebase Auth 상태 확인 및 자동 로그인
   useEffect(() => {
@@ -392,10 +434,16 @@ const AdminRecapPage = () => {
             다시보기 서비스 등록자 승인 및 현황 관리
           </p>
         </div>
-        <Button onClick={loadRegistrants} variant="outline" size="sm" className="h-9">
-          <RefreshCw className="w-3.5 h-3.5 mr-2" />
-          새로고침
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={() => setManualRegisterOpen(true)} variant="outline" size="sm" className="h-9">
+            <Plus className="w-3.5 h-3.5 mr-2" />
+            수동 등록
+          </Button>
+          <Button onClick={loadRegistrants} variant="outline" size="sm" className="h-9">
+            <RefreshCw className="w-3.5 h-3.5 mr-2" />
+            새로고침
+          </Button>
+        </div>
       </div>
 
       {/* 요약 카드 */}
@@ -524,6 +572,39 @@ const AdminRecapPage = () => {
               className="bg-green-600 hover:bg-green-700"
             >
               {updatingUid !== null ? '처리중...' : '승인'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* 수동 등록 다이얼로그 */}
+      <Dialog open={manualRegisterOpen} onOpenChange={setManualRegisterOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>수동 사용자 등록</DialogTitle>
+            <DialogDescription>
+              Firebase Auth에 가입되어 있으나 목록에 없는 사용자를 등록합니다.<br />
+              UID는 Firebase Console에서 확인하여 입력해주세요.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="manualUid">UID (필수)</Label>
+              <Input id="manualUid" value={manualUid} onChange={(e) => setManualUid(e.target.value)} placeholder="Firebase Auth UID" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="manualEmail">이메일 (필수)</Label>
+              <Input id="manualEmail" value={manualEmail} onChange={(e) => setManualEmail(e.target.value)} placeholder="user@example.com" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="manualName">이름 (필수)</Label>
+              <Input id="manualName" value={manualName} onChange={(e) => setManualName(e.target.value)} placeholder="홍길동" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setManualRegisterOpen(false)}>취소</Button>
+            <Button onClick={handleManualRegister} disabled={manualLoading}>
+              {manualLoading ? '등록 중...' : '등록'}
             </Button>
           </DialogFooter>
         </DialogContent>
