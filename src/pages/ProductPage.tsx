@@ -316,6 +316,30 @@ const ProductPage = () => {
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
 
+      {/* 우측 상단 사용자 정보 (RecapPage와 동일한 스타일) */}
+      {user && (
+        <div className="fixed top-24 right-4 z-40 flex items-center gap-3 bg-white/95 backdrop-blur-sm px-4 py-2 rounded-full shadow-md border border-gray-200">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 bg-primary/10 rounded-full flex items-center justify-center">
+              <Package className="w-4 h-4 text-primary" />
+            </div>
+            <span className="text-sm font-medium text-foreground max-w-[150px] truncate">
+              {user.email}
+            </span>
+          </div>
+          <div className="h-4 w-px bg-gray-300"></div>
+          <Button
+            onClick={handleLogout}
+            variant="ghost"
+            size="sm"
+            className="h-7 px-2 text-xs"
+          >
+            <LogOut className="w-3 h-3 mr-1" />
+            로그아웃
+          </Button>
+        </div>
+      )}
+
       <main className="flex-1 container mx-auto px-4 pt-40 pb-16">
         <div className="max-w-7xl mx-auto">
           {/* 인증 정보 표시 */}

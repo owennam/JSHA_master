@@ -8,11 +8,12 @@ import {
   sendPasswordResetEmail,
 } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { getUserProfile, createUserProfile, UserProfile, UserStatus, checkExistingServices, addInsoleServiceToExistingUser } from '@/lib/firestore';
+import { getUserProfile, createUserProfile, UserProfile, UserStatus, checkExistingServices, addInsoleServiceToExistingUser, getRecapRegistrant, RecapRegistrant } from '@/lib/firestore';
 
 interface AuthContextType {
   user: User | null;
   userProfile: UserProfile | null;
+  recapProfile: RecapRegistrant | null;
   loading: boolean;
   signUp: (email: string, password: string, clinicName: string, directorName: string, location: string, status?: UserStatus) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
@@ -37,6 +38,7 @@ interface AuthProviderProps {
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [recapProfile, setRecapProfile] = useState<RecapRegistrant | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -50,16 +52,22 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setUser(firebaseUser);
 
       if (firebaseUser) {
-        // 사용자가 로그인된 경우 Firestore에서 프로필 가져오기
+        // 사용자가 로그인된 경우 두 컬렉션 모두에서 프로필 가져오기
         try {
-          const profile = await getUserProfile(firebaseUser.uid);
-          setUserProfile(profile);
+          const [insoleProfile, recapRegistrant] = await Promise.all([
+            getUserProfile(firebaseUser.uid),
+            getRecapRegistrant(firebaseUser.uid),
+          ]);
+          setUserProfile(insoleProfile);
+          setRecapProfile(recapRegistrant);
         } catch (error) {
-          console.error('Failed to fetch user profile:', error);
+          console.error('Failed to fetch user profiles:', error);
           setUserProfile(null);
+          setRecapProfile(null);
         }
       } else {
         setUserProfile(null);
+        setRecapProfile(null);
       }
 
       setLoading(false);
@@ -170,6 +178,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const value: AuthContextType = {
     user,
     userProfile,
+    recapProfile,
     loading,
     signUp,
     signIn,
