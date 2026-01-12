@@ -526,5 +526,128 @@ router.patch('/recap-registrants/:email/status', authMiddleware, async (req, res
     }
 });
 */
+// ============================================
+// Firebase Auth 사용자 동기화 (Auth에는 있지만 Firestore에 없는 사용자)
+// ============================================
+
+// Auth 사용자 목록 조회 (Firestore 미등록 사용자 포함)
+router.get('/sync-auth-users', authMiddleware, async (req, res) => {
+    if (!db) {
+        return res.status(503).json({
+            success: false,
+            message: 'Firebase Admin is not initialized'
+        });
+    }
+
+    try {
+        const { admin } = await import('../firebaseAdmin.js');
+
+        // 1. Firebase Auth에서 모든 사용자 가져오기
+        const listUsersResult = await admin.auth().listUsers(1000);
+        const authUsers = listUsersResult.users;
+
+        // 2. Firestore에서 기존 등록자 가져오기 (users + recapRegistrants)
+        const [usersSnapshot, recapSnapshot] = await Promise.all([
+            db.collection('users').get(),
+            db.collection('recapRegistrants').get()
+        ]);
+
+        const existingUserUids = new Set();
+        usersSnapshot.forEach(doc => existingUserUids.add(doc.id));
+        recapSnapshot.forEach(doc => existingUserUids.add(doc.id));
+
+        // 3. Firestore에 없는 Auth 사용자 필터링
+        const unregisteredUsers = authUsers
+            .filter(user => !existingUserUids.has(user.uid))
+            .map(user => ({
+                uid: user.uid,
+                email: user.email,
+                displayName: user.displayName || '',
+                createdAt: user.metadata.creationTime
+            }));
+
+        res.json({
+            success: true,
+            data: {
+                totalAuthUsers: authUsers.length,
+                registeredUsers: existingUserUids.size,
+                unregisteredUsers: unregisteredUsers
+            }
+        });
+    } catch (error) {
+        console.error('Failed to sync auth users:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to sync auth users',
+            error: error.message
+        });
+    }
+});
+
+// Auth 사용자를 Firestore recapRegistrants에 등록
+router.post('/sync-auth-users', authMiddleware, async (req, res) => {
+    if (!db) {
+        return res.status(503).json({
+            success: false,
+            message: 'Firebase Admin is not initialized'
+        });
+    }
+
+    const { uids, collection = 'recapRegistrants' } = req.body;
+
+    if (!uids || !Array.isArray(uids) || uids.length === 0) {
+        return res.status(400).json({
+            success: false,
+            message: 'uids array is required'
+        });
+    }
+
+    try {
+        const { admin } = await import('../firebaseAdmin.js');
+        const results = [];
+
+        for (const uid of uids) {
+            try {
+                // Auth에서 사용자 정보 가져오기
+                const userRecord = await admin.auth().getUser(uid);
+
+                // Firestore에 등록
+                const docData = {
+                    uid: uid,
+                    email: userRecord.email || '',
+                    name: userRecord.displayName || userRecord.email?.split('@')[0] || '이름미입력',
+                    status: 'pending',
+                    accessLevel: 'preview',
+                    createdAt: new Date().toISOString(),
+                    syncedFromAuth: true
+                };
+
+                if (collection === 'users') {
+                    docData.clinicName = '미입력';
+                    docData.directorName = docData.name;
+                    docData.location = '기타';
+                }
+
+                await db.collection(collection).doc(uid).set(docData);
+                results.push({ uid, email: userRecord.email, success: true });
+            } catch (userError) {
+                results.push({ uid, success: false, error: userError.message });
+            }
+        }
+
+        res.json({
+            success: true,
+            message: `Synced ${results.filter(r => r.success).length} of ${uids.length} users`,
+            data: results
+        });
+    } catch (error) {
+        console.error('Failed to sync auth users to Firestore:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to sync auth users',
+            error: error.message
+        });
+    }
+});
 
 export default router;

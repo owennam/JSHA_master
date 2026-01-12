@@ -28,7 +28,7 @@ import {
 } from "firebase/auth";
 import { AlertCircle, Loader2, Video, Info } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { createRecapRegistrant, checkExistingServices, addRecapServiceToExistingUser } from "@/lib/firestore";
+import { createRecapRegistrant, checkExistingServices, addRecapServiceToExistingUser, getRecapRegistrant } from "@/lib/firestore";
 
 const RecapAuthPage = () => {
     const navigate = useNavigate();
@@ -94,7 +94,22 @@ const RecapAuthPage = () => {
         }
 
         try {
-            await signInWithEmailAndPassword(auth!, loginEmail, loginPassword);
+            const userCredential = await signInWithEmailAndPassword(auth!, loginEmail, loginPassword);
+            const loggedInUser = userCredential.user;
+
+            // 로그인 성공 후 recapRegistrants에 문서가 있는지 확인
+            const existingRegistrant = await getRecapRegistrant(loggedInUser.uid);
+            if (!existingRegistrant) {
+                // Firestore에 문서가 없으면 자동 생성 (pending 상태)
+                await createRecapRegistrant(
+                    loggedInUser.uid,
+                    loggedInUser.email || loginEmail,
+                    loggedInUser.email?.split('@')[0] || '이름미입력', // 이름이 없으면 이메일 앞부분 사용
+                    undefined,
+                    'pending'
+                );
+                console.log('✅ Auto-created recapRegistrant for existing Auth user');
+            }
             // onAuthStateChanged에서 리다이렉트 처리
         } catch (error: any) {
             setLoginError(getAuthErrorMessage(error.code));
