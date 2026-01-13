@@ -407,7 +407,10 @@ export const getAllRecapVideos = async (publishedOnly: boolean = true): Promise<
   }
 
   const querySnapshot = await getDocs(q);
-  return querySnapshot.docs.map(doc => doc.data() as RecapVideo);
+  return querySnapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data()
+  } as RecapVideo));
 };
 
 /**

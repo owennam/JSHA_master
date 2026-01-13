@@ -591,7 +591,8 @@ const getAuthErrorMessage = (errorCode: string): string => {
         case "auth/too-many-requests":
             return "너무 많은 로그인 시도가 있었습니다. 잠시 후 다시 시도해주세요.";
         default:
-            return "인증 오류가 발생했습니다. 다시 시도해주세요.";
+            console.error("Unknown auth error code:", errorCode);
+            return `인증 오류가 발생했습니다. (${errorCode}) 다시 시도해주세요.`;
     }
 };
 
