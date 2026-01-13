@@ -141,3 +141,25 @@ https://vimeo.com/123456789/abc123hash
 - [Firebase Auth 설정](https://firebase.google.com/docs/auth)
 - [Firestore 보안 규칙](https://firebase.google.com/docs/firestore/security/get-started)
 - [Vimeo 개발자 문서](https://developer.vimeo.com/)
+
+---
+
+## 📌 TODO: 다시보기 UI 개선 (예정)
+
+### Phase 1: 스케일링 및 텍스트 크기 조정
+- [ ] 비디오 썸네일 크기 최적화 (현재 너무 작음)
+- [ ] 제목/설명 텍스트 가독성 개선
+- [ ] 모바일 반응형 레이아웃 점검
+- [ ] 비디오 그리드 간격 조정
+
+### Phase 2: 사용자 경험 개선
+- [ ] 비디오 로딩 스켈레톤 UI 추가
+- [ ] 재생 진행률 표시
+- [ ] 마지막 시청 위치 기억
+- [ ] 접근 등급별 뱃지 시각적 구분
+
+### Phase 3: 성능 최적화
+- [ ] 썸네일 lazy loading
+- [ ] 비디오 목록 페이지네이션
+- [ ] 이미지 WebP 변환
+
