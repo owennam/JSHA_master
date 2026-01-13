@@ -527,6 +527,109 @@ router.patch('/recap-registrants/:email/status', authMiddleware, async (req, res
 });
 */
 // ============================================
+// 다시보기 등록자 관리 (Firestore 기반)
+// ============================================
+
+// 다시보기 등록자 목록 조회
+router.get('/recap-registrants', authMiddleware, async (req, res) => {
+    if (!db) {
+        return res.status(503).json({
+            success: false,
+            message: 'Firebase Admin is not initialized'
+        });
+    }
+
+    try {
+        const { status } = req.query;
+        let registrantsRef = db.collection('recapRegistrants');
+
+        // status 쿼리 파라미터가 있으면 필터링
+        if (status && status !== 'all') {
+            registrantsRef = registrantsRef.where('status', '==', status);
+        }
+
+        const snapshot = await registrantsRef.orderBy('createdAt', 'desc').get();
+        const registrants = [];
+
+        snapshot.forEach(doc => {
+            registrants.push({
+                uid: doc.id,
+                ...doc.data()
+            });
+        });
+
+        res.json({ success: true, data: registrants });
+    } catch (error) {
+        console.error('Failed to fetch recap registrants:', error);
+        res.status(500).json({ success: false, message: 'Failed to fetch recap registrants' });
+    }
+});
+
+// 다시보기 등록자 상태 업데이트
+router.patch('/recap-registrants/:uid/status', authMiddleware, async (req, res) => {
+    if (!db) {
+        return res.status(503).json({
+            success: false,
+            message: 'Firebase Admin is not initialized'
+        });
+    }
+
+    const { uid } = req.params;
+    const { status, accessLevel } = req.body;
+
+    if (!status || !['pending', 'approved', 'rejected'].includes(status)) {
+        return res.status(400).json({
+            success: false,
+            message: 'Invalid status. Must be: pending, approved, or rejected'
+        });
+    }
+
+    try {
+        const updateData = {
+            status,
+            updatedAt: new Date().toISOString()
+        };
+
+        // accessLevel도 함께 업데이트 (optional)
+        if (accessLevel) {
+            updateData.accessLevel = accessLevel;
+        }
+
+        await db.collection('recapRegistrants').doc(uid).update(updateData);
+
+        // 승인 시 이메일 발송
+        if (status === 'approved') {
+            try {
+                const userDoc = await db.collection('recapRegistrants').doc(uid).get();
+                if (userDoc.exists) {
+                    const userData = userDoc.data();
+                    const emailService = (await import('../emailService.js')).default;
+                    // 이메일 발송 (비동기, 에러가 전체 응답을 방해하지 않도록 함)
+                    emailService.sendRecapApprovalToUser({
+                        email: userData.email,
+                        name: userData.name || '회원',
+                        accessLevel: userData.accessLevel || 'preview'
+                    }).catch(err => console.error('Failed to send recap approval email (async):', err));
+                }
+            } catch (emailError) {
+                console.error('Error fetching user data for email:', emailError);
+            }
+        }
+
+        res.json({
+            success: true,
+            message: `Recap registrant status updated to ${status}`
+        });
+    } catch (error) {
+        console.error('Failed to update recap registrant status:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to update registrant status'
+        });
+    }
+});
+
+// ============================================
 // Firebase Auth 사용자 동기화 (Auth에는 있지만 Firestore에 없는 사용자)
 // ============================================
 

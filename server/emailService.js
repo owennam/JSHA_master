@@ -1373,6 +1373,92 @@ class EmailService {
 
     return results;
   }
+
+  /**
+   * 다시보기 회원에게 계정 승인 알림 이메일 발송
+   */
+  async sendRecapApprovalToUser(userData) {
+    if (!this.initialized) {
+      await this.initialize();
+    }
+
+    const { email, name, accessLevel } = userData;
+    console.log(`Sending recap approval email to: ${email}, Name: ${name}`);
+
+    const accessLevelText = {
+      'preview': '미리보기',
+      'session1': '세션1',
+      'graduate': '수료자 전체'
+    };
+
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+      </head>
+      <body style="font-family: 'Noto Sans KR', sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+          <h1 style="color: white; margin: 0; font-size: 28px;">🎉 가입이 승인되었습니다!</h1>
+        </div>
+
+        <div style="background-color: #ffffff; padding: 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 10px 10px;">
+          <p style="font-size: 16px; margin-bottom: 20px;">
+            안녕하세요, <strong>${name}</strong>님!<br>
+            JSHA 마스터 코스 다시보기 서비스 가입이 승인되었습니다.
+          </p>
+
+          <div style="background-color: #ecfdf5; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #10b981;">
+            <p style="margin: 0; color: #065f46;">
+              <strong>승인 완료!</strong><br><br>
+              지금 바로 로그인하여 마스터 코스 영상을 시청하실 수 있습니다.<br>
+              <strong>접근 등급:</strong> ${accessLevelText[accessLevel] || accessLevel}
+            </p>
+          </div>
+
+          <div style="text-align: center; margin: 40px 0;">
+            <a href="https://www.jshamaster.com/recap" style="background-color: #10b981; color: white; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px; display: inline-block;">
+              다시보기 시청하기
+            </a>
+          </div>
+
+          <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin-top: 30px;">
+            <h3 style="margin-top: 0; color: #374151; font-size: 16px;">서비스 안내</h3>
+            <ul style="margin: 0; padding-left: 20px; color: #4b5563; font-size: 14px;">
+              <li style="margin-bottom: 5px;">마스터 코스 수료자 전용 영상을 시청하실 수 있습니다.</li>
+              <li style="margin-bottom: 5px;">접근 등급에 따라 시청 가능한 영상이 다릅니다.</li>
+              <li style="margin-bottom: 5px;">문의사항은 jshaworkshop@gmail.com으로 연락주세요.</li>
+            </ul>
+          </div>
+
+          <div style="margin-top: 30px; text-align: center; color: #6b7280; font-size: 14px;">
+            <p>이 이메일은 발신 전용입니다.</p>
+            <p style="margin: 10px 0;">© 2026 JSHA Master Course. All rights reserved.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    try {
+      const { data, error } = await this.resend.emails.send({
+        from: `JSHA 마스터 코스 <${config.resendFromEmail}>`,
+        to: [email],
+        subject: `[JSHA 다시보기] 가입이 승인되었습니다 - ${name}님`,
+        html: htmlContent,
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      console.log('✅ Recap approval email sent to user:', email);
+      return { success: true, messageId: data.id };
+    } catch (error) {
+      console.error('❌ Failed to send recap approval email:', error);
+      return { success: false, error: error.message };
+    }
+  }
 }
 
 // 싱글톤 인스턴스
