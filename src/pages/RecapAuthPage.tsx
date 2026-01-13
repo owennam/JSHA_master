@@ -111,9 +111,8 @@ const RecapAuthPage = () => {
                 await createRecapRegistrant(
                     loggedInUser.uid,
                     loggedInUser.email || loginEmail,
-                    loggedInUser.email?.split('@')[0] || '이름미입력', // 이름이 없으면 이메일 앞부분 사용
-                    undefined,
-                    'pending'
+                    loggedInUser.email?.split('@')[0] || '이름미입력' // 이름이 없으면 이메일 앞부분 사용
+                    // batch는 전달하지 않음 (기본값 undefined가 처리됨)
                 );
                 console.log('✅ Auto-created recapRegistrant for existing Auth user');
             }
@@ -205,7 +204,7 @@ const RecapAuthPage = () => {
                     newUser.uid,
                     signupEmail,
                     signupName,
-                    signupBatch || undefined,
+                    signupBatch || undefined, // 빈 문자열일 경우 undefined로 처리
                     'pending',
                     'preview',
                     privacyAgreed,

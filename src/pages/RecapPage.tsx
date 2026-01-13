@@ -265,10 +265,8 @@ const RecapPage = () => {
       await addRecapServiceToExistingUser(
         user.uid,
         user.email || insoleProfile.email,
-        insoleProfile.directorName,
-        undefined, // batch
-        'pending',
-        'preview'
+        insoleProfile.directorName
+        // batch, status, accessLevel은 기본값 사용
       );
 
       toast({
