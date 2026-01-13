@@ -13,6 +13,11 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
 
+    // Helper function: 관리자인지 확인
+    function isAdmin() {
+      return isSignedIn() && request.auth.uid == 'Fvupff2KAzLqbRwJO8ThFr28omE3';
+    }
+
     // ============================================
     // 기존 users 컬렉션 (인솔 회원)
     // ============================================
@@ -53,8 +58,8 @@ service cloud.firestore {
     match /recapVideos/{videoId} {
       // 승인된 사용자만 읽기 가능 (accessLevel 기반 필터링은 클라이언트에서 처리)
       allow read: if isSignedIn();
-      // 쓰기는 서버(Admin SDK)에서만 가능
-      allow write: if false;
+      // 관리자만 쓰기 가능
+      allow write: if isAdmin();
     }
 
     // 기타 모든 문서는 기본적으로 접근 불가

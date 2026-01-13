@@ -53,6 +53,9 @@ export interface UserProfile {
   directorName: string;
   location: string;
   status: UserStatus;
+  privacyAgreed: boolean; // 개인정보 수집 동의
+  marketingAgreed: boolean; // 마케팅 수신 동의
+  agreedAt: string; // 동의 일시
   createdAt: string;
   updatedAt: string;
 }
@@ -66,7 +69,9 @@ export const createUserProfile = async (
   clinicName: string,
   directorName: string,
   location: string,
-  status: UserStatus = 'pending'
+  status: UserStatus = 'pending',
+  privacyAgreed: boolean = false,
+  marketingAgreed: boolean = false
 ): Promise<void> => {
   if (!db) {
     throw new Error('Firestore is not initialized');
@@ -79,6 +84,9 @@ export const createUserProfile = async (
     directorName,
     location,
     status,
+    privacyAgreed,
+    marketingAgreed,
+    agreedAt: new Date().toISOString(),
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
@@ -209,6 +217,9 @@ export interface RecapRegistrant {
   batch?: string; // 수료 기수
   status: UserStatus; // 승인 상태 (pending, approved, rejected)
   accessLevel: AccessLevel; // 영상 접근 등급
+  privacyAgreed: boolean; // 개인정보 수집 동의
+  marketingAgreed: boolean; // 마케팅 수신 동의
+  agreedAt: string; // 동의 일시
   createdAt: string;
   updatedAt: string;
 }
@@ -222,7 +233,9 @@ export const createRecapRegistrant = async (
   name: string,
   batch?: string,
   status: UserStatus = 'pending',
-  accessLevel: AccessLevel = 'preview'
+  accessLevel: AccessLevel = 'preview',
+  privacyAgreed: boolean = false,
+  marketingAgreed: boolean = false
 ): Promise<void> => {
   if (!db) {
     throw new Error('Firestore is not initialized');
@@ -235,6 +248,9 @@ export const createRecapRegistrant = async (
     batch,
     status,
     accessLevel,
+    privacyAgreed,
+    marketingAgreed,
+    agreedAt: new Date().toISOString(),
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };

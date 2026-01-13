@@ -21,6 +21,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { authenticateUser, authorizedUsers } from "@/data/authorizedUsers";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Checkbox } from "@/components/ui/checkbox";
+import { PrivacyPolicyModal } from "@/components/common/PrivacyPolicyModal";
 
 const AuthPage = () => {
   const navigate = useNavigate();
@@ -46,6 +48,11 @@ const AuthPage = () => {
   const [directorName, setDirectorName] = useState("");
   const [signupError, setSignupError] = useState("");
   const [signupLoading, setSignupLoading] = useState(false);
+
+  // 개인정보 동의 상태
+  const [privacyAgreed, setPrivacyAgreed] = useState(false);
+  const [marketingAgreed, setMarketingAgreed] = useState(false);
+  const [isPrivacyModalOpen, setIsPrivacyModalOpen] = useState(false);
 
   /**
    * 로그인 처리
@@ -135,6 +142,12 @@ const AuthPage = () => {
       return;
     }
 
+    if (!privacyAgreed) {
+      setSignupError("개인정보 수집 및 이용에 동의해주세요.");
+      setSignupLoading(false);
+      return;
+    }
+
     // authorizedUsers 목록에서 화이트리스트 확인
     const isWhitelisted = authenticateUser(clinicName, directorName);
 
@@ -149,7 +162,7 @@ const AuthPage = () => {
     try {
       // 화이트리스트에 있으면 즉시 승인('approved'), 없으면 승인 대기('pending')
       const status = isWhitelisted ? 'approved' : 'pending';
-      await signUp(signupEmail, signupPassword, clinicName, directorName, location, status);
+      await signUp(signupEmail, signupPassword, clinicName, directorName, location, status, privacyAgreed, marketingAgreed);
 
       // 관리자에게 알림 전송
       try {
@@ -385,6 +398,53 @@ const AuthPage = () => {
                         />
                       </div>
 
+                      {/* 개인정보 동의 */}
+                      <div className="space-y-3 pt-2 border-t">
+                        <div className="flex items-start space-x-2">
+                          <Checkbox
+                            id="privacyAgreed"
+                            checked={privacyAgreed}
+                            onCheckedChange={(checked) => setPrivacyAgreed(checked === true)}
+                            disabled={signupLoading}
+                          />
+                          <div className="grid gap-1.5 leading-none">
+                            <label
+                              htmlFor="privacyAgreed"
+                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                            >
+                              개인정보 수집 및 이용 동의 (필수)
+                            </label>
+                            <button
+                              type="button"
+                              onClick={() => setIsPrivacyModalOpen(true)}
+                              className="text-xs text-primary hover:underline text-left"
+                            >
+                              내용 보기
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="flex items-start space-x-2">
+                          <Checkbox
+                            id="marketingAgreed"
+                            checked={marketingAgreed}
+                            onCheckedChange={(checked) => setMarketingAgreed(checked === true)}
+                            disabled={signupLoading}
+                          />
+                          <div className="grid gap-1.5 leading-none">
+                            <label
+                              htmlFor="marketingAgreed"
+                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                            >
+                              마케팅 정보 수신 동의 (선택)
+                            </label>
+                            <p className="text-xs text-muted-foreground">
+                              이메일, SMS로 새로운 서비스 및 이벤트 정보를 받습니다
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
                       {signupError && (
                         <Alert variant="destructive">
                           <AlertCircle className="h-4 w-4" />
@@ -436,6 +496,12 @@ const AuthPage = () => {
       </main>
 
       <Footer showBusinessInfo={true} />
+
+      {/* 개인정보 처리방침 모달 */}
+      <PrivacyPolicyModal
+        open={isPrivacyModalOpen}
+        onOpenChange={setIsPrivacyModalOpen}
+      />
     </div>
   );
 };

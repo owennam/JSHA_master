@@ -15,7 +15,7 @@ interface AuthContextType {
   userProfile: UserProfile | null;
   recapProfile: RecapRegistrant | null;
   loading: boolean;
-  signUp: (email: string, password: string, clinicName: string, directorName: string, location: string, status?: UserStatus) => Promise<void>;
+  signUp: (email: string, password: string, clinicName: string, directorName: string, location: string, status?: UserStatus, privacyAgreed?: boolean, marketingAgreed?: boolean) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
@@ -85,7 +85,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     clinicName: string,
     directorName: string,
     location: string,
-    status: UserStatus = 'pending'
+    status: UserStatus = 'pending',
+    privacyAgreed: boolean = false,
+    marketingAgreed: boolean = false
   ) => {
     if (!auth) {
       throw new Error('Firebase Auth is not initialized');
@@ -97,7 +99,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const newUser = userCredential.user;
 
       // 2. Firestore에 사용자 프로필 저장 (status 포함)
-      await createUserProfile(newUser.uid, email, clinicName, directorName, location, status);
+      await createUserProfile(newUser.uid, email, clinicName, directorName, location, status, privacyAgreed, marketingAgreed);
 
       // 프로필 다시 가져오기
       const profile = await getUserProfile(newUser.uid);
