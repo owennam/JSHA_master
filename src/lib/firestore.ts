@@ -245,7 +245,7 @@ export const createRecapRegistrant = async (
     uid,
     email,
     name,
-    batch,
+    ...(batch !== undefined && { batch }), // undefined일 때는 필드 자체를 제거
     status,
     accessLevel,
     privacyAgreed,
