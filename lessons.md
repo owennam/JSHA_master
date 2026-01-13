@@ -897,3 +897,194 @@ Website Builder 시스템은 체계적이고 확장 가능한 웹 개발 방법�
 4. **확장성**: 향후 기능 추가 시 체계적 확장 가능
 
 특히 **마케팅 퍼널 최적화**와 **SEO 강화**를 우선적으로 적용하면 즉각적인 비즈니스 임팩트를 기대할 수 있습니다.
+
+---
+---
+
+# 회원가입 워크플로우 개선 회고
+
+## 📅 작업 날짜
+2026-01-13
+
+---
+
+## ✅ 구현된 기능
+
+### 1. 개인정보 동의 시스템
+- **개인정보 수집 동의 체크박스** (필수)
+- **마케팅 정보 수신 동의 체크박스** (선택)
+- **개인정보 처리방침 모달** (`PrivacyPolicyModal.tsx`)
+- Firestore에 `privacyAgreed`, `marketingAgreed`, `agreedAt` 필드 저장
+
+### 2. 이메일 알림 시스템
+| 시점 | 발송 대상 | 함수명 |
+|------|----------|--------|
+| 가입 직후 | 가입자 | `sendRecapWelcomeEmail()` |
+| 가입 직후 | 관리자 | `sendRecapSignupNotificationToAdmin()` |
+| 관리자 승인 시 | 가입자 | `sendRecapApprovalToUser()` |
+
+### 3. 관리자 API 추가
+- `GET /api/admin/recap-registrants` - 다시보기 회원 목록
+- `PATCH /api/admin/recap-registrants/:uid/status` - 상태 변경 + 승인 이메일
+
+---
+
+## 📚 배운 점
+
+1. **Resend API 활용**: 이메일 발송이 매우 간단하고 안정적
+2. **비동기 이메일 발송**: API 응답을 블로킹하지 않도록 `.catch()` 패턴 사용
+3. **TypeScript 타입 확장**: 기존 인터페이스에 새 필드 추가 시 관련 함수도 업데이트 필요
+
+---
+
+## ⚠️ 내일 할 작업
+
+### 1. 수동 테스트 (우선)
+- 다시보기 회원가입 전체 흐름 테스트
+- 개인정보 동의 체크박스 작동 확인
+- 환영 이메일 수신 확인
+- 관리자 승인 → 승인 이메일 수신 확인
+
+### 2. 인솔 회원 테스트
+- 화이트리스트 자동 승인 로직 확인
+- 개인정보 동의 데이터 Firestore 저장 확인
+
+---
+
+# 다시보기 UI 스케일링 개선 방안
+
+## 🎯 문제 정의
+
+현재 UI는 영상 수가 적을 때 적합하지만, **영상이 100개 이상** 증가하면 확장성 문제 발생
+
+### 현재 구조의 한계
+1. 단일 리스트 뷰: 스크롤이 너무 길어짐
+2. 필터링 부재: 원하는 영상 찾기 어려움
+3. 카테고리 없음: 세션/모듈별 구분 불가
+
+---
+
+## 💡 개선 아이디어
+
+### 1. 카테고리 기반 네비게이션
+
+```
+📁 마스터 코스 다시보기
+├── 📂 모듈 1: 기초 (12개 영상)
+│   ├── 🎥 1-1. DTR 기법 소개
+│   ├── 🎥 1-2. STR 기본 원리
+│   └── ...
+├── 📂 모듈 2: 심화 (15개 영상)
+├── 📂 모듈 3: 실전 (10개 영상)
+└── 📂 보너스 콘텐츠 (5개 영상)
+```
+
+**구현 방법**:
+- `RecapVideo` 타입에 `category`, `module`, `order` 필드 추가
+- 사이드바 네비게이션 또는 탭 구조
+
+### 2. 검색 및 필터 기능
+
+```text
+🔍 검색: "DTR"
+📌 필터: [모듈 1] [세션 2] [2024년]
+🏷️ 태그: #기법 #진단 #치료
+```
+
+**구현 방법**:
+- Firestore 쿼리 또는 로컬 필터링
+- `tags` 배열 필드 추가
+
+### 3. 시각적 개선
+
+| 뷰 옵션 | 설명 |
+|---------|------|
+| **그리드 뷰** | 썸네일 중심 (현재) |
+| **리스트 뷰** | 제목 + 설명 중심, 컴팩트 |
+| **카로셀** | 각 카테고리별 가로 스크롤 |
+
+### 4. 진행률 트래킹
+
+```
+📊 시청 현황
+├── ✅ 완료: 15개
+├── ⏸️ 시청 중: 3개
+└── ⬜ 미시청: 25개
+
+🏆 진행률: 35%
+```
+
+**구현 방법**:
+- Firestore에 `userProgress` 컬렉션 추가
+- `{ videoId, lastPosition, completed, watchedAt }`
+
+### 5. 아코디언 UI (권장 - 단순 구현)
+
+```tsx
+<Accordion type="single" collapsible>
+  <AccordionItem value="module1">
+    <AccordionTrigger>모듈 1: 기초 (12개)</AccordionTrigger>
+    <AccordionContent>
+      {videos.filter(v => v.module === 1).map(video => (
+        <VideoCard key={video.id} video={video} />
+      ))}
+    </AccordionContent>
+  </AccordionItem>
+</Accordion>
+```
+
+---
+
+## 🎯 권장 구현 순서
+
+### Phase 1: 최소 변경으로 확장성 확보
+1. `RecapVideo` 타입에 `category`, `order` 필드 추가
+2. 관리자 비디오 관리 페이지에 카테고리/순서 입력 UI 추가
+3. RecapPage에서 카테고리별 그룹핑 표시
+
+### Phase 2: 사용자 경험 개선
+1. 검색 기능 추가
+2. 시청 진행률 트래킹
+3. "계속 시청" 섹션 추가
+
+### Phase 3: 고급 기능
+1. 플레이리스트 기능
+2. 북마크/즐겨찾기
+3. 시청 통계 대시보드
+
+---
+
+## 🔧 기술적 고려사항
+
+### Firestore 스키마 확장
+```typescript
+interface RecapVideo {
+  // 기존 필드
+  id: string;
+  title: string;
+  vimeoUrl: string;
+  
+  // 새 필드 (확장성)
+  category?: string;      // "module1", "module2", "bonus"
+  order?: number;         // 표시 순서
+  tags?: string[];        // 검색용 태그
+  duration?: number;      // 영상 길이 (초)
+}
+
+interface UserProgress {
+  userId: string;
+  videoId: string;
+  lastPosition: number;   // 마지막 시청 위치 (초)
+  completed: boolean;
+  watchedAt: string;
+}
+```
+
+---
+
+## 💭 결론
+
+**단기적**: 아코디언 UI + 카테고리 필드 추가로 빠르게 확장성 확보
+**장기적**: 진행률 트래킹 + 검색으로 Netflix 스타일 UX 구현
+
+내일 수동 테스트 후 우선순위 결정 예정.
