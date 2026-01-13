@@ -156,7 +156,28 @@ https://vimeo.com/123456789/abc123hash
 
 ---
 
-## 📚 참고 문서
+## �️ 개발 가이드: Website Builder 스킬
+
+UI/UX 개선 작업 시 `website-builder-extracted` 폴더의 스킬을 활용하세요:
+
+```
+📁 website-builder-extracted/website-builder/
+├── SKILL.md           # 멀티 에이전트 웹 개발 워크플로우
+├── marketing.md       # 마케팅 전략 가이드
+├── design.md          # 디자인 시스템 원칙
+├── seo.md             # SEO 최적화 체크리스트
+├── content.md         # 콘텐츠 작성 가이드
+└── frontend.md        # 프론트엔드 구현 패턴
+```
+
+**활용 예시:**
+- 랜딩 페이지 개선 → `SKILL.md` + `marketing.md`
+- UI 컴포넌트 개선 → `design.md` + `frontend.md`
+- 검색 최적화 → `seo.md`
+
+---
+
+## �📚 참고 문서
 
 - [Firebase Auth 설정](https://firebase.google.com/docs/auth)
 - [Firestore 보안 규칙](https://firebase.google.com/docs/firestore/security/get-started)
