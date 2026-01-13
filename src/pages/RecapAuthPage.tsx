@@ -200,16 +200,29 @@ const RecapAuthPage = () => {
             const newUser = userCredential.user;
 
             // 2. Firestore에 다시보기 등록자 저장 (pending 상태)
-            await createRecapRegistrant(
-                newUser.uid,
-                signupEmail,
-                signupName,
-                signupBatch || undefined,
-                'pending',
-                'preview',
-                privacyAgreed,
-                marketingAgreed
-            );
+            try {
+                await createRecapRegistrant(
+                    newUser.uid,
+                    signupEmail,
+                    signupName,
+                    signupBatch || undefined,
+                    'pending',
+                    'preview',
+                    privacyAgreed,
+                    marketingAgreed
+                );
+                console.log('✅ Firestore registration successful for:', newUser.uid);
+            } catch (firestoreError: any) {
+                console.error('❌ Firestore registration failed:', firestoreError);
+                // Firestore 실패해도 Auth는 성공했으므로 사용자에게 알림
+                toast({
+                    title: "등록 정보 저장 오류",
+                    description: "계정은 생성되었으나 등록 정보 저장에 실패했습니다. 관리자에게 문의해주세요.",
+                    variant: "destructive",
+                });
+                // 이 경우에도 로그인 상태이므로 RecapPage로 이동됨
+                // RecapPage에서 recapRegistrant가 없으면 자동 생성 시도함
+            }
 
             // 3. 관리자 알림 및 환영 이메일 발송
             try {
