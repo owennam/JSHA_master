@@ -211,9 +211,26 @@ const RecapAuthPage = () => {
                 marketingAgreed
             );
 
+            // 3. 관리자 알림 및 환영 이메일 발송
+            try {
+                const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+                fetch(`${API_URL}/notify-recap-signup`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: signupEmail,
+                        name: signupName,
+                        batch: signupBatch || '',
+                        status: 'pending'
+                    })
+                }).catch(err => console.error('Failed to send recap signup notification:', err));
+            } catch (notifyError) {
+                console.error('Notification error:', notifyError);
+            }
+
             toast({
                 title: "회원가입 완료",
-                description: "관리자 승인 후 영상을 시청하실 수 있습니다.",
+                description: "관리자 승인 후 영상을 시청하실 수 있습니다. 환영 이메일을 확인해주세요.",
             });
 
             // RecapPage로 이동 (onAuthStateChanged에서 처리)

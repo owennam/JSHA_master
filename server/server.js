@@ -640,6 +640,60 @@ app.post('/notify-signup', async (req, res) => {
   }
 });
 
+// 다시보기 회원가입 알림 엔드포인트
+app.post('/notify-recap-signup', async (req, res) => {
+  const { email, name, batch, status } = req.body;
+
+  // 요청 파라미터 검증
+  if (!email || !name) {
+    return res.status(400).json({
+      success: false,
+      error: 'Missing required parameters',
+      message: 'email, name are required'
+    });
+  }
+
+  try {
+    console.log('다시보기 회원가입 알림 요청:', { email, name, batch, status });
+
+    const userData = {
+      email,
+      name,
+      batch: batch || '',
+      status: status || 'pending'
+    };
+
+    // 이메일 발송 (가입자 환영 + 관리자 알림)
+    const emailResults = await emailService.sendRecapSignupEmails(userData);
+
+    if (emailResults.user.success) {
+      console.log('✅ 가입자에게 환영 이메일 발송 성공');
+    } else {
+      console.warn('⚠️ 가입자에게 환영 이메일 발송 실패:', emailResults.user.error);
+    }
+
+    if (emailResults.admin.success) {
+      console.log('✅ 관리자에게 가입 알림 이메일 발송 성공');
+    } else {
+      console.warn('⚠️ 관리자에게 가입 알림 이메일 발송 실패:', emailResults.admin.error);
+    }
+
+    res.json({
+      success: true,
+      message: 'Recap signup notification sent successfully',
+      results: emailResults
+    });
+
+  } catch (error) {
+    console.error('다시보기 회원가입 알림 처리 중 오류:', error);
+    res.status(500).json({
+      success: false,
+      error: 'INTERNAL_SERVER_ERROR',
+      message: 'Failed to process recap signup notification'
+    });
+  }
+});
+
 // 404 핸들러
 app.use((req, res) => {
   res.status(404).json({
