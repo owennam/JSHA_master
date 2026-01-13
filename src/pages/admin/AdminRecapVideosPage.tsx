@@ -5,14 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import {
-  RecapVideo,
-  AccessLevel,
-  getAllRecapVideos,
-  createRecapVideo,
-  updateRecapVideo,
-  deleteRecapVideo,
-} from "@/lib/firestore";
+// Firestore SDK 대신 API 사용
+import type { AccessLevel } from "@/lib/firestore";
 import {
   Video,
   Plus,
@@ -49,6 +43,68 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+// RecapVideo 타입 정의 (API 응답용)
+interface RecapVideo {
+  id: string;
+  title: string;
+  description: string;
+  vimeoUrl: string;
+  duration: string;
+  module: string;
+  thumbnail: string;
+  order: number;
+  isPublished: boolean;
+  accessLevel: AccessLevel;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// API Helper 함수들
+const getApiUrl = () => import.meta.env.VITE_API_URL || import.meta.env.VITE_SERVER_URL || '';
+const getAuthHeaders = () => ({
+  'Content-Type': 'application/json',
+  'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+});
+
+const apiGetAllVideos = async (publishedOnly: boolean = false): Promise<RecapVideo[]> => {
+  const response = await fetch(`${getApiUrl()}/api/admin/recap-videos${publishedOnly ? '?publishedOnly=true' : ''}`, {
+    headers: getAuthHeaders()
+  });
+  const result = await response.json();
+  if (!result.success) throw new Error(result.message || 'Failed to fetch videos');
+  return result.data;
+};
+
+const apiCreateVideo = async (videoData: Omit<RecapVideo, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> => {
+  const response = await fetch(`${getApiUrl()}/api/admin/recap-videos`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(videoData)
+  });
+  const result = await response.json();
+  if (!result.success) throw new Error(result.message || 'Failed to create video');
+  return result.data.id;
+};
+
+const apiUpdateVideo = async (videoId: string, updates: Partial<RecapVideo>): Promise<void> => {
+  const response = await fetch(`${getApiUrl()}/api/admin/recap-videos/${videoId}`, {
+    method: 'PATCH',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(updates)
+  });
+  const result = await response.json();
+  if (!result.success) throw new Error(result.message || 'Failed to update video');
+};
+
+const apiDeleteVideo = async (videoId: string): Promise<void> => {
+  const response = await fetch(`${getApiUrl()}/api/admin/recap-videos/${videoId}`, {
+    method: 'DELETE',
+    headers: getAuthHeaders()
+  });
+  const result = await response.json();
+  if (!result.success) throw new Error(result.message || 'Failed to delete video');
+};
+
 const AdminRecapVideosPage = () => {
   const { toast } = useToast();
   const [videos, setVideos] = useState<RecapVideo[]>([]);
@@ -72,7 +128,7 @@ const AdminRecapVideosPage = () => {
   const loadVideos = async () => {
     setLoading(true);
     try {
-      const videoList = await getAllRecapVideos(false); // 모든 비디오 (미공개 포함)
+      const videoList = await apiGetAllVideos(false); // 모든 비디오 (미공개 포함)
       setVideos(videoList);
     } catch (error) {
       console.error("Failed to load videos:", error);
@@ -85,6 +141,7 @@ const AdminRecapVideosPage = () => {
       setLoading(false);
     }
   };
+
 
   useEffect(() => {
     loadVideos();
@@ -149,13 +206,13 @@ const AdminRecapVideosPage = () => {
 
     try {
       if (editingVideo) {
-        await updateRecapVideo(editingVideo.id, formData);
+        await apiUpdateVideo(editingVideo.id, formData);
         toast({
           title: "수정 완료",
           description: "비디오가 수정되었습니다.",
         });
       } else {
-        await createRecapVideo(formData);
+        await apiCreateVideo(formData);
         toast({
           title: "추가 완료",
           description: "새 비디오가 추가되었습니다.",
@@ -175,7 +232,7 @@ const AdminRecapVideosPage = () => {
 
   const handleTogglePublish = async (video: RecapVideo) => {
     try {
-      await updateRecapVideo(video.id, { isPublished: !video.isPublished });
+      await apiUpdateVideo(video.id, { isPublished: !video.isPublished });
       toast({
         title: video.isPublished ? "비공개 처리" : "공개 처리",
         description: `비디오가 ${!video.isPublished ? "공개" : "비공개"}되었습니다.`,
@@ -196,7 +253,7 @@ const AdminRecapVideosPage = () => {
     }
 
     try {
-      await deleteRecapVideo(video.id);
+      await apiDeleteVideo(video.id);
       toast({
         title: "삭제 완료",
         description: "비디오가 삭제되었습니다.",

@@ -1,17 +1,11 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input"; // Added Input
+import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import {
-  RecapRegistrant,
-  UserStatus,
-  AccessLevel,
-  getRecapRegistrantsByStatus,
-  updateRecapRegistrantStatus,
-  updateRecapRegistrantAccessLevel,
-} from "@/lib/firestore";
+// Firestore SDK 대신 API 사용 - 타입만 import
+import type { UserStatus, AccessLevel } from "@/lib/firestore";
 import {
   Users,
   CheckCircle,
@@ -20,10 +14,8 @@ import {
   RefreshCw,
   Shield,
   RotateCcw,
-  Plus, // Added Plus
+  Plus,
 } from "lucide-react";
-import { auth } from "@/lib/firebase";
-import { onAuthStateChanged, signInAnonymously } from "firebase/auth";
 import {
   Tabs,
   TabsContent,
@@ -55,6 +47,47 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 
+// RecapRegistrant 타입 정의 (API 응답용)
+interface RecapRegistrant {
+  uid: string;
+  email: string;
+  name: string;
+  batch?: string;
+  status: UserStatus;
+  accessLevel: AccessLevel;
+  privacyAgreed: boolean;
+  marketingAgreed: boolean;
+  agreedAt: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// API Helper 함수들
+const getApiUrl = () => import.meta.env.VITE_API_URL || import.meta.env.VITE_SERVER_URL || '';
+const getAuthHeaders = () => ({
+  'Content-Type': 'application/json',
+  'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+});
+
+const apiGetRegistrantsByStatus = async (status: UserStatus): Promise<RecapRegistrant[]> => {
+  const response = await fetch(`${getApiUrl()}/api/admin/recap-registrants?status=${status}`, {
+    headers: getAuthHeaders()
+  });
+  const result = await response.json();
+  if (!result.success) throw new Error(result.message || 'Failed to fetch registrants');
+  return result.data;
+};
+
+const apiUpdateRegistrantStatus = async (uid: string, status: UserStatus, accessLevel?: AccessLevel): Promise<void> => {
+  const response = await fetch(`${getApiUrl()}/api/admin/recap-registrants/${uid}/status`, {
+    method: 'PATCH',
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ status, accessLevel })
+  });
+  const result = await response.json();
+  if (!result.success) throw new Error(result.message || 'Failed to update status');
+};
+
 const AdminRecapPage = () => {
   const { toast } = useToast();
   const [pendingRegistrants, setPendingRegistrants] = useState<RecapRegistrant[]>([]);
@@ -62,7 +95,6 @@ const AdminRecapPage = () => {
   const [rejectedRegistrants, setRejectedRegistrants] = useState<RecapRegistrant[]>([]);
   const [loading, setLoading] = useState(true);
   const [updatingUid, setUpdatingUid] = useState<string | null>(null);
-  const [authChecked, setAuthChecked] = useState(false);
 
   // 승인 다이얼로그 상태
   const [approvalDialogOpen, setApprovalDialogOpen] = useState(false);
@@ -83,15 +115,9 @@ const AdminRecapPage = () => {
     }
     setManualLoading(true);
     try {
-      const token = localStorage.getItem('admin_token');
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-
-      const response = await fetch(`${API_URL}/api/admin/manual-register`, {
+      const response = await fetch(`${getApiUrl()}/api/admin/manual-register`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify({ uid: manualUid, email: manualEmail, name: manualName })
       });
 
@@ -109,33 +135,14 @@ const AdminRecapPage = () => {
     }
   };
 
-  // Firebase Auth 상태 확인
-  useEffect(() => {
-    if (!auth) {
-      setAuthChecked(true);
-      return;
-    }
-
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        console.log("✅ Admin authenticated:", user.uid);
-      } else {
-        console.log("⚠️ No user authenticated - some features may be limited");
-      }
-      setAuthChecked(true);
-    });
-
-    return () => unsubscribe();
-  }, []);
-
   const loadRegistrants = async () => {
     setLoading(true);
     try {
-      // Firestore에서 직접 조회
+      // API를 통해 조회
       const [pending, approved, rejected] = await Promise.all([
-        getRecapRegistrantsByStatus('pending'),
-        getRecapRegistrantsByStatus('approved'),
-        getRecapRegistrantsByStatus('rejected'),
+        apiGetRegistrantsByStatus('pending'),
+        apiGetRegistrantsByStatus('approved'),
+        apiGetRegistrantsByStatus('rejected'),
       ]);
 
       setPendingRegistrants(pending);
@@ -155,10 +162,9 @@ const AdminRecapPage = () => {
   };
 
   useEffect(() => {
-    if (authChecked) {
-      loadRegistrants();
-    }
-  }, [authChecked]);
+    loadRegistrants();
+  }, []);
+
 
   // 승인 다이얼로그 열기
   const openApprovalDialog = (registrant: RecapRegistrant) => {
@@ -173,9 +179,8 @@ const AdminRecapPage = () => {
 
     setUpdatingUid(selectedRegistrant.uid);
     try {
-      // 상태와 접근 등급을 동시에 업데이트
-      await updateRecapRegistrantStatus(selectedRegistrant.uid, 'approved');
-      await updateRecapRegistrantAccessLevel(selectedRegistrant.uid, selectedAccessLevel);
+      // 상태와 접근 등급을 동시에 업데이트 (API에서 한 번에 처리)
+      await apiUpdateRegistrantStatus(selectedRegistrant.uid, 'approved', selectedAccessLevel);
 
       toast({
         title: "승인 완료",
@@ -185,6 +190,7 @@ const AdminRecapPage = () => {
       setApprovalDialogOpen(false);
       setSelectedRegistrant(null);
       await loadRegistrants();
+
     } catch (error: any) {
       console.error("Failed to approve:", error);
       toast({
@@ -201,7 +207,7 @@ const AdminRecapPage = () => {
   const handleReject = async (uid: string) => {
     setUpdatingUid(uid);
     try {
-      await updateRecapRegistrantStatus(uid, 'rejected');
+      await apiUpdateRegistrantStatus(uid, 'rejected');
 
       toast({
         title: "거부 완료",
@@ -225,7 +231,7 @@ const AdminRecapPage = () => {
   const handleRevokeApproval = async (uid: string) => {
     setUpdatingUid(uid);
     try {
-      await updateRecapRegistrantStatus(uid, 'pending');
+      await apiUpdateRegistrantStatus(uid, 'pending');
 
       toast({
         title: "승인 취소",
@@ -249,7 +255,7 @@ const AdminRecapPage = () => {
   const handleUpdateAccessLevel = async (uid: string, newAccessLevel: AccessLevel) => {
     setUpdatingUid(uid);
     try {
-      await updateRecapRegistrantAccessLevel(uid, newAccessLevel);
+      await apiUpdateRegistrantStatus(uid, 'approved', newAccessLevel);
 
       toast({
         title: "등급 변경 완료",

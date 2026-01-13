@@ -13,9 +13,7 @@ import {
     Video,
     Clock
 } from 'lucide-react';
-import { auth } from '@/lib/firebase';
-import { onAuthStateChanged, signInAnonymously } from 'firebase/auth';
-import { getRecapRegistrantsByStatus } from '@/lib/firestore';
+
 
 interface OrderInfo {
     orderId: string;
@@ -54,27 +52,16 @@ const AdminDashboard = () => {
     const [authChecked, setAuthChecked] = useState(false);
 
     // Firebase Auth 상태 확인 및 자동 로그인
+    // Firebase Auth 상태 확인 및 자동 로그인 로직 제거 (서버 API만 사용)
     useEffect(() => {
-        if (!auth) {
-            setAuthChecked(true);
+        // 이미 토큰이 있는지 확인 (AdminLoginPage에서 설정됨)
+        const token = localStorage.getItem('admin_token');
+        if (!token) {
+            navigate('/admin/login');
             return;
         }
-
-        const unsubscribe = onAuthStateChanged(auth, async (user) => {
-            if (!user) {
-                try {
-                    console.log("Dashboard not authenticated, signing in anonymously...");
-                    await signInAnonymously(auth);
-                    console.log("✅ Dashboard anonymous sign-in successful");
-                } catch (error) {
-                    console.error("Dashboard anonymous sign-in failed:", error);
-                }
-            }
-            setAuthChecked(true);
-        });
-
-        return () => unsubscribe();
-    }, []);
+        setAuthChecked(true);
+    }, [navigate]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -107,26 +94,41 @@ const AdminDashboard = () => {
                             'Authorization': `Bearer ${token}`
                         },
                     }),
-                    // Firestore에서 다시보기 등록자 데이터 가져오기
-                    getRecapRegistrantsByStatus('pending'),
-                    getRecapRegistrantsByStatus('approved')
+                    fetch(`${API_URL}/api/admin/recap-registrants?status=pending`, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                    }),
+                    fetch(`${API_URL}/api/admin/recap-registrants?status=approved`, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                    })
                 ]);
 
-                if (!ordersResponse.ok || !applicationsResponse.ok || !usersResponse.ok) {
+                if (!ordersResponse.ok || !applicationsResponse.ok || !usersResponse.ok || !recapPendingData.ok || !recapApprovedData.ok) {
                     throw new Error('Failed to fetch dashboard data');
                 }
 
                 const ordersResult = await ordersResponse.json();
                 const applicationsResult = await applicationsResponse.json();
                 const usersResult = await usersResponse.json();
+                const recapPendingResult = await recapPendingData.json();
+                const recapApprovedResult = await recapApprovedData.json();
 
-                if (!ordersResult.success || !applicationsResult.success || !usersResult.success) {
+                if (!ordersResult.success || !applicationsResult.success || !usersResult.success || !recapPendingResult.success || !recapApprovedResult.success) {
                     throw new Error('Failed to load dashboard data');
                 }
 
                 const orders: OrderInfo[] = ordersResult.data || [];
                 const applications = applicationsResult.data || [];
                 const pendingUsers = usersResult.data || [];
+                const recapPending = recapPendingResult.data || [];
+                const recapApproved = recapApprovedResult.data || [];
 
                 // 주문 관리 페이지와 동일한 방식으로 통계 계산 (lines 283-300)
                 const totalRevenue = orders.reduce((sum, order) => {
@@ -145,8 +147,8 @@ const AdminDashboard = () => {
                     masterCourseRegistrations: applications.length,
                     pendingUsers: pendingUsers.length,
                     pendingOrderCancels,
-                    recapPending: recapPendingData.length,
-                    recapApproved: recapApprovedData.length
+                    recapPending: recapPending.length,
+                    recapApproved: recapApproved.length
                 });
             } catch (error) {
                 console.error('Failed to fetch dashboard data:', error);

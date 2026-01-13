@@ -1,4 +1,52 @@
+# 관리자 인증 API 마이그레이션
+
+## 📅 작업 날짜
+2026-01-13
+
+---
+
+## 🎯 구현된 기능
+
+### 문제 상황
+- 관리자 대시보드에서 `net::ERR_BLOCKED_BY_CLIENT` 오류 발생
+- 브라우저 확장 프로그램이 Firestore 직접 연결을 차단
+- Firebase Auth UID 기반 규칙으로 인한 권한 문제
+
+### 해결 방안: 비밀번호 기반 인증 (JWT)
+- 모든 관리자 페이지에서 Firestore SDK 직접 호출 제거
+- 서버 API를 통한 데이터 접근으로 변경 (JWT 토큰 인증)
+- Firebase Admin SDK는 서버에서만 사용 (규칙 우회)
+
+---
+
+## 📚 변경된 파일
+
+### 서버 (`adminRoutes.js`)
+- **새 API 추가**:
+  - `GET /api/admin/recap-videos` - 비디오 목록 조회
+  - `POST /api/admin/recap-videos` - 비디오 생성
+  - `PATCH /api/admin/recap-videos/:id` - 비디오 수정
+  - `DELETE /api/admin/recap-videos/:id` - 비디오 삭제
+
+### 클라이언트
+- **`AdminDashboard.tsx`**: Firebase Auth 로직 제거, API 호출로 대체
+- **`AdminRecapVideosPage.tsx`**: Firestore SDK 제거, API 헬퍼 함수 추가
+- **`AdminRecapPage.tsx`**: Firestore SDK 제거, API 헬퍼 함수 추가
+
+---
+
+## ⚠️ 주의사항
+
+1. **서버 필수 실행**: 관리자 페이지 사용 시 Express 서버가 반드시 실행 중이어야 함
+2. **VITE_API_URL 설정**: 프로덕션 환경에서는 `.env`에 API URL 설정 필요
+3. **토큰 관리**: `localStorage`에 `admin_token` 저장됨 (24시간 유효)
+
+---
+
+---
+
 # 다시보기 접근 시스템 구현 회고
+
 
 ## 📅 작업 기간
 2026-01-10 ~ 2026-01-11

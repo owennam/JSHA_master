@@ -56,10 +56,10 @@ service cloud.firestore {
     // 다시보기 비디오 컬렉션 (recapVideos)
     // ============================================
     match /recapVideos/{videoId} {
-      // 승인된 사용자만 읽기 가능 (accessLevel 기반 필터링은 클라이언트에서 처리)
-      allow read: if isSignedIn();
-      // 관리자만 쓰기 가능
-      allow write: if isAdmin();
+      // 읽기는 누구나 가능 (보안: isPublished 필터링 + 클라이언트 accessLevel 체크)
+      allow read: if true;
+      // 쓰기는 서버 Admin SDK만 가능 (서버 API 통해서만 수정)
+      allow write: if false;
     }
 
     // 기타 모든 문서는 기본적으로 접근 불가

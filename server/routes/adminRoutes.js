@@ -806,4 +806,129 @@ router.post('/manual-register', authMiddleware, async (req, res) => {
     }
 });
 
+
+// ============================================
+// 다시보기 비디오 관리 (Firestore 기반)
+// ============================================
+
+// 비디오 목록 조회
+router.get('/recap-videos', authMiddleware, async (req, res) => {
+    if (!db) {
+        return res.status(503).json({
+            success: false,
+            message: 'Firebase Admin is not initialized'
+        });
+    }
+
+    try {
+        const { publishedOnly } = req.query;
+        let videosRef = db.collection('recapVideos');
+        let query = videosRef.orderBy('order', 'asc');
+
+        if (publishedOnly === 'true') {
+            query = query.where('isPublished', '==', true);
+        }
+
+        const snapshot = await query.get();
+        const videos = [];
+
+        snapshot.forEach(doc => {
+            videos.push({
+                id: doc.id,
+                ...doc.data()
+            });
+        });
+
+        res.json({ success: true, data: videos });
+    } catch (error) {
+        console.error('Failed to fetch recap videos:', error);
+        res.status(500).json({ success: false, message: 'Failed to fetch recap videos' });
+    }
+});
+
+// 비디오 생성
+router.post('/recap-videos', authMiddleware, async (req, res) => {
+    if (!db) {
+        return res.status(503).json({
+            success: false,
+            message: 'Firebase Admin is not initialized'
+        });
+    }
+
+    try {
+        const videoData = {
+            ...req.body,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+        };
+
+        const docRef = await db.collection('recapVideos').add(videoData);
+
+        res.json({
+            success: true,
+            message: 'Video created successfully',
+            data: { id: docRef.id, ...videoData }
+        });
+    } catch (error) {
+        console.error('Failed to create video:', error);
+        res.status(500).json({ success: false, message: 'Failed to create video' });
+    }
+});
+
+// 비디오 수정
+router.patch('/recap-videos/:id', authMiddleware, async (req, res) => {
+    if (!db) {
+        return res.status(503).json({
+            success: false,
+            message: 'Firebase Admin is not initialized'
+        });
+    }
+
+    const { id } = req.params;
+
+    try {
+        const updates = {
+            ...req.body,
+            updatedAt: new Date().toISOString()
+        };
+
+        // id 필드가 body에 포함되어 있다면 제거 (문서 ID는 변경 불가)
+        delete updates.id;
+
+        await db.collection('recapVideos').doc(id).update(updates);
+
+        res.json({
+            success: true,
+            message: 'Video updated successfully'
+        });
+    } catch (error) {
+        console.error('Failed to update video:', error);
+        res.status(500).json({ success: false, message: 'Failed to update video' });
+    }
+});
+
+// 비디오 삭제
+router.delete('/recap-videos/:id', authMiddleware, async (req, res) => {
+    if (!db) {
+        return res.status(503).json({
+            success: false,
+            message: 'Firebase Admin is not initialized'
+        });
+    }
+
+    const { id } = req.params;
+
+    try {
+        await db.collection('recapVideos').doc(id).delete();
+
+        res.json({
+            success: true,
+            message: 'Video deleted successfully'
+        });
+    } catch (error) {
+        console.error('Failed to delete video:', error);
+        res.status(500).json({ success: false, message: 'Failed to delete video' });
+    }
+});
+
 export default router;
