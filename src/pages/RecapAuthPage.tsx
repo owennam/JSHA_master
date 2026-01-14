@@ -28,7 +28,7 @@ import {
 } from "firebase/auth";
 import { AlertCircle, Loader2, Video, Info } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { createRecapRegistrant, checkExistingServices, addRecapServiceToExistingUser, getRecapRegistrant } from "@/lib/firestore";
+import { createRecapRegistrant, checkExistingServices, addRecapServiceToExistingUser, getRecapRegistrant, registerBookCode, validateBookCode } from "@/lib/firestore";
 import { Checkbox } from "@/components/ui/checkbox";
 import { PrivacyPolicyModal } from "@/components/common/PrivacyPolicyModal";
 
@@ -64,6 +64,10 @@ const RecapAuthPage = () => {
     const [privacyAgreed, setPrivacyAgreed] = useState(false);
     const [marketingAgreed, setMarketingAgreed] = useState(false);
     const [isPrivacyModalOpen, setIsPrivacyModalOpen] = useState(false);
+
+    // 교과서 코드 상태
+    const [bookCode, setBookCode] = useState("");
+    const [phoneNumber, setPhoneNumber] = useState("");
 
     // Firebase Auth 상태 감시
     useEffect(() => {
@@ -193,6 +197,21 @@ const RecapAuthPage = () => {
             return;
         }
 
+        // 교과서 코드 입력 시 유효성 검증
+        if (bookCode) {
+            const codeConfig = validateBookCode(bookCode);
+            if (!codeConfig) {
+                setSignupError("유효하지 않은 교과서 코드입니다.");
+                setSignupLoading(false);
+                return;
+            }
+            if (!phoneNumber || phoneNumber.replace(/-/g, '').length < 10) {
+                setSignupError("교과서 코드 등록 시 휴대폰 번호를 정확히 입력해주세요.");
+                setSignupLoading(false);
+                return;
+            }
+        }
+
         try {
             // 1. Firebase Auth에 사용자 생성
             const userCredential = await createUserWithEmailAndPassword(auth!, signupEmail, signupPassword);
@@ -211,6 +230,28 @@ const RecapAuthPage = () => {
                     marketingAgreed
                 );
                 console.log('✅ Firestore registration successful for:', newUser.uid);
+
+                // 3. 교과서 코드 등록 (입력된 경우)
+                if (bookCode && phoneNumber) {
+                    const bookResult = await registerBookCode(
+                        newUser.uid,
+                        signupEmail,
+                        bookCode,
+                        phoneNumber
+                    );
+                    if (bookResult.success) {
+                        toast({
+                            title: "📚 교과서 코드 등록 완료",
+                            description: "특별 영상에 접근할 수 있습니다!",
+                        });
+                    } else {
+                        toast({
+                            title: "교과서 코드 등록 실패",
+                            description: bookResult.error,
+                            variant: "destructive",
+                        });
+                    }
+                }
             } catch (firestoreError: any) {
                 console.error('❌ Firestore registration failed:', firestoreError);
                 // Firestore 실패해도 Auth는 성공했으므로 사용자에게 알림
@@ -223,7 +264,7 @@ const RecapAuthPage = () => {
                 // RecapPage에서 recapRegistrant가 없으면 자동 생성 시도함
             }
 
-            // 3. 관리자 알림 및 환영 이메일 발송
+            // 4. 관리자 알림 및 환영 이메일 발송
             try {
                 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
                 fetch(`${API_URL}/notify-recap-signup`, {
@@ -233,7 +274,8 @@ const RecapAuthPage = () => {
                         email: signupEmail,
                         name: signupName,
                         batch: signupBatch || '',
-                        status: 'pending'
+                        status: 'pending',
+                        bookCode: bookCode || ''
                     })
                 }).catch(err => console.error('Failed to send recap signup notification:', err));
             } catch (notifyError) {
@@ -242,7 +284,9 @@ const RecapAuthPage = () => {
 
             toast({
                 title: "회원가입 완료",
-                description: "관리자 승인 후 영상을 시청하실 수 있습니다. 환영 이메일을 확인해주세요.",
+                description: bookCode
+                    ? "교과서 코드가 등록되었습니다. 영상을 시청하실 수 있습니다!"
+                    : "관리자 승인 후 영상을 시청하실 수 있습니다. 환영 이메일을 확인해주세요.",
             });
 
             // RecapPage로 이동 (onAuthStateChanged에서 처리)
@@ -476,6 +520,43 @@ const RecapAuthPage = () => {
                                                     onChange={(e) => setSignupPasswordConfirm(e.target.value)}
                                                     disabled={signupLoading}
                                                 />
+                                            </div>
+
+                                            {/* 교과서 코드 등록 (선택) */}
+                                            <div className="space-y-3 pt-3 border-t border-dashed">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-sm font-medium">📚 교과서 코드 등록 (선택)</span>
+                                                </div>
+                                                <p className="text-xs text-muted-foreground">
+                                                    교과서를 구매하셨다면 코드를 입력하여 특별 영상에 접근하세요.
+                                                </p>
+                                                <div className="space-y-2">
+                                                    <Label htmlFor="bookCode">교과서 코드</Label>
+                                                    <Input
+                                                        id="bookCode"
+                                                        type="text"
+                                                        placeholder="JSHA-MASTER-2026-XXXX"
+                                                        value={bookCode}
+                                                        onChange={(e) => setBookCode(e.target.value.toUpperCase())}
+                                                        disabled={signupLoading}
+                                                    />
+                                                </div>
+                                                {bookCode && (
+                                                    <div className="space-y-2">
+                                                        <Label htmlFor="phoneNumber">휴대폰 번호 *</Label>
+                                                        <Input
+                                                            id="phoneNumber"
+                                                            type="tel"
+                                                            placeholder="010-1234-5678"
+                                                            value={phoneNumber}
+                                                            onChange={(e) => setPhoneNumber(e.target.value)}
+                                                            disabled={signupLoading}
+                                                        />
+                                                        <p className="text-xs text-muted-foreground">
+                                                            ⚠️ 휴대폰 번호당 1회만 등록 가능합니다.
+                                                        </p>
+                                                    </div>
+                                                )}
                                             </div>
 
                                             {/* 개인정보 동의 */}

@@ -19,8 +19,34 @@ export { db };
 // 사용자 승인 상태
 export type UserStatus = 'pending' | 'approved' | 'rejected';
 
-// 접근 등급 (영상 접근 레벨)
-export type AccessLevel = 'preview' | 'session1' | 'graduate';
+// 접근 등급 (영상 접근 레벨) - book 추가
+export type AccessLevel = 'free' | 'book' | 'preview' | 'session1' | 'graduate';
+
+// 교과서 코드 설정
+export interface BookCodeConfig {
+  name: string;
+  accessLevel: AccessLevel;
+  maxRegistrations: number;
+}
+
+export const BOOK_CODES: Record<string, BookCodeConfig> = {
+  'JSHA-MASTER-2026-7K3M': {
+    name: '마스터 교과서 2026',
+    accessLevel: 'book',
+    maxRegistrations: 500,
+  }
+};
+
+// 교과서 등록 정보 타입
+export interface BookRegistration {
+  id: string;
+  uid: string;
+  email: string;
+  code: string;
+  phoneNumber: string;
+  accessLevel: AccessLevel;
+  registeredAt: string;
+}
 
 // 주문 상태
 export type OrderStatus = 'completed' | 'cancel_requested' | 'canceled';
@@ -684,4 +710,146 @@ export const addInsoleServiceToExistingUser = async (
   // users 컬렉션에 새로운 문서 생성
   await createUserProfile(uid, email, clinicName, directorName, location, status);
   console.log('✅ Insole service added to existing user:', uid);
+};
+
+// ============================================
+// 교과서 코드 등록 관련 함수들
+// ============================================
+
+/**
+ * 교과서 코드 유효성 검증
+ */
+export const validateBookCode = (code: string): BookCodeConfig | null => {
+  const normalizedCode = code.trim().toUpperCase();
+  return BOOK_CODES[normalizedCode] || null;
+};
+
+/**
+ * 휴대폰 번호로 이미 등록된 교과서 코드가 있는지 확인
+ */
+export const isPhoneNumberRegistered = async (phoneNumber: string): Promise<boolean> => {
+  if (!db) {
+    throw new Error('Firestore is not initialized');
+  }
+
+  const normalizedPhone = phoneNumber.replace(/-/g, '').trim();
+  const registrationsRef = collection(db, 'bookRegistrations');
+  const q = query(registrationsRef, where('phoneNumber', '==', normalizedPhone));
+  const querySnapshot = await getDocs(q);
+
+  return !querySnapshot.empty;
+};
+
+/**
+ * 특정 코드의 현재 등록 수 조회
+ */
+export const getBookCodeRegistrationCount = async (code: string): Promise<number> => {
+  if (!db) {
+    throw new Error('Firestore is not initialized');
+  }
+
+  const normalizedCode = code.trim().toUpperCase();
+  const registrationsRef = collection(db, 'bookRegistrations');
+  const q = query(registrationsRef, where('code', '==', normalizedCode));
+  const querySnapshot = await getDocs(q);
+
+  return querySnapshot.size;
+};
+
+/**
+ * 교과서 코드 등록
+ */
+export const registerBookCode = async (
+  uid: string,
+  email: string,
+  code: string,
+  phoneNumber: string
+): Promise<{ success: boolean; error?: string }> => {
+  if (!db) {
+    return { success: false, error: 'Firestore가 초기화되지 않았습니다.' };
+  }
+
+  const normalizedCode = code.trim().toUpperCase();
+  const normalizedPhone = phoneNumber.replace(/-/g, '').trim();
+
+  // 1. 코드 유효성 검증
+  const codeConfig = validateBookCode(normalizedCode);
+  if (!codeConfig) {
+    return { success: false, error: '유효하지 않은 코드입니다.' };
+  }
+
+  // 2. 휴대폰 번호 중복 체크
+  const isRegistered = await isPhoneNumberRegistered(normalizedPhone);
+  if (isRegistered) {
+    return { success: false, error: '이미 등록된 휴대폰 번호입니다. 휴대폰 번호당 1회만 등록 가능합니다.' };
+  }
+
+  // 3. 등록 인원 제한 체크
+  const currentCount = await getBookCodeRegistrationCount(normalizedCode);
+  if (currentCount >= codeConfig.maxRegistrations) {
+    return { success: false, error: `등록 인원이 마감되었습니다. (${currentCount}/${codeConfig.maxRegistrations})` };
+  }
+
+  // 4. 등록 진행
+  const registrationsRef = collection(db, 'bookRegistrations');
+  const newRegistrationRef = doc(registrationsRef);
+
+  const registration: BookRegistration = {
+    id: newRegistrationRef.id,
+    uid,
+    email,
+    code: normalizedCode,
+    phoneNumber: normalizedPhone,
+    accessLevel: codeConfig.accessLevel,
+    registeredAt: new Date().toISOString(),
+  };
+
+  await setDoc(newRegistrationRef, registration);
+
+  // 5. recapRegistrant의 accessLevel 업데이트 (있는 경우)
+  try {
+    const registrant = await getRecapRegistrant(uid);
+    if (registrant) {
+      await updateRecapRegistrantAccessLevel(uid, codeConfig.accessLevel);
+    }
+  } catch (error) {
+    console.error('Error updating recap registrant access level:', error);
+  }
+
+  console.log('✅ Book code registered:', normalizedCode, 'for user:', uid);
+  return { success: true };
+};
+
+/**
+ * 사용자의 교과서 등록 정보 조회
+ */
+export const getUserBookRegistration = async (uid: string): Promise<BookRegistration | null> => {
+  if (!db) {
+    throw new Error('Firestore is not initialized');
+  }
+
+  const registrationsRef = collection(db, 'bookRegistrations');
+  const q = query(registrationsRef, where('uid', '==', uid));
+  const querySnapshot = await getDocs(q);
+
+  if (!querySnapshot.empty) {
+    return querySnapshot.docs[0].data() as BookRegistration;
+  }
+
+  return null;
+};
+
+/**
+ * 모든 교과서 등록 조회 (Admin용)
+ */
+export const getAllBookRegistrations = async (): Promise<BookRegistration[]> => {
+  if (!db) {
+    throw new Error('Firestore is not initialized');
+  }
+
+  const registrationsRef = collection(db, 'bookRegistrations');
+  const q = query(registrationsRef, orderBy('registeredAt', 'desc'));
+  const querySnapshot = await getDocs(q);
+
+  return querySnapshot.docs.map(doc => doc.data() as BookRegistration);
 };
