@@ -19,7 +19,7 @@ export const products: Product[] = [
     type: "높이 조절",
     price: 9900,
     description: "특허받은 척추측만증 교정용 JS Insole",
-    image: "/images/products/insole-main.png",
+    image: "/images/products/insole-height.png",
     isActive: true,
     options: {
       sizes: ["6mm", "8mm", "11mm", "15mm", "18mm"],
@@ -32,7 +32,7 @@ export const products: Product[] = [
     type: "웨지형",
     price: 9900,
     description: "특허받은 척추측만증 교정용 JS Insole",
-    image: "/images/products/insole-main.png",
+    image: "/images/products/insole-wedge.png",
     isActive: true,
     options: {
       sizes: ["표준"],
@@ -51,7 +51,7 @@ export const products: Product[] = [
     type: "높이 조절",
     price: 9900,
     description: "특허받은 척추측만증 교정용 JS Insole",
-    image: "/images/products/insole-main.png",
+    image: "/images/products/insole-height.png",
     isActive: true,
     options: {
       sizes: ["5mm", "7mm", "10mm", "13mm", "16mm"],
@@ -64,7 +64,7 @@ export const products: Product[] = [
     type: "웨지형",
     price: 9900,
     description: "특허받은 척추측만증 교정용 JS Insole",
-    image: "/images/products/insole-main.png",
+    image: "/images/products/insole-wedge.png",
     isActive: true,
     options: {
       sizes: ["표준"],
