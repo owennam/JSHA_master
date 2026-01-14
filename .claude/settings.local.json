@@ -38,7 +38,8 @@
       "Bash(powershell -Command:*)",
       "Bash(firebase:*)",
       "Bash(test:*)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(git stash drop:*)"
     ],
     "deny": [],
     "ask": []
