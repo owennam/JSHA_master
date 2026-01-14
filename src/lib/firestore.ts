@@ -600,18 +600,28 @@ export const getAllOrders = async (): Promise<OrderInfo[]> => {
 // ============================================
 
 /**
- * 접근 등급 계층 정의 (낮은 순서 -> 높은 순서)
- */
-const ACCESS_LEVEL_HIERARCHY: AccessLevel[] = ['preview', 'session1', 'graduate'];
-
-/**
- * 접근 등급 비교 함수
- * @returns userLevel이 requiredLevel 이상이면 true
+ * 접근 등급 비교 함수 (Matrix Logic)
+ * @returns userLevel이 requiredLevel에 접근 권한이 있는지 여부
  */
 export const canAccessLevel = (userLevel: AccessLevel, requiredLevel: AccessLevel): boolean => {
-  const userIndex = ACCESS_LEVEL_HIERARCHY.indexOf(userLevel);
-  const requiredIndex = ACCESS_LEVEL_HIERARCHY.indexOf(requiredLevel);
-  return userIndex >= requiredIndex;
+  // 1. 수료자(graduate)는 모든 영상 접근 가능
+  if (userLevel === 'graduate') return true;
+
+  // 2. 맛보기(preview) 무료(free) 등급 영상은 누구나 접근 가능 (로그인 전제)
+  if (requiredLevel === 'preview' || requiredLevel === 'free') return true;
+
+  // 3. 세션 1 구매자(session1)는 맛보기 + 세션 1 접근 가능
+  if (userLevel === 'session1') {
+    return requiredLevel === 'session1';
+  }
+
+  // 4. 교과서 구매자(book)는 맛보기 + 교과서 영상 접근 가능
+  if (userLevel === 'book') {
+    return requiredLevel === 'book';
+  }
+
+  // 그 외의 경우 접근 불가 (예: free 유저가 session1 접근 시도, session1 유저가 book 접근 시도 등)
+  return false;
 };
 
 /**

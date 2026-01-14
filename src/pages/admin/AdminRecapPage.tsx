@@ -599,6 +599,12 @@ const AdminRecapPage = () => {
                         <span className="text-xs text-muted-foreground">맛보기 + 세션 1 영상 시청 가능</span>
                       </div>
                     </SelectItem>
+                    <SelectItem value="book">
+                      <div className="flex flex-col items-start">
+                        <span className="font-medium">교과서 구매자</span>
+                        <span className="text-xs text-muted-foreground">맛보기 + 교과서 영상 시청 가능</span>
+                      </div>
+                    </SelectItem>
                     <SelectItem value="graduate">
                       <div className="flex flex-col items-start">
                         <span className="font-medium">수료자</span>

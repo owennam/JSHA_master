@@ -187,7 +187,30 @@ const RecapPage = () => {
 
   // 모듈별 비디오 분류
   const moduleData = useMemo(() => {
-    const modules = [...new Set(videos.map(v => v.module))].sort();
+    // 원하는 정렬 순서 정의
+    const sortOrder = [
+      "맛보기", "프리세션", "Free Session", "Preview",
+      "세션 1", "Session 1",
+      "세션 2", "Session 2",
+      "세션 3", "Session 3",
+      "세션 4", "Session 4",
+      "교과서", "Textbook", "Book"
+    ];
+
+    const modules = [...new Set(videos.map(v => v.module))].sort((a, b) => {
+      const indexA = sortOrder.indexOf(a);
+      const indexB = sortOrder.indexOf(b);
+
+      // 둘 다 정렬 목록에 있으면 순서대로
+      if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+      // a만 있으면 a가 먼저
+      if (indexA !== -1) return -1;
+      // b만 있으면 b가 먼저
+      if (indexB !== -1) return 1;
+      // 둘 다 없으면 문자열 정렬
+      return a.localeCompare(b);
+    });
+
     const counts: Record<string, number> = {};
     modules.forEach(m => {
       counts[m] = videos.filter(v => v.module === m).length;
