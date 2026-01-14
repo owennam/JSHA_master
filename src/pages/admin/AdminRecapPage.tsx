@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 // Firestore SDK 대신 API 사용 - 타입만 import
-import type { UserStatus, AccessLevel } from "@/lib/firestore";
+import { getAllBookRegistrations, type UserStatus, type AccessLevel, type BookRegistration } from "@/lib/firestore";
 import {
   Users,
   CheckCircle,
@@ -15,6 +15,7 @@ import {
   Shield,
   RotateCcw,
   Plus,
+  BookOpen,
 } from "lucide-react";
 import {
   Tabs,
@@ -93,6 +94,7 @@ const AdminRecapPage = () => {
   const [pendingRegistrants, setPendingRegistrants] = useState<RecapRegistrant[]>([]);
   const [approvedRegistrants, setApprovedRegistrants] = useState<RecapRegistrant[]>([]);
   const [rejectedRegistrants, setRejectedRegistrants] = useState<RecapRegistrant[]>([]);
+  const [bookRegistrants, setBookRegistrants] = useState<BookRegistration[]>([]);
   const [loading, setLoading] = useState(true);
   const [updatingUid, setUpdatingUid] = useState<string | null>(null);
 
@@ -148,6 +150,14 @@ const AdminRecapPage = () => {
       setPendingRegistrants(pending);
       setApprovedRegistrants(approved);
       setRejectedRegistrants(rejected);
+
+      // 교과서 등록 정보 조회 (Firestore SDK 직접 사용)
+      try {
+        const books = await getAllBookRegistrations();
+        setBookRegistrants(books);
+      } catch (bookError) {
+        console.error("Failed to load book registrations:", bookError);
+      }
 
     } catch (error) {
       console.error("Failed to load registrants:", error);
@@ -278,6 +288,8 @@ const AdminRecapPage = () => {
   // 접근 등급 라벨 가져오기
   const getAccessLevelLabel = (level: AccessLevel): string => {
     const labels: Record<AccessLevel, string> = {
+      'free': '무료 가입',
+      'book': '교과서 구매자',
       'preview': '맛보기',
       'session1': '세션 1',
       'graduate': '수료자',
@@ -288,6 +300,8 @@ const AdminRecapPage = () => {
   // 접근 등급 뱃지 색상
   const getAccessLevelColor = (level: AccessLevel): string => {
     const colors: Record<AccessLevel, string> = {
+      'free': 'bg-slate-100 text-slate-700',
+      'book': 'bg-purple-100 text-purple-700',
       'preview': 'bg-gray-100 text-gray-700',
       'session1': 'bg-blue-100 text-blue-700',
       'graduate': 'bg-green-100 text-green-700',
@@ -469,13 +483,23 @@ const AdminRecapPage = () => {
             <div className="text-2xl font-bold text-slate-800">{rejectedRegistrants.length}</div>
           </CardContent>
         </Card>
+        <Card className="shadow-sm">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-4 pt-4">
+            <CardTitle className="text-sm font-medium text-muted-foreground">교과서 등록</CardTitle>
+            <BookOpen className="h-4 w-4 text-purple-500" />
+          </CardHeader>
+          <CardContent className="px-4 pb-4">
+            <div className="text-2xl font-bold text-slate-800">{bookRegistrants.length}</div>
+          </CardContent>
+        </Card>
       </div>
 
       <Tabs defaultValue="pending" className="w-full">
-        <TabsList className="grid w-full max-w-md grid-cols-3 mb-6 bg-slate-100 p-1">
+        <TabsList className="grid w-full max-w-2xl grid-cols-4 mb-6 bg-slate-100 p-1">
           <TabsTrigger value="pending" className="text-xs">승인 대기 ({pendingRegistrants.length})</TabsTrigger>
           <TabsTrigger value="approved" className="text-xs">승인됨 ({approvedRegistrants.length})</TabsTrigger>
           <TabsTrigger value="rejected" className="text-xs">거부됨 ({rejectedRegistrants.length})</TabsTrigger>
+          <TabsTrigger value="books" className="text-xs">교과서 등록 ({bookRegistrants.length})</TabsTrigger>
         </TabsList>
 
         <TabsContent value="pending" className="mt-0">
@@ -488,6 +512,43 @@ const AdminRecapPage = () => {
 
         <TabsContent value="rejected" className="mt-0">
           <RegistrantTable registrants={rejectedRegistrants} isPending={false} isApproved={false} />
+        </TabsContent>
+
+        <TabsContent value="books" className="mt-0">
+          <div className="rounded-md border bg-white overflow-hidden">
+            <Table>
+              <TableHeader className="bg-muted/50">
+                <TableRow>
+                  <TableHead className="w-[180px]">사용자 (UID)</TableHead>
+                  <TableHead>이메일</TableHead>
+                  <TableHead>교과서 코드</TableHead>
+                  <TableHead>휴대폰 번호</TableHead>
+                  <TableHead className="w-[150px]">등록일</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {bookRegistrants.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                      등록된 교과서 내역이 없습니다.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  bookRegistrants.map((book) => (
+                    <TableRow key={book.id} className="hover:bg-muted/5">
+                      <TableCell className="font-mono text-xs">{book.uid.slice(0, 8)}...</TableCell>
+                      <TableCell className="text-sm">{book.email}</TableCell>
+                      <TableCell className="font-mono font-bold text-purple-700">{book.code}</TableCell>
+                      <TableCell className="font-mono">{book.phoneNumber}</TableCell>
+                      <TableCell className="text-xs text-muted-foreground">
+                        {new Date(book.registeredAt).toLocaleDateString('ko-KR')} {new Date(book.registeredAt).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
         </TabsContent>
       </Tabs>
 

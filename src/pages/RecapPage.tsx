@@ -8,13 +8,17 @@ import { PlayCircle, CheckCircle, Video, LogOut, Clock, XCircle, X, Lock, Shield
 import { useToast } from "@/hooks/use-toast";
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged, signOut, User } from "firebase/auth";
-import { getRecapRegistrant, RecapRegistrant, getAllRecapVideos, RecapVideo, AccessLevel, canAccessLevel, getUserProfile, addRecapServiceToExistingUser } from "@/lib/firestore";
+import { getRecapRegistrant, RecapRegistrant, getAllRecapVideos, RecapVideo, AccessLevel, canAccessLevel, getUserProfile, addRecapServiceToExistingUser, registerBookCode, validateBookCode } from "@/lib/firestore";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import {
   Sheet,
@@ -103,6 +107,8 @@ const getEmbedUrl = (url: string): string => {
 // 접근 등급 레이블 및 색상
 const getAccessLevelLabel = (level: AccessLevel): string => {
   const labels: Record<AccessLevel, string> = {
+    'free': '무료 가입',
+    'book': '교과서 구매자',
     'preview': '맛보기',
     'session1': '세션 1',
     'graduate': '수료자',
@@ -112,6 +118,8 @@ const getAccessLevelLabel = (level: AccessLevel): string => {
 
 const getAccessLevelColor = (level: AccessLevel): string => {
   const colors: Record<AccessLevel, string> = {
+    'free': 'bg-slate-100 text-slate-700 border-slate-300',
+    'book': 'bg-purple-100 text-purple-700 border-purple-300',
     'preview': 'bg-gray-100 text-gray-700 border-gray-300',
     'session1': 'bg-blue-100 text-blue-700 border-blue-300',
     'graduate': 'bg-green-100 text-green-700 border-green-300',
@@ -132,6 +140,50 @@ const RecapPage = () => {
   const [selectedVideo, setSelectedVideo] = useState<RecapVideo | null>(null);
   const [selectedModule, setSelectedModule] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  // 교과서 등록 상태
+  const [isBookDialogOpen, setIsBookDialogOpen] = useState(false);
+  const [bookCode, setBookCode] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [registerLoading, setRegisterLoading] = useState(false);
+
+  const handleBookRegister = async () => {
+    if (!user || !user.email) return;
+    if (!bookCode) {
+      toast({ title: "오류", description: "교과서 코드를 입력해주세요.", variant: "destructive" });
+      return;
+    }
+    if (!validateBookCode(bookCode)) {
+      toast({ title: "오류", description: "유효하지 않은 교과서 코드입니다.", variant: "destructive" });
+      return;
+    }
+    if (!phoneNumber || phoneNumber.replace(/-/g, '').length < 10) {
+      toast({ title: "오류", description: "휴대폰 번호를 정확히 입력해주세요.", variant: "destructive" });
+      return;
+    }
+
+    setRegisterLoading(true);
+    try {
+      const result = await registerBookCode(user.uid, user.email, bookCode, phoneNumber);
+      if (result.success) {
+        toast({
+          title: "📚 교과서 코드 등록 완료",
+          description: "특별 영상에 접근할 수 있습니다!",
+        });
+        setIsBookDialogOpen(false);
+        setBookCode("");
+        setPhoneNumber("");
+        // 페이지 새로고침하여 권한 업데이트 반영 (가장 확실함)
+        window.location.reload();
+      } else {
+        toast({ title: "등록 실패", description: result.error, variant: "destructive" });
+      }
+    } catch (error) {
+      toast({ title: "오류", description: "등록 중 오류가 발생했습니다.", variant: "destructive" });
+    } finally {
+      setRegisterLoading(false);
+    }
+  };
 
   // 모듈별 비디오 분류
   const moduleData = useMemo(() => {
@@ -588,8 +640,8 @@ const RecapPage = () => {
                     <button
                       onClick={() => setSelectedModule(null)}
                       className={`flex items-center justify-between w-full px-3 py-2.5 text-left rounded-lg transition-colors ${selectedModule === null
-                          ? 'bg-primary text-white'
-                          : 'hover:bg-muted text-foreground'
+                        ? 'bg-primary text-white'
+                        : 'hover:bg-muted text-foreground'
                         }`}
                     >
                       <span className="flex items-center gap-2">
@@ -607,8 +659,8 @@ const RecapPage = () => {
                         key={module}
                         onClick={() => setSelectedModule(module)}
                         className={`flex items-center justify-between w-full px-3 py-2.5 text-left rounded-lg transition-colors ${selectedModule === module
-                            ? 'bg-primary text-white'
-                            : 'hover:bg-muted text-foreground'
+                          ? 'bg-primary text-white'
+                          : 'hover:bg-muted text-foreground'
                           }`}
                       >
                         <span className="flex items-center gap-2">
@@ -621,6 +673,18 @@ const RecapPage = () => {
                       </button>
                     ))}
                   </nav>
+
+                  {/* 교과서 등록 버튼 (사이드바 하단) */}
+                  <div className="mt-8 pt-4 border-t">
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start text-xs border-dashed border-primary/50 hover:border-primary text-primary"
+                      onClick={() => setIsBookDialogOpen(true)}
+                    >
+                      <Plus className="w-3.5 h-3.5 mr-2" />
+                      교과서 코드 등록
+                    </Button>
+                  </div>
                 </div>
               </aside>
 
@@ -647,8 +711,8 @@ const RecapPage = () => {
                       <button
                         onClick={() => { setSelectedModule(null); setIsSidebarOpen(false); }}
                         className={`flex items-center justify-between w-full px-3 py-3 text-left rounded-lg transition-colors ${selectedModule === null
-                            ? 'bg-primary text-white'
-                            : 'hover:bg-muted text-foreground'
+                          ? 'bg-primary text-white'
+                          : 'hover:bg-muted text-foreground'
                           }`}
                       >
                         <span className="flex items-center gap-2">
@@ -668,8 +732,8 @@ const RecapPage = () => {
                           key={module}
                           onClick={() => { setSelectedModule(module); setIsSidebarOpen(false); }}
                           className={`flex items-center justify-between w-full px-3 py-3 text-left rounded-lg transition-colors ${selectedModule === module
-                              ? 'bg-primary text-white'
-                              : 'hover:bg-muted text-foreground'
+                            ? 'bg-primary text-white'
+                            : 'hover:bg-muted text-foreground'
                             }`}
                         >
                           <span className="flex items-center gap-2">
@@ -685,6 +749,18 @@ const RecapPage = () => {
                         </button>
                       ))}
                     </nav>
+
+                    {/* 교과서 등록 버튼 (모바일) */}
+                    <div className="mt-6 pt-4 border-t">
+                      <Button
+                        variant="outline"
+                        className="w-full justify-center text-sm border-dashed border-primary/50 hover:border-primary text-primary"
+                        onClick={() => { setIsSidebarOpen(false); setIsBookDialogOpen(true); }}
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        교과서 코드 등록
+                      </Button>
+                    </div>
                   </SheetContent>
                 </Sheet>
               </div>
@@ -816,6 +892,48 @@ const RecapPage = () => {
                   />
                 )}
               </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* 교과서 등록 다이얼로그 */}
+          <Dialog open={isBookDialogOpen} onOpenChange={setIsBookDialogOpen}>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>📚 교과서 코드 등록</DialogTitle>
+                <DialogDescription>
+                  교과서에 포함된 코드를 입력하여 추가 콘텐츠를 잠금 해제하세요.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="bookCode">교과서 코드</Label>
+                  <Input
+                    id="bookCode"
+                    value={bookCode}
+                    onChange={(e) => setBookCode(e.target.value.toUpperCase())}
+                    placeholder="JSHA-MASTER-2026-XXXX"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="phoneNumber">휴대폰 번호</Label>
+                  <Input
+                    id="phoneNumber"
+                    type="tel"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    placeholder="010-1234-5678"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    ⚠️ 휴대폰 번호당 1회만 등록 가능합니다.
+                  </p>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setIsBookDialogOpen(false)}>취소</Button>
+                <Button onClick={handleBookRegister} disabled={registerLoading} className="bg-primary text-white">
+                  {registerLoading ? '등록 중...' : '등록하기'}
+                </Button>
+              </DialogFooter>
             </DialogContent>
           </Dialog>
 
