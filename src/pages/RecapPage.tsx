@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PlayCircle, CheckCircle, Video, LogOut, Clock, XCircle, X, Lock, Shield, Plus } from "lucide-react";
+import { PlayCircle, CheckCircle, Video, LogOut, Clock, XCircle, X, Lock, Shield, Plus, Folder, Menu, ChevronRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged, signOut, User } from "firebase/auth";
@@ -16,6 +16,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 // embed HTML에서 Vimeo URL 추출
 const extractVimeoFromEmbed = (input: string): string => {
@@ -123,6 +130,24 @@ const RecapPage = () => {
   const [videos, setVideos] = useState<RecapVideo[]>([]);
   const [videosLoading, setVideosLoading] = useState(true);
   const [selectedVideo, setSelectedVideo] = useState<RecapVideo | null>(null);
+  const [selectedModule, setSelectedModule] = useState<string | null>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  // 모듈별 비디오 분류
+  const moduleData = useMemo(() => {
+    const modules = [...new Set(videos.map(v => v.module))].sort();
+    const counts: Record<string, number> = {};
+    modules.forEach(m => {
+      counts[m] = videos.filter(v => v.module === m).length;
+    });
+    return { modules, counts, total: videos.length };
+  }, [videos]);
+
+  // 필터링된 비디오
+  const filteredVideos = useMemo(() => {
+    if (!selectedModule) return videos;
+    return videos.filter(v => v.module === selectedModule);
+  }, [videos, selectedModule]);
 
   // Firebase 인증 상태 감지
   useEffect(() => {
@@ -520,23 +545,21 @@ const RecapPage = () => {
         </Button>
       </div>
 
-      <main className="pt-40 pb-20 px-4">
+      <main className="pt-32 pb-20 px-4">
         <div className="container mx-auto max-w-7xl">
           {/* 헤더 */}
-          <div className="text-center mb-12 animate-fade-in">
+          <div className="text-center mb-8 animate-fade-in">
             <div className="inline-flex items-center gap-2 mb-4 px-4 py-2 bg-primary/10 rounded-full">
               <CheckCircle className="w-5 h-5 text-primary" />
               <span className="text-sm font-semibold text-primary">
                 {registrantData?.batch ? '수료자 인증 완료' : '접근 승인됨'}
               </span>
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
+            <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
               마스터 코스 다시보기
             </h1>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              수업 영상을 다시 확인하고 복습하세요.
-              <br />
-              언제든지 필요한 내용을 다시 학습할 수 있습니다.
+            <p className="text-muted-foreground">
+              수업 영상을 다시 확인하고 복습하세요
             </p>
           </div>
 
@@ -552,92 +575,227 @@ const RecapPage = () => {
               <p className="text-sm text-muted-foreground mt-2">영상이 추가되면 이메일로 알려드리겠습니다.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-              {videos.map((video) => {
-                const canAccess = registrantData?.accessLevel
-                  ? canAccessLevel(registrantData.accessLevel, video.accessLevel)
-                  : false;
-
-                return (
-                  <div
-                    key={video.id}
-                    onClick={() => canAccess && setSelectedVideo(video)}
-                    onKeyDown={(e) => {
-                      if ((e.key === 'Enter' || e.key === ' ') && canAccess) {
-                        e.preventDefault();
-                        setSelectedVideo(video);
-                      }
-                    }}
-                    tabIndex={canAccess ? 0 : -1}
-                    role="button"
-                    aria-label={`${video.title} ${canAccess ? '비디오 재생' : '접근 제한됨'}`}
-                    className={`block ${canAccess ? 'cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-xl' : 'cursor-not-allowed'}`}
-                  >
-                    <Card
-                      className={`group transition-all duration-300 border-2 ${canAccess
-                        ? 'hover:shadow-xl hover:-translate-y-1'
-                        : 'opacity-75'
+            <div className="flex gap-6">
+              {/* 사이드바 - 데스크톱 */}
+              <aside className="hidden lg:block w-64 flex-shrink-0">
+                <div className="sticky top-32 bg-white rounded-xl border shadow-sm p-4">
+                  <h2 className="font-semibold text-lg mb-4 flex items-center gap-2">
+                    <Folder className="w-5 h-5 text-primary" />
+                    세션별 보기
+                  </h2>
+                  <nav className="space-y-1">
+                    {/* 전체 */}
+                    <button
+                      onClick={() => setSelectedModule(null)}
+                      className={`flex items-center justify-between w-full px-3 py-2.5 text-left rounded-lg transition-colors ${selectedModule === null
+                          ? 'bg-primary text-white'
+                          : 'hover:bg-muted text-foreground'
                         }`}
                     >
-                      <CardHeader className="p-0">
-                        <div className="relative overflow-hidden rounded-t-xl">
-                          <img
-                            src={getVideoThumbnail(video.vimeoUrl, video.thumbnail)}
-                            alt={video.title}
-                            loading="lazy"
-                            decoding="async"
-                            className={`w-full h-48 object-cover transition-transform duration-300 ${canAccess ? 'group-hover:scale-105' : 'filter grayscale'
-                              }`}
-                          />
+                      <span className="flex items-center gap-2">
+                        <Video className="w-4 h-4" />
+                        전체 영상
+                      </span>
+                      <Badge variant={selectedModule === null ? "secondary" : "outline"} className="ml-2">
+                        {moduleData.total}
+                      </Badge>
+                    </button>
 
-                          {/* 잠금 오버레이 (접근 불가) */}
-                          {!canAccess && (
-                            <div
-                              className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center"
-                              aria-label={`${getAccessLevelLabel(video.accessLevel)} 등급 이상 필요`}
-                            >
-                              <Lock className="w-12 h-12 text-white mb-2" aria-hidden="true" />
-                              <Badge variant="outline" className={`${getAccessLevelColor(video.accessLevel)} border-white`}>
-                                {getAccessLevelLabel(video.accessLevel)} 이상 필요
-                              </Badge>
-                            </div>
-                          )}
+                    {/* 세션별 목록 */}
+                    {moduleData.modules.map((module) => (
+                      <button
+                        key={module}
+                        onClick={() => setSelectedModule(module)}
+                        className={`flex items-center justify-between w-full px-3 py-2.5 text-left rounded-lg transition-colors ${selectedModule === module
+                            ? 'bg-primary text-white'
+                            : 'hover:bg-muted text-foreground'
+                          }`}
+                      >
+                        <span className="flex items-center gap-2">
+                          <Folder className="w-4 h-4" />
+                          {module}
+                        </span>
+                        <Badge variant={selectedModule === module ? "secondary" : "outline"} className="ml-2">
+                          {moduleData.counts[module]}
+                        </Badge>
+                      </button>
+                    ))}
+                  </nav>
+                </div>
+              </aside>
 
-                          {/* 재생 아이콘 (접근 가능) */}
-                          {canAccess && (
-                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                              <PlayCircle className="w-16 h-16 text-white" />
-                            </div>
-                          )}
-
-                          <div className="absolute top-2 left-2 bg-primary text-primary-foreground px-3 py-1 rounded-full text-xs font-semibold">
-                            {video.module}
-                          </div>
-                          <div className="absolute top-2 right-2 bg-black/70 text-white px-2 py-1 rounded text-xs">
-                            {video.duration}
-                          </div>
-
-                          {/* 접근 등급 뱃지 */}
-                          {canAccess && (
-                            <div className="absolute bottom-2 right-2">
-                              <Badge variant="outline" className={`text-xs ${getAccessLevelColor(video.accessLevel)}`}>
-                                {getAccessLevelLabel(video.accessLevel)}
-                              </Badge>
-                            </div>
-                          )}
+              {/* 모바일 세션 선택 */}
+              <div className="lg:hidden mb-4 w-full">
+                <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
+                  <SheetTrigger asChild>
+                    <Button variant="outline" className="w-full justify-between">
+                      <span className="flex items-center gap-2">
+                        <Menu className="w-4 h-4" />
+                        {selectedModule || '전체 영상'}
+                      </span>
+                      <Badge variant="secondary">{selectedModule ? moduleData.counts[selectedModule] : moduleData.total}</Badge>
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent side="left" className="w-80">
+                    <SheetHeader>
+                      <SheetTitle className="flex items-center gap-2">
+                        <Folder className="w-5 h-5 text-primary" />
+                        세션별 보기
+                      </SheetTitle>
+                    </SheetHeader>
+                    <nav className="mt-6 space-y-1">
+                      <button
+                        onClick={() => { setSelectedModule(null); setIsSidebarOpen(false); }}
+                        className={`flex items-center justify-between w-full px-3 py-3 text-left rounded-lg transition-colors ${selectedModule === null
+                            ? 'bg-primary text-white'
+                            : 'hover:bg-muted text-foreground'
+                          }`}
+                      >
+                        <span className="flex items-center gap-2">
+                          <Video className="w-4 h-4" />
+                          전체 영상
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <Badge variant={selectedModule === null ? "secondary" : "outline"}>
+                            {moduleData.total}
+                          </Badge>
+                          <ChevronRight className="w-4 h-4" />
                         </div>
-                      </CardHeader>
-                      <CardContent className="p-4">
-                        <CardTitle className={`text-lg mb-2 transition-colors ${canAccess ? 'group-hover:text-primary' : 'text-muted-foreground'
-                          }`}>
-                          {video.title}
-                        </CardTitle>
-                        <p className="text-sm text-muted-foreground">{video.description}</p>
-                      </CardContent>
-                    </Card>
+                      </button>
+
+                      {moduleData.modules.map((module) => (
+                        <button
+                          key={module}
+                          onClick={() => { setSelectedModule(module); setIsSidebarOpen(false); }}
+                          className={`flex items-center justify-between w-full px-3 py-3 text-left rounded-lg transition-colors ${selectedModule === module
+                              ? 'bg-primary text-white'
+                              : 'hover:bg-muted text-foreground'
+                            }`}
+                        >
+                          <span className="flex items-center gap-2">
+                            <Folder className="w-4 h-4" />
+                            {module}
+                          </span>
+                          <div className="flex items-center gap-2">
+                            <Badge variant={selectedModule === module ? "secondary" : "outline"}>
+                              {moduleData.counts[module]}
+                            </Badge>
+                            <ChevronRight className="w-4 h-4" />
+                          </div>
+                        </button>
+                      ))}
+                    </nav>
+                  </SheetContent>
+                </Sheet>
+              </div>
+
+              {/* 비디오 그리드 */}
+              <div className="flex-1 min-w-0">
+                {/* 현재 선택된 세션 표시 */}
+                {selectedModule && (
+                  <div className="mb-4 flex items-center gap-2">
+                    <Badge variant="outline" className="text-sm py-1 px-3">
+                      {selectedModule}
+                    </Badge>
+                    <span className="text-sm text-muted-foreground">
+                      {filteredVideos.length}개 영상
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setSelectedModule(null)}
+                      className="ml-auto text-xs"
+                    >
+                      전체 보기
+                    </Button>
                   </div>
-                );
-              })}
+                )}
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5">
+                  {filteredVideos.map((video) => {
+                    const canAccess = registrantData?.accessLevel
+                      ? canAccessLevel(registrantData.accessLevel, video.accessLevel)
+                      : false;
+
+                    return (
+                      <div
+                        key={video.id}
+                        onClick={() => canAccess && setSelectedVideo(video)}
+                        onKeyDown={(e) => {
+                          if ((e.key === 'Enter' || e.key === ' ') && canAccess) {
+                            e.preventDefault();
+                            setSelectedVideo(video);
+                          }
+                        }}
+                        tabIndex={canAccess ? 0 : -1}
+                        role="button"
+                        aria-label={`${video.title} ${canAccess ? '비디오 재생' : '접근 제한됨'}`}
+                        className={`block ${canAccess ? 'cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-xl' : 'cursor-not-allowed'}`}
+                      >
+                        <Card
+                          className={`group transition-all duration-300 border-2 ${canAccess
+                            ? 'hover:shadow-xl hover:-translate-y-1'
+                            : 'opacity-75'
+                            }`}
+                        >
+                          <CardHeader className="p-0">
+                            <div className="relative overflow-hidden rounded-t-xl">
+                              <img
+                                src={getVideoThumbnail(video.vimeoUrl, video.thumbnail)}
+                                alt={video.title}
+                                loading="lazy"
+                                decoding="async"
+                                className={`w-full h-44 object-cover transition-transform duration-300 ${canAccess ? 'group-hover:scale-105' : 'filter grayscale'
+                                  }`}
+                              />
+
+                              {/* 잠금 오버레이 (접근 불가) */}
+                              {!canAccess && (
+                                <div
+                                  className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center"
+                                  aria-label={`${getAccessLevelLabel(video.accessLevel)} 등급 이상 필요`}
+                                >
+                                  <Lock className="w-10 h-10 text-white mb-2" aria-hidden="true" />
+                                  <Badge variant="outline" className={`${getAccessLevelColor(video.accessLevel)} border-white`}>
+                                    {getAccessLevelLabel(video.accessLevel)} 이상 필요
+                                  </Badge>
+                                </div>
+                              )}
+
+                              {/* 재생 아이콘 (접근 가능) */}
+                              {canAccess && (
+                                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <PlayCircle className="w-14 h-14 text-white" />
+                                </div>
+                              )}
+
+                              <div className="absolute top-2 right-2 bg-black/70 text-white px-2 py-1 rounded text-xs">
+                                {video.duration}
+                              </div>
+
+                              {/* 접근 등급 뱃지 */}
+                              {canAccess && (
+                                <div className="absolute bottom-2 right-2">
+                                  <Badge variant="outline" className={`text-xs ${getAccessLevelColor(video.accessLevel)}`}>
+                                    {getAccessLevelLabel(video.accessLevel)}
+                                  </Badge>
+                                </div>
+                              )}
+                            </div>
+                          </CardHeader>
+                          <CardContent className="p-4">
+                            <CardTitle className={`text-base mb-1 transition-colors line-clamp-2 ${canAccess ? 'group-hover:text-primary' : 'text-muted-foreground'
+                              }`}>
+                              {video.title}
+                            </CardTitle>
+                            <p className="text-sm text-muted-foreground line-clamp-2">{video.description}</p>
+                          </CardContent>
+                        </Card>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
           )}
 
