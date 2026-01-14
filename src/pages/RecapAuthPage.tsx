@@ -280,17 +280,20 @@ const RecapAuthPage = () => {
 
             <main className="pt-20 pb-20">
                 <section className="py-20 px-4 bg-gradient-to-br from-primary/7 via-background to-secondary/7">
-                    <div className="container mx-auto max-w-md">
+                    <div className="container mx-auto max-w-full sm:max-w-md px-4">
                         <div className="text-center mb-8 animate-fade-in">
                             <div className="inline-flex items-center gap-2 mb-4 px-4 py-2 bg-primary/10 rounded-full">
                                 <Video className="w-5 h-5 text-primary" />
                                 <span className="text-sm font-semibold text-primary">다시보기 전용</span>
                             </div>
                             <h1 className="text-3xl md:text-4xl font-bold mb-4 text-black">
-                                마스터 코스 다시보기
+                                JSHA 마스터 코스 다시보기
+                                <span className="block text-xl md:text-2xl text-primary mt-2 font-semibold">
+                                    수료자 전용 영상 서비스
+                                </span>
                             </h1>
                             <p className="text-lg text-muted-foreground">
-                                수료자 및 등록자 전용 영상 서비스입니다
+                                지금 가입하고 <strong>평생 무제한</strong>으로 강의 영상에 접근하세요
                             </p>
                         </div>
 
@@ -336,8 +339,8 @@ const RecapAuthPage = () => {
                                             </div>
 
                                             {loginError && (
-                                                <Alert variant="destructive">
-                                                    <AlertCircle className="h-4 w-4" />
+                                                <Alert variant="destructive" role="alert" aria-live="assertive">
+                                                    <AlertCircle className="h-4 w-4" aria-hidden="true" />
                                                     <AlertDescription>{loginError}</AlertDescription>
                                                 </Alert>
                                             )}
@@ -442,6 +445,10 @@ const RecapAuthPage = () => {
                                                     onChange={(e) => setSignupBatch(e.target.value)}
                                                     disabled={signupLoading}
                                                 />
+                                                <p className="text-xs text-muted-foreground">
+                                                    💡 <strong>팁:</strong> 입학 때 등록한 이메일과 동일하고 기수를 정확히 입력하면
+                                                    <strong className="text-primary"> 즉시 자동 승인</strong>됩니다!
+                                                </p>
                                             </div>
 
                                             <div className="space-y-2">
@@ -519,8 +526,8 @@ const RecapAuthPage = () => {
                                             </div>
 
                                             {signupError && (
-                                                <Alert variant="destructive">
-                                                    <AlertCircle className="h-4 w-4" />
+                                                <Alert variant="destructive" role="alert" aria-live="assertive">
+                                                    <AlertCircle className="h-4 w-4" aria-hidden="true" />
                                                     <AlertDescription>{signupError}</AlertDescription>
                                                 </Alert>
                                             )}

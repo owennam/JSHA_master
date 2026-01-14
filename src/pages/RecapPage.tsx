@@ -305,12 +305,12 @@ const RecapPage = () => {
         <Header />
 
         {/* 우측 상단 사용자 정보 */}
-        <div className="fixed top-24 right-4 z-40 flex items-center gap-3 bg-white/95 backdrop-blur-sm px-4 py-2 rounded-full shadow-md border border-gray-200">
+        <div className="fixed top-20 right-2 sm:top-24 sm:right-4 z-40 flex items-center gap-2 sm:gap-3 bg-white/95 backdrop-blur-sm px-3 sm:px-4 py-2 rounded-full shadow-md border border-gray-200">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-blue-100 rounded-full flex items-center justify-center">
-              <Plus className="w-4 h-4 text-blue-600" />
+            <div className="w-7 h-7 bg-blue-100 rounded-full flex items-center justify-center" aria-label="다시보기 서비스 미등록">
+              <Plus className="w-4 h-4 text-blue-600" aria-hidden="true" />
             </div>
-            <span className="text-sm font-medium text-foreground max-w-[150px] truncate">
+            <span className="text-xs sm:text-sm font-medium text-foreground max-w-[100px] sm:max-w-[150px] truncate">
               {user?.email || "인증된 사용자"}
             </span>
           </div>
@@ -377,12 +377,12 @@ const RecapPage = () => {
         <Header />
 
         {/* 우측 상단 사용자 정보 */}
-        <div className="fixed top-24 right-4 z-40 flex items-center gap-3 bg-white/95 backdrop-blur-sm px-4 py-2 rounded-full shadow-md border border-gray-200">
+        <div className="fixed top-20 right-2 sm:top-24 sm:right-4 z-40 flex items-center gap-2 sm:gap-3 bg-white/95 backdrop-blur-sm px-3 sm:px-4 py-2 rounded-full shadow-md border border-gray-200">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-amber-100 rounded-full flex items-center justify-center">
-              <Clock className="w-4 h-4 text-amber-600" />
+            <div className="w-7 h-7 bg-amber-100 rounded-full flex items-center justify-center" aria-label="승인 대기 중">
+              <Clock className="w-4 h-4 text-amber-600" aria-hidden="true" />
             </div>
-            <span className="text-sm font-medium text-foreground max-w-[150px] truncate">
+            <span className="text-xs sm:text-sm font-medium text-foreground max-w-[100px] sm:max-w-[150px] truncate">
               {user?.email || "인증된 사용자"}
             </span>
           </div>
@@ -434,12 +434,12 @@ const RecapPage = () => {
         <Header />
 
         {/* 우측 상단 사용자 정보 */}
-        <div className="fixed top-24 right-4 z-40 flex items-center gap-3 bg-white/95 backdrop-blur-sm px-4 py-2 rounded-full shadow-md border border-gray-200">
+        <div className="fixed top-20 right-2 sm:top-24 sm:right-4 z-40 flex items-center gap-2 sm:gap-3 bg-white/95 backdrop-blur-sm px-3 sm:px-4 py-2 rounded-full shadow-md border border-gray-200">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-red-100 rounded-full flex items-center justify-center">
-              <XCircle className="w-4 h-4 text-red-600" />
+            <div className="w-7 h-7 bg-red-100 rounded-full flex items-center justify-center" aria-label="접근 거부됨">
+              <XCircle className="w-4 h-4 text-red-600" aria-hidden="true" />
             </div>
-            <span className="text-sm font-medium text-foreground max-w-[150px] truncate">
+            <span className="text-xs sm:text-sm font-medium text-foreground max-w-[100px] sm:max-w-[150px] truncate">
               {user?.email || "인증된 사용자"}
             </span>
           </div>
@@ -490,12 +490,12 @@ const RecapPage = () => {
       <Header />
 
       {/* 우측 상단 사용자 정보 */}
-      <div className="fixed top-24 right-4 z-40 flex items-center gap-3 bg-white/95 backdrop-blur-sm px-4 py-2 rounded-full shadow-md border border-gray-200">
+      <div className="fixed top-20 right-2 sm:top-24 sm:right-4 z-40 flex items-center gap-2 sm:gap-3 bg-white/95 backdrop-blur-sm px-3 sm:px-4 py-2 rounded-full shadow-md border border-gray-200">
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 bg-primary/10 rounded-full flex items-center justify-center">
-            <CheckCircle className="w-4 h-4 text-primary" />
+          <div className="w-7 h-7 bg-primary/10 rounded-full flex items-center justify-center" aria-label="접근 승인됨">
+            <CheckCircle className="w-4 h-4 text-primary" aria-hidden="true" />
           </div>
-          <span className="text-sm font-medium text-foreground max-w-[150px] truncate">
+          <span className="text-xs sm:text-sm font-medium text-foreground max-w-[100px] sm:max-w-[150px] truncate">
             {user?.email || "인증된 사용자"}
           </span>
         </div>
@@ -552,7 +552,7 @@ const RecapPage = () => {
               <p className="text-sm text-muted-foreground mt-2">영상이 추가되면 이메일로 알려드리겠습니다.</p>
             </div>
           ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {videos.map((video) => {
                 const canAccess = registrantData?.accessLevel
                   ? canAccessLevel(registrantData.accessLevel, video.accessLevel)
@@ -562,7 +562,16 @@ const RecapPage = () => {
                   <div
                     key={video.id}
                     onClick={() => canAccess && setSelectedVideo(video)}
-                    className={`block ${canAccess ? 'cursor-pointer' : 'cursor-not-allowed'}`}
+                    onKeyDown={(e) => {
+                      if ((e.key === 'Enter' || e.key === ' ') && canAccess) {
+                        e.preventDefault();
+                        setSelectedVideo(video);
+                      }
+                    }}
+                    tabIndex={canAccess ? 0 : -1}
+                    role="button"
+                    aria-label={`${video.title} ${canAccess ? '비디오 재생' : '접근 제한됨'}`}
+                    className={`block ${canAccess ? 'cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-xl' : 'cursor-not-allowed'}`}
                   >
                     <Card
                       className={`group transition-all duration-300 border-2 ${canAccess
@@ -575,14 +584,19 @@ const RecapPage = () => {
                           <img
                             src={getVideoThumbnail(video.vimeoUrl, video.thumbnail)}
                             alt={video.title}
+                            loading="lazy"
+                            decoding="async"
                             className={`w-full h-48 object-cover transition-transform duration-300 ${canAccess ? 'group-hover:scale-105' : 'filter grayscale'
                               }`}
                           />
 
                           {/* 잠금 오버레이 (접근 불가) */}
                           {!canAccess && (
-                            <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center">
-                              <Lock className="w-12 h-12 text-white mb-2" />
+                            <div
+                              className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center"
+                              aria-label={`${getAccessLevelLabel(video.accessLevel)} 등급 이상 필요`}
+                            >
+                              <Lock className="w-12 h-12 text-white mb-2" aria-hidden="true" />
                               <Badge variant="outline" className={`${getAccessLevelColor(video.accessLevel)} border-white`}>
                                 {getAccessLevelLabel(video.accessLevel)} 이상 필요
                               </Badge>
