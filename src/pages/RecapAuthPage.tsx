@@ -535,7 +535,7 @@ const RecapAuthPage = () => {
                                                     <Input
                                                         id="bookCode"
                                                         type="text"
-                                                        placeholder="JSHA-MASTER-2026-XXXX"
+                                                        placeholder="교과서 뒷면의 코드를 입력하세요"
                                                         value={bookCode}
                                                         onChange={(e) => setBookCode(e.target.value.toUpperCase())}
                                                         disabled={signupLoading}
@@ -547,10 +547,11 @@ const RecapAuthPage = () => {
                                                         <Input
                                                             id="phoneNumber"
                                                             type="tel"
-                                                            placeholder="010-1234-5678"
+                                                            placeholder="01012345678 (- 없이 입력)"
                                                             value={phoneNumber}
-                                                            onChange={(e) => setPhoneNumber(e.target.value)}
+                                                            onChange={(e) => setPhoneNumber(e.target.value.replace(/[^0-9]/g, ''))}
                                                             disabled={signupLoading}
+                                                            maxLength={11}
                                                         />
                                                         <p className="text-xs text-muted-foreground">
                                                             ⚠️ 휴대폰 번호당 1회만 등록 가능합니다.
