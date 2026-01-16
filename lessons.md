@@ -223,6 +223,10 @@ UI/UX 개선 작업 시 `website-builder-extracted` 폴더의 스킬을 활용�
 - [x] Admin 비디오 관리 페이지: 교과서(book) 접근 등급 추가
 - [x] 모듈 Input → Select 드롭다운 변경
 
+### Phase 3.5: Admin 및 인증 고도화 ✅ (2026-01-16 완료)
+- [x] **회원가입 개선**: 의료기관 필수, 휴대폰번호 중복 체크, 교과서 구매자 자동 승인
+- [x] **Admin 기능**: 의료기관 컬럼 추가, **사용자 영구 삭제** (서버 API 연동)
+
 ### Phase 4: 성능 최적화 (예정)
 - [ ] 비디오 목록 페이지네이션 (50개 이상 시)
 - [ ] 이미지 WebP 변환 (커스텀 이미지에만 필요)
@@ -269,6 +273,15 @@ match /bookRegistrations/{registrationId} {
 const player = new Player(iframeRef.current);
 player.on('ended', () => { /* 시청 완료 처리 */ });
 ```
+
+### 10. 사용자 영구 삭제 (Auth vs Firestore)
+
+| 구분 | Firestore 삭제 | Auth 삭제 | 서버 API 통합 삭제 |
+|------|----------------|-----------|--------------------|
+| **결과** | 데이터만 사라짐 | 로그인만 불가능 | **완벽한 초기화** |
+| **문제점** | 재가입 시도 시 '이미 가입된 계정' 오류 | 데이터 고아(Orphan) 발생 | 없음 ✅ |
+
+**해결**: `DELETE /api/admin/users/:uid` 엔드포인트를 만들어 `admin.auth().deleteUser`와 `db.delete`를 트랜잭션처럼 수행.
 
 ---
 
