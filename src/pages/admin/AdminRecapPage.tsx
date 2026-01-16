@@ -53,6 +53,7 @@ interface RecapRegistrant {
   uid: string;
   email: string;
   name: string;
+  clinic?: string;
   batch?: string;
   status: UserStatus;
   accessLevel: AccessLevel;
@@ -333,12 +334,13 @@ const AdminRecapPage = () => {
         <Table>
           <TableHeader className="bg-muted/50">
             <TableRow>
-              <TableHead className="w-[180px]">이름</TableHead>
+              <TableHead className="w-[120px]">이름</TableHead>
+              <TableHead>의료기관</TableHead>
               <TableHead>이메일</TableHead>
-              <TableHead className="w-[90px]">기수</TableHead>
-              {isApproved && <TableHead className="w-[130px]">접근 등급</TableHead>}
-              <TableHead className="w-[110px]">신청일</TableHead>
-              <TableHead className="text-right w-[200px]">{isPending ? '관리' : isApproved ? '관리' : '상태'}</TableHead>
+              <TableHead className="w-[70px]">기수</TableHead>
+              {isApproved && <TableHead className="w-[100px]">접근 등급</TableHead>}
+              <TableHead className="w-[90px]">신청일</TableHead>
+              <TableHead className="text-right w-[180px]">{isPending ? '관리' : isApproved ? '관리' : '상태'}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -348,15 +350,16 @@ const AdminRecapPage = () => {
               return (
                 <TableRow key={registrant.uid} className="group hover:bg-muted/5">
                   <TableCell className="font-medium">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1">
                       <span className="text-sm font-bold text-slate-800">{registrant.name}</span>
                       {isBookPurchaser && (
-                        <Badge className="bg-purple-100 text-purple-700 hover:bg-purple-100 text-xs px-1.5 py-0">
-                          📚 교과서
+                        <Badge className="bg-purple-100 text-purple-700 hover:bg-purple-100 text-xs px-1 py-0">
+                          📚
                         </Badge>
                       )}
                     </div>
                   </TableCell>
+                  <TableCell className="text-sm text-slate-600">{registrant.clinic || '-'}</TableCell>
                   <TableCell className="text-sm text-slate-600 font-mono">{registrant.email}</TableCell>
                   <TableCell>
                     {registrant.batch ? (
