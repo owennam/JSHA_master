@@ -50,6 +50,12 @@ service cloud.firestore {
 
       // 로그인된 사용자는 수정 가능 (관리자 승인 기능용)
       allow update: if isSignedIn();
+
+      // 시청 기록 서브컬렉션
+      match /watchedVideos/{videoId} {
+        // 본인만 읽기/쓰기 가능
+        allow read, write: if isOwner(userId);
+      }
     }
 
     // ============================================

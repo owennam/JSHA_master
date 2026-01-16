@@ -1,14 +1,16 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { PlayCircle, CheckCircle, Video, LogOut, Clock, XCircle, X, Lock, Shield, Plus, Folder, Menu, ChevronRight } from "lucide-react";
+import { PlayCircle, CheckCircle, Video, LogOut, Clock, XCircle, Lock, Shield, Plus, Folder, Menu, ChevronRight, ChevronDown, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged, signOut, User } from "firebase/auth";
-import { getRecapRegistrant, RecapRegistrant, getAllRecapVideos, RecapVideo, AccessLevel, canAccessLevel, getUserProfile, addRecapServiceToExistingUser, registerBookCode, validateBookCode } from "@/lib/firestore";
+import { getRecapRegistrant, RecapRegistrant, getAllRecapVideos, RecapVideo, AccessLevel, canAccessLevel, getUserProfile, addRecapServiceToExistingUser, registerBookCode, validateBookCode, markVideoAsWatched, getWatchedVideos, unmarkVideoAsWatched } from "@/lib/firestore";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,6 +29,14 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { Checkbox } from "@/components/ui/checkbox";
+import Player from "@vimeo/player";
 
 // embed HTML에서 Vimeo URL 추출
 const extractVimeoFromEmbed = (input: string): string => {
@@ -135,11 +145,13 @@ const RecapPage = () => {
   const [user, setUser] = useState<User | null>(null);
   const [accessStatus, setAccessStatus] = useState<AccessStatus>('loading');
   const [registrantData, setRegistrantData] = useState<RecapRegistrant | null>(null);
-  const [videos, setVideos] = useState<RecapVideo[]>([]);
-  const [videosLoading, setVideosLoading] = useState(true);
   const [selectedVideo, setSelectedVideo] = useState<RecapVideo | null>(null);
   const [selectedModule, setSelectedModule] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [watchedVideos, setWatchedVideos] = useState<string[]>([]);
+  const [filterMode, setFilterMode] = useState<'all' | 'accessible' | 'watched'>('all');
+  const playerRef = useRef<Player | null>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
 
   // 교과서 등록 상태
   const [isBookDialogOpen, setIsBookDialogOpen] = useState(false);
@@ -185,6 +197,15 @@ const RecapPage = () => {
     }
   };
 
+  // 비디오 목록 로드 (React Query)
+  const { data: videos = [], isLoading: videosLoading } = useQuery({
+    queryKey: ['recapVideos'],
+    queryFn: () => getAllRecapVideos(true),
+    enabled: accessStatus === 'approved',
+    staleTime: 5 * 60 * 1000, // 5분간 캐시 유지
+    retry: 2,
+  });
+
   // 모듈별 비디오 분류
   const moduleData = useMemo(() => {
     // 원하는 정렬 순서 정의
@@ -220,9 +241,22 @@ const RecapPage = () => {
 
   // 필터링된 비디오
   const filteredVideos = useMemo(() => {
-    if (!selectedModule) return videos;
-    return videos.filter(v => v.module === selectedModule);
-  }, [videos, selectedModule]);
+    let result = videos;
+
+    // 모듈 필터
+    if (selectedModule) {
+      result = result.filter(v => v.module === selectedModule);
+    }
+
+    // 필터 모드 적용
+    if (filterMode === 'accessible' && registrantData?.accessLevel) {
+      result = result.filter(v => canAccessLevel(registrantData.accessLevel, v.accessLevel));
+    } else if (filterMode === 'watched') {
+      result = result.filter(v => watchedVideos.includes(v.id));
+    }
+
+    return result;
+  }, [videos, selectedModule, filterMode, watchedVideos, registrantData]);
 
   // Firebase 인증 상태 감지
   useEffect(() => {
@@ -303,29 +337,97 @@ const RecapPage = () => {
     }
   };
 
-  // 비디오 목록 로드
+  // 시청 기록 로드
   useEffect(() => {
-    const loadVideos = async () => {
-      if (accessStatus === 'approved') {
+    const loadWatchedVideos = async () => {
+      if (user && accessStatus === 'approved') {
         try {
-          setVideosLoading(true);
-          const videoList = await getAllRecapVideos(true);
-          setVideos(videoList);
+          const watched = await getWatchedVideos(user.uid);
+          setWatchedVideos(watched);
         } catch (error) {
-          console.error("Failed to load videos:", error);
-          toast({
-            title: "비디오 로드 실패",
-            description: "비디오 목록을 불러올 수 없습니다.",
-            variant: "destructive",
-          });
-        } finally {
-          setVideosLoading(false);
+          console.error('Failed to load watched videos:', error);
         }
       }
     };
+    loadWatchedVideos();
+  }, [user, accessStatus]);
 
-    loadVideos();
-  }, [accessStatus, toast]);
+  // 시청 완료 토글 핸들러
+  const handleToggleWatched = async (videoId: string) => {
+    if (!user) return;
+
+    const isWatched = watchedVideos.includes(videoId);
+
+    // 낙관적 업데이트
+    if (isWatched) {
+      setWatchedVideos(prev => prev.filter(id => id !== videoId));
+    } else {
+      setWatchedVideos(prev => [...prev, videoId]);
+    }
+
+    try {
+      if (isWatched) {
+        await unmarkVideoAsWatched(user.uid, videoId);
+      } else {
+        await markVideoAsWatched(user.uid, videoId);
+      }
+    } catch (error) {
+      // 롤백
+      if (isWatched) {
+        setWatchedVideos(prev => [...prev, videoId]);
+      } else {
+        setWatchedVideos(prev => prev.filter(id => id !== videoId));
+      }
+      toast({
+        title: "오류",
+        description: "시청 기록 저장에 실패했습니다.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Vimeo Player 초기화 및 ended 이벤트 핸들러
+  useEffect(() => {
+    // 선택된 영상이 없거나 이미 시청 완료된 경우 무시
+    if (!selectedVideo || !iframeRef.current) return;
+
+    // 기존 Player 정리
+    if (playerRef.current) {
+      playerRef.current.off('ended');
+      playerRef.current = null;
+    }
+
+    // 약간의 지연 후 Player 초기화 (iframe 로드 완료 대기)
+    const timer = setTimeout(() => {
+      if (iframeRef.current) {
+        try {
+          const player = new Player(iframeRef.current);
+          playerRef.current = player;
+
+          // 영상 재생 완료 시 자동 시청 완료 처리
+          player.on('ended', () => {
+            if (selectedVideo && !watchedVideos.includes(selectedVideo.id)) {
+              handleToggleWatched(selectedVideo.id);
+              toast({
+                title: "시청 완료! ✅",
+                description: `"${selectedVideo.title}" 영상을 시청 완료했습니다.`,
+              });
+            }
+          });
+        } catch (error) {
+          console.error('Vimeo Player 초기화 실패:', error);
+        }
+      }
+    }, 500);
+
+    return () => {
+      clearTimeout(timer);
+      if (playerRef.current) {
+        playerRef.current.off('ended');
+        playerRef.current = null;
+      }
+    };
+  }, [selectedVideo?.id]); // selectedVideo.id가 변경될 때만 재초기화
 
   // 로그아웃 처리
   const handleLogout = async () => {
@@ -640,8 +742,35 @@ const RecapPage = () => {
 
           {/* 영상 목록 */}
           {videosLoading ? (
-            <div className="flex items-center justify-center py-20">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+            <div className="flex gap-6">
+              {/* 사이드바 스켈레톤 - 데스크톱 */}
+              <aside className="hidden lg:block w-64 flex-shrink-0">
+                <div className="sticky top-32 bg-white rounded-xl border shadow-sm p-4">
+                  <Skeleton className="h-6 w-32 mb-4" />
+                  <div className="space-y-2">
+                    {[...Array(5)].map((_, i) => (
+                      <Skeleton key={i} className="h-10 w-full rounded-lg" />
+                    ))}
+                  </div>
+                </div>
+              </aside>
+              {/* 비디오 그리드 스켈레톤 */}
+              <div className="flex-1 min-w-0">
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5">
+                  {[...Array(6)].map((_, i) => (
+                    <Card key={i} className="border-2">
+                      <CardHeader className="p-0">
+                        <Skeleton className="h-44 w-full rounded-t-xl" />
+                      </CardHeader>
+                      <CardContent className="p-4">
+                        <Skeleton className="h-5 w-3/4 mb-2" />
+                        <Skeleton className="h-4 w-full" />
+                        <Skeleton className="h-4 w-2/3 mt-1" />
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
             </div>
           ) : videos.length === 0 ? (
             <div className="text-center py-20">
@@ -651,57 +780,134 @@ const RecapPage = () => {
             </div>
           ) : (
             <div className="flex gap-6">
-              {/* 사이드바 - 데스크톱 */}
-              <aside className="hidden lg:block w-64 flex-shrink-0">
-                <div className="sticky top-32 bg-white rounded-xl border shadow-sm p-4">
-                  <h2 className="font-semibold text-lg mb-4 flex items-center gap-2">
-                    <Folder className="w-5 h-5 text-primary" />
-                    세션별 보기
-                  </h2>
-                  <nav className="space-y-1">
-                    {/* 전체 */}
-                    <button
-                      onClick={() => setSelectedModule(null)}
-                      className={`flex items-center justify-between w-full px-3 py-2.5 text-left rounded-lg transition-colors ${selectedModule === null
-                        ? 'bg-primary text-white'
-                        : 'hover:bg-muted text-foreground'
-                        }`}
-                    >
-                      <span className="flex items-center gap-2">
-                        <Video className="w-4 h-4" />
-                        전체 영상
-                      </span>
-                      <Badge variant={selectedModule === null ? "secondary" : "outline"} className="ml-2">
-                        {moduleData.total}
-                      </Badge>
-                    </button>
-
-                    {/* 세션별 목록 */}
-                    {moduleData.modules.map((module) => (
-                      <button
-                        key={module}
-                        onClick={() => setSelectedModule(module)}
-                        className={`flex items-center justify-between w-full px-3 py-2.5 text-left rounded-lg transition-colors ${selectedModule === module
-                          ? 'bg-primary text-white'
-                          : 'hover:bg-muted text-foreground'
-                          }`}
+              {/* 사이드바 - 데스크톱 (강의 목록) */}
+              <aside className="hidden lg:block w-72 flex-shrink-0">
+                <div className="sticky top-32 bg-white rounded-xl border shadow-sm overflow-hidden max-h-[calc(100vh-160px)] flex flex-col">
+                  {/* 필터 옵션 */}
+                  <div className="p-4 border-b bg-gray-50">
+                    <div className="flex gap-2 flex-wrap">
+                      <Button
+                        variant={filterMode === 'all' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setFilterMode('all')}
+                        className="text-xs"
                       >
-                        <span className="flex items-center gap-2">
-                          <Folder className="w-4 h-4" />
-                          {module}
-                        </span>
-                        <Badge variant={selectedModule === module ? "secondary" : "outline"} className="ml-2">
-                          {moduleData.counts[module]}
-                        </Badge>
-                      </button>
-                    ))}
-                  </nav>
+                        전체
+                      </Button>
+                      <Button
+                        variant={filterMode === 'accessible' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setFilterMode('accessible')}
+                        className="text-xs"
+                      >
+                        시청 가능
+                      </Button>
+                      <Button
+                        variant={filterMode === 'watched' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setFilterMode('watched')}
+                        className="text-xs"
+                      >
+                        시청 완료
+                      </Button>
+                    </div>
+                  </div>
 
-                  {/* 교과서 등록 버튼 (사이드바 하단) */}
-                  <div className="mt-8 pt-4 border-t">
+                  {/* 강의 목록 헤더 */}
+                  <div className="p-4 border-b">
+                    <h2 className="font-semibold text-lg flex items-center gap-2">
+                      <Folder className="w-5 h-5 text-primary" />
+                      강의 목록
+                      <Badge variant="secondary" className="ml-auto">
+                        {filteredVideos.length}개
+                      </Badge>
+                    </h2>
+                  </div>
+
+                  {/* 아코디언 강의 목록 */}
+                  <div className="flex-1 overflow-y-auto p-2">
+                    <Accordion type="multiple" defaultValue={moduleData.modules} className="space-y-1">
+                      {moduleData.modules.map((module) => {
+                        const moduleVideos = filteredVideos.filter(v => v.module === module);
+                        if (moduleVideos.length === 0) return null;
+                        const watchedCount = moduleVideos.filter(v => watchedVideos.includes(v.id)).length;
+
+                        return (
+                          <AccordionItem key={module} value={module} className="border rounded-lg">
+                            <AccordionTrigger className="px-3 py-2 text-sm hover:no-underline">
+                              <div className="flex items-center gap-2 flex-1">
+                                <Folder className="w-4 h-4 text-primary" />
+                                <span className="font-medium">{module}</span>
+                                <Badge variant="outline" className="ml-auto text-xs">
+                                  {watchedCount}/{moduleVideos.length}
+                                </Badge>
+                              </div>
+                            </AccordionTrigger>
+                            <AccordionContent className="pb-2 px-1">
+                              <div className="space-y-1">
+                                {moduleVideos.map((video) => {
+                                  const canAccess = registrantData?.accessLevel
+                                    ? canAccessLevel(registrantData.accessLevel, video.accessLevel)
+                                    : false;
+                                  const isWatched = watchedVideos.includes(video.id);
+                                  const isSelected = selectedVideo?.id === video.id;
+
+                                  return (
+                                    <div
+                                      key={video.id}
+                                      className={`flex items-start gap-2 p-2 rounded-lg cursor-pointer transition-colors ${isSelected
+                                        ? 'bg-primary/10 border border-primary/30'
+                                        : canAccess
+                                          ? 'hover:bg-muted'
+                                          : 'opacity-60'
+                                        }`}
+                                      onClick={() => canAccess && setSelectedVideo(video)}
+                                    >
+                                      {/* 체크박스 */}
+                                      <div
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          if (canAccess) handleToggleWatched(video.id);
+                                        }}
+                                        className={`flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${isWatched
+                                          ? 'bg-green-500 border-green-500'
+                                          : 'border-gray-300 hover:border-primary'
+                                          } ${!canAccess ? 'opacity-50' : 'cursor-pointer'}`}
+                                      >
+                                        {isWatched && <Check className="w-3 h-3 text-white" />}
+                                      </div>
+
+                                      {/* 영상 정보 */}
+                                      <div className="flex-1 min-w-0">
+                                        <div className="flex items-center gap-1">
+                                          {!canAccess && <Lock className="w-3 h-3 text-gray-400" />}
+                                          <span className={`text-sm font-medium truncate ${isSelected ? 'text-primary' : ''}`}>
+                                            {video.title}
+                                          </span>
+                                        </div>
+                                        <span className="text-xs text-muted-foreground">{video.duration}</span>
+                                      </div>
+
+                                      {/* 재생 아이콘 */}
+                                      {isSelected && (
+                                        <PlayCircle className="w-4 h-4 text-primary flex-shrink-0" />
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </AccordionContent>
+                          </AccordionItem>
+                        );
+                      })}
+                    </Accordion>
+                  </div>
+
+                  {/* 교과서 등록 버튼 */}
+                  <div className="p-4 border-t bg-gray-50">
                     <Button
                       variant="outline"
-                      className="w-full justify-start text-xs border-dashed border-primary/50 hover:border-primary text-primary"
+                      className="w-full justify-center text-xs border-dashed border-primary/50 hover:border-primary text-primary"
                       onClick={() => setIsBookDialogOpen(true)}
                     >
                       <Plus className="w-3.5 h-3.5 mr-2" />
@@ -711,212 +917,150 @@ const RecapPage = () => {
                 </div>
               </aside>
 
-              {/* 모바일 세션 선택 */}
-              <div className="lg:hidden mb-4 w-full">
+              {/* 모바일 사이드바 토글 */}
+              <div className="lg:hidden w-full">
                 <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
                   <SheetTrigger asChild>
-                    <Button variant="outline" className="w-full justify-between">
+                    <Button variant="outline" className="w-full justify-between mb-4">
                       <span className="flex items-center gap-2">
                         <Menu className="w-4 h-4" />
-                        {selectedModule || '전체 영상'}
+                        강의 목록
                       </span>
-                      <Badge variant="secondary">{selectedModule ? moduleData.counts[selectedModule] : moduleData.total}</Badge>
+                      <Badge variant="secondary">{filteredVideos.length}개</Badge>
                     </Button>
                   </SheetTrigger>
-                  <SheetContent side="left" className="w-80">
-                    <SheetHeader>
+                  <SheetContent side="left" className="w-80 p-0">
+                    <SheetHeader className="p-4 border-b">
                       <SheetTitle className="flex items-center gap-2">
                         <Folder className="w-5 h-5 text-primary" />
-                        세션별 보기
+                        강의 목록
                       </SheetTitle>
                     </SheetHeader>
-                    <nav className="mt-6 space-y-1">
-                      <button
-                        onClick={() => { setSelectedModule(null); setIsSidebarOpen(false); }}
-                        className={`flex items-center justify-between w-full px-3 py-3 text-left rounded-lg transition-colors ${selectedModule === null
-                          ? 'bg-primary text-white'
-                          : 'hover:bg-muted text-foreground'
-                          }`}
-                      >
-                        <span className="flex items-center gap-2">
-                          <Video className="w-4 h-4" />
-                          전체 영상
-                        </span>
-                        <div className="flex items-center gap-2">
-                          <Badge variant={selectedModule === null ? "secondary" : "outline"}>
-                            {moduleData.total}
-                          </Badge>
-                          <ChevronRight className="w-4 h-4" />
-                        </div>
-                      </button>
+                    {/* 모바일 강의 목록 - 동일한 아코디언 구조 */}
+                    <div className="overflow-y-auto max-h-[calc(100vh-120px)] p-2">
+                      <Accordion type="multiple" defaultValue={moduleData.modules} className="space-y-1">
+                        {moduleData.modules.map((module) => {
+                          const moduleVideos = filteredVideos.filter(v => v.module === module);
+                          if (moduleVideos.length === 0) return null;
 
-                      {moduleData.modules.map((module) => (
-                        <button
-                          key={module}
-                          onClick={() => { setSelectedModule(module); setIsSidebarOpen(false); }}
-                          className={`flex items-center justify-between w-full px-3 py-3 text-left rounded-lg transition-colors ${selectedModule === module
-                            ? 'bg-primary text-white'
-                            : 'hover:bg-muted text-foreground'
-                            }`}
-                        >
-                          <span className="flex items-center gap-2">
-                            <Folder className="w-4 h-4" />
-                            {module}
-                          </span>
-                          <div className="flex items-center gap-2">
-                            <Badge variant={selectedModule === module ? "secondary" : "outline"}>
-                              {moduleData.counts[module]}
-                            </Badge>
-                            <ChevronRight className="w-4 h-4" />
-                          </div>
-                        </button>
-                      ))}
-                    </nav>
+                          return (
+                            <AccordionItem key={module} value={module} className="border rounded-lg">
+                              <AccordionTrigger className="px-3 py-2 text-sm hover:no-underline">
+                                <div className="flex items-center gap-2 flex-1">
+                                  <Folder className="w-4 h-4 text-primary" />
+                                  <span className="font-medium">{module}</span>
+                                </div>
+                              </AccordionTrigger>
+                              <AccordionContent className="pb-2 px-1">
+                                <div className="space-y-1">
+                                  {moduleVideos.map((video) => {
+                                    const canAccess = registrantData?.accessLevel
+                                      ? canAccessLevel(registrantData.accessLevel, video.accessLevel)
+                                      : false;
+                                    const isWatched = watchedVideos.includes(video.id);
 
-                    {/* 교과서 등록 버튼 (모바일) */}
-                    <div className="mt-6 pt-4 border-t">
-                      <Button
-                        variant="outline"
-                        className="w-full justify-center text-sm border-dashed border-primary/50 hover:border-primary text-primary"
-                        onClick={() => { setIsSidebarOpen(false); setIsBookDialogOpen(true); }}
-                      >
-                        <Plus className="w-4 h-4 mr-2" />
-                        교과서 코드 등록
-                      </Button>
+                                    return (
+                                      <div
+                                        key={video.id}
+                                        className={`flex items-center gap-2 p-2 rounded-lg ${canAccess ? 'hover:bg-muted cursor-pointer' : 'opacity-60'}`}
+                                        onClick={() => {
+                                          if (canAccess) {
+                                            setSelectedVideo(video);
+                                            setIsSidebarOpen(false);
+                                          }
+                                        }}
+                                      >
+                                        <div className={`w-4 h-4 rounded border ${isWatched ? 'bg-green-500 border-green-500' : 'border-gray-300'} flex items-center justify-center`}>
+                                          {isWatched && <Check className="w-3 h-3 text-white" />}
+                                        </div>
+                                        <span className="text-sm truncate flex-1">{video.title}</span>
+                                        {!canAccess && <Lock className="w-3 h-3 text-gray-400" />}
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </AccordionContent>
+                            </AccordionItem>
+                          );
+                        })}
+                      </Accordion>
                     </div>
                   </SheetContent>
                 </Sheet>
               </div>
 
-              {/* 비디오 그리드 */}
+              {/* 메인 콘텐츠 영역 (플레이어) */}
               <div className="flex-1 min-w-0">
-                {/* 현재 선택된 세션 표시 */}
-                {selectedModule && (
-                  <div className="mb-4 flex items-center gap-2">
-                    <Badge variant="outline" className="text-sm py-1 px-3">
-                      {selectedModule}
-                    </Badge>
-                    <span className="text-sm text-muted-foreground">
-                      {filteredVideos.length}개 영상
-                    </span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setSelectedModule(null)}
-                      className="ml-auto text-xs"
-                    >
-                      전체 보기
-                    </Button>
+                {selectedVideo ? (
+                  <div className="space-y-4">
+                    {/* 비디오 플레이어 */}
+                    <div className="bg-black rounded-xl overflow-hidden">
+                      <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+                        <iframe
+                          ref={iframeRef}
+                          id="vimeo-player"
+                          src={getEmbedUrl(selectedVideo.vimeoUrl)}
+                          className="absolute inset-0 w-full h-full"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                          title={selectedVideo.title}
+                        />
+                      </div>
+                    </div>
+
+                    {/* 비디오 정보 */}
+                    <Card>
+                      <CardContent className="p-4">
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1">
+                            <h2 className="text-xl font-bold mb-2">{selectedVideo.title}</h2>
+                            <p className="text-muted-foreground">{selectedVideo.description}</p>
+                            <div className="flex items-center gap-2 mt-3">
+                              <Badge variant="outline">{selectedVideo.module}</Badge>
+                              <Badge className={`${getAccessLevelColor(selectedVideo.accessLevel)}`}>
+                                {getAccessLevelLabel(selectedVideo.accessLevel)}
+                              </Badge>
+                              <span className="text-sm text-muted-foreground">{selectedVideo.duration}</span>
+                            </div>
+                          </div>
+                          {/* 시청 완료 버튼 */}
+                          <Button
+                            variant={watchedVideos.includes(selectedVideo.id) ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => handleToggleWatched(selectedVideo.id)}
+                            className="flex-shrink-0"
+                          >
+                            {watchedVideos.includes(selectedVideo.id) ? (
+                              <>
+                                <CheckCircle className="w-4 h-4 mr-2" />
+                                시청 완료
+                              </>
+                            ) : (
+                              <>
+                                <Check className="w-4 h-4 mr-2" />
+                                완료 표시
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                ) : (
+                  /* 영상 미선택 시 안내 */
+                  <div className="flex items-center justify-center h-96 bg-muted/30 rounded-xl border-2 border-dashed">
+                    <div className="text-center">
+                      <PlayCircle className="w-16 h-16 mx-auto mb-4 text-muted-foreground/50" />
+                      <p className="text-lg font-medium text-muted-foreground">영상을 선택해주세요</p>
+                      <p className="text-sm text-muted-foreground mt-1">좌측 강의 목록에서 시청할 영상을 선택하세요</p>
+                    </div>
                   </div>
                 )}
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5">
-                  {filteredVideos.map((video) => {
-                    const canAccess = registrantData?.accessLevel
-                      ? canAccessLevel(registrantData.accessLevel, video.accessLevel)
-                      : false;
-
-                    return (
-                      <div
-                        key={video.id}
-                        onClick={() => canAccess && setSelectedVideo(video)}
-                        onKeyDown={(e) => {
-                          if ((e.key === 'Enter' || e.key === ' ') && canAccess) {
-                            e.preventDefault();
-                            setSelectedVideo(video);
-                          }
-                        }}
-                        tabIndex={canAccess ? 0 : -1}
-                        role="button"
-                        aria-label={`${video.title} ${canAccess ? '비디오 재생' : '접근 제한됨'}`}
-                        className={`block ${canAccess ? 'cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-xl' : 'cursor-not-allowed'}`}
-                      >
-                        <Card
-                          className={`group transition-all duration-300 border-2 ${canAccess
-                            ? 'hover:shadow-xl hover:-translate-y-1'
-                            : 'opacity-75'
-                            }`}
-                        >
-                          <CardHeader className="p-0">
-                            <div className="relative overflow-hidden rounded-t-xl">
-                              <img
-                                src={getVideoThumbnail(video.vimeoUrl, video.thumbnail)}
-                                alt={video.title}
-                                loading="lazy"
-                                decoding="async"
-                                className={`w-full h-44 object-cover transition-transform duration-300 ${canAccess ? 'group-hover:scale-105' : 'filter grayscale'
-                                  }`}
-                              />
-
-                              {/* 잠금 오버레이 (접근 불가) */}
-                              {!canAccess && (
-                                <div
-                                  className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center"
-                                  aria-label={`${getAccessLevelLabel(video.accessLevel)} 등급 이상 필요`}
-                                >
-                                  <Lock className="w-10 h-10 text-white mb-2" aria-hidden="true" />
-                                  <Badge variant="outline" className={`${getAccessLevelColor(video.accessLevel)} border-white`}>
-                                    {getAccessLevelLabel(video.accessLevel)} 이상 필요
-                                  </Badge>
-                                </div>
-                              )}
-
-                              {/* 재생 아이콘 (접근 가능) */}
-                              {canAccess && (
-                                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                  <PlayCircle className="w-14 h-14 text-white" />
-                                </div>
-                              )}
-
-                              <div className="absolute top-2 right-2 bg-black/70 text-white px-2 py-1 rounded text-xs">
-                                {video.duration}
-                              </div>
-
-                              {/* 접근 등급 뱃지 */}
-                              {canAccess && (
-                                <div className="absolute bottom-2 right-2">
-                                  <Badge variant="outline" className={`text-xs ${getAccessLevelColor(video.accessLevel)}`}>
-                                    {getAccessLevelLabel(video.accessLevel)}
-                                  </Badge>
-                                </div>
-                              )}
-                            </div>
-                          </CardHeader>
-                          <CardContent className="p-4">
-                            <CardTitle className={`text-base mb-1 transition-colors line-clamp-2 ${canAccess ? 'group-hover:text-primary' : 'text-muted-foreground'
-                              }`}>
-                              {video.title}
-                            </CardTitle>
-                            <p className="text-sm text-muted-foreground line-clamp-2">{video.description}</p>
-                          </CardContent>
-                        </Card>
-                      </div>
-                    );
-                  })}
-                </div>
               </div>
             </div>
           )}
 
-          {/* 비디오 플레이어 모달 */}
-          <Dialog open={!!selectedVideo} onOpenChange={(open) => !open && setSelectedVideo(null)}>
-            <DialogContent className="max-w-5xl w-full p-0 overflow-hidden">
-              <DialogHeader className="p-4 pb-2">
-                <DialogTitle className="pr-8">{selectedVideo?.title}</DialogTitle>
-              </DialogHeader>
-              <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
-                {selectedVideo && (
-                  <iframe
-                    src={getEmbedUrl(selectedVideo.vimeoUrl)}
-                    className="absolute inset-0 w-full h-full"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    title={selectedVideo.title}
-                  />
-                )}
-              </div>
-            </DialogContent>
-          </Dialog>
+          {/* 비디오 플레이어 모달 - 제거됨, 인라인 플레이어로 대체 */}
 
           {/* 교과서 등록 다이얼로그 */}
           <Dialog open={isBookDialogOpen} onOpenChange={setIsBookDialogOpen}>
@@ -1001,9 +1145,9 @@ const RecapPage = () => {
             </Card>
           </div>
         </div>
-      </main>
+      </main >
       <Footer />
-    </div>
+    </div >
   );
 };
 

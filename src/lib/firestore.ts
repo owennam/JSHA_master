@@ -863,3 +863,58 @@ export const getAllBookRegistrations = async (): Promise<BookRegistration[]> => 
 
   return querySnapshot.docs.map(doc => doc.data() as BookRegistration);
 };
+
+// ============================================
+// 시청 기록 관련 함수들
+// ============================================
+
+// 시청 기록 타입
+export interface WatchedVideo {
+  videoId: string;
+  watchedAt: string;
+}
+
+/**
+ * 영상 시청 완료 표시
+ * recapRegistrants/{uid}/watchedVideos/{videoId} 서브컬렉션에 저장
+ */
+export const markVideoAsWatched = async (uid: string, videoId: string): Promise<void> => {
+  if (!db) {
+    throw new Error('Firestore is not initialized');
+  }
+
+  const watchedRef = doc(db, 'recapRegistrants', uid, 'watchedVideos', videoId);
+  await setDoc(watchedRef, {
+    videoId,
+    watchedAt: new Date().toISOString(),
+  });
+  console.log('✅ Video marked as watched:', videoId, 'by user:', uid);
+};
+
+/**
+ * 사용자의 시청 완료 영상 목록 조회
+ * @returns videoId 배열
+ */
+export const getWatchedVideos = async (uid: string): Promise<string[]> => {
+  if (!db) {
+    throw new Error('Firestore is not initialized');
+  }
+
+  const watchedRef = collection(db, 'recapRegistrants', uid, 'watchedVideos');
+  const querySnapshot = await getDocs(watchedRef);
+
+  return querySnapshot.docs.map(doc => doc.id);
+};
+
+/**
+ * 영상 시청 완료 표시 해제
+ */
+export const unmarkVideoAsWatched = async (uid: string, videoId: string): Promise<void> => {
+  if (!db) {
+    throw new Error('Firestore is not initialized');
+  }
+
+  const watchedRef = doc(db, 'recapRegistrants', uid, 'watchedVideos', videoId);
+  await deleteDoc(watchedRef);
+  console.log('✅ Video unmarked as watched:', videoId, 'by user:', uid);
+};
