@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 // Firestore SDK 대신 API 사용 - 타입만 import
-import { getAllBookRegistrations, type UserStatus, type AccessLevel, type BookRegistration } from "@/lib/firestore";
+import { getAllBookRegistrations, type UserStatus, type AccessLevel, type BookRegistration, deleteRecapRegistrant } from "@/lib/firestore";
 import {
   Users,
   CheckCircle,
@@ -16,6 +16,7 @@ import {
   RotateCcw,
   Plus,
   BookOpen,
+  Trash2,
 } from "lucide-react";
 import {
   Tabs,
@@ -262,6 +263,34 @@ const AdminRecapPage = () => {
     }
   };
 
+  // 영구 삭제
+  const handleDelete = async (uid: string) => {
+    if (!window.confirm("정말로 이 사용자의 등록 정보를 영구 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.")) {
+      return;
+    }
+
+    setUpdatingUid(uid);
+    try {
+      await deleteRecapRegistrant(uid);
+
+      toast({
+        title: "삭제 완료",
+        description: "사용자 등록 정보가 영구 삭제되었습니다.",
+      });
+
+      await loadRegistrants();
+    } catch (error: any) {
+      console.error('Failed to delete registrant:', error);
+      toast({
+        title: "삭제 실패",
+        description: error.message || "삭제 처리에 실패했습니다.",
+        variant: "destructive",
+      });
+    } finally {
+      setUpdatingUid(null);
+    }
+  };
+
   // 접근 등급 업데이트 (approved 상태인 사용자)
   const handleUpdateAccessLevel = async (uid: string, newAccessLevel: AccessLevel) => {
     setUpdatingUid(uid);
@@ -434,6 +463,16 @@ const AdminRecapPage = () => {
                         거부됨
                       </Badge>
                     )}
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-8 px-2 text-xs text-slate-400 hover:text-red-600 hover:bg-red-50 ml-1"
+                      onClick={() => handleDelete(registrant.uid)}
+                      disabled={updatingUid === registrant.uid}
+                      title="영구 삭제"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </Button>
                   </TableCell>
                 </TableRow>
               );

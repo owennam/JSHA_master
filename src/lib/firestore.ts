@@ -291,6 +291,18 @@ export const createRecapRegistrant = async (
 };
 
 /**
+ * 다시보기 등록자 영구 삭제
+ */
+export const deleteRecapRegistrant = async (uid: string): Promise<void> => {
+  if (!db) {
+    throw new Error('Firestore is not initialized');
+  }
+
+  await deleteDoc(doc(db, 'recapRegistrants', uid));
+  console.log('✅ Recap registrant deleted:', uid);
+};
+
+/**
  * Firestore에서 다시보기 등록자 조회
  */
 export const getRecapRegistrant = async (uid: string): Promise<RecapRegistrant | null> => {
