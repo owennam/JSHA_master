@@ -358,20 +358,24 @@ const AdminRecapVideosPage = () => {
               videos.map((video) => {
                 const getAccessLevelLabel = (level: AccessLevel): string => {
                   const labels: Record<AccessLevel, string> = {
+                    'free': '맛보기',
                     'preview': '맛보기',
                     'session1': '세션 1',
+                    'book': '교과서',
                     'graduate': '수료자',
                   };
-                  return labels[level];
+                  return labels[level] || level;
                 };
 
                 const getAccessLevelColor = (level: AccessLevel): string => {
                   const colors: Record<AccessLevel, string> = {
+                    'free': 'bg-gray-100 text-gray-700',
                     'preview': 'bg-gray-100 text-gray-700',
                     'session1': 'bg-blue-100 text-blue-700',
+                    'book': 'bg-purple-100 text-purple-700',
                     'graduate': 'bg-green-100 text-green-700',
                   };
-                  return colors[level];
+                  return colors[level] || 'bg-gray-100 text-gray-700';
                 };
 
                 return (
@@ -494,13 +498,22 @@ const AdminRecapVideosPage = () => {
               <Label htmlFor="module" className="text-right">
                 모듈
               </Label>
-              <Input
-                id="module"
+              <Select
                 value={formData.module}
-                onChange={(e) => setFormData({ ...formData, module: e.target.value })}
-                className="col-span-3"
-                placeholder="세션 1"
-              />
+                onValueChange={(value) => setFormData({ ...formData, module: value })}
+              >
+                <SelectTrigger id="module" className="col-span-3">
+                  <SelectValue placeholder="모듈 선택" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="프리세션">프리세션</SelectItem>
+                  <SelectItem value="세션 1">세션 1</SelectItem>
+                  <SelectItem value="세션 2">세션 2</SelectItem>
+                  <SelectItem value="세션 3">세션 3</SelectItem>
+                  <SelectItem value="세션 4">세션 4</SelectItem>
+                  <SelectItem value="교과서">교과서</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="grid grid-cols-4 items-center gap-4">
@@ -566,6 +579,12 @@ const AdminRecapVideosPage = () => {
                     <div className="flex flex-col items-start">
                       <span className="font-medium">세션 1</span>
                       <span className="text-xs text-muted-foreground">세션 1 참가자 이상</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="book">
+                    <div className="flex flex-col items-start">
+                      <span className="font-medium">교과서</span>
+                      <span className="text-xs text-muted-foreground">교과서 구매자</span>
                     </div>
                   </SelectItem>
                   <SelectItem value="graduate">
