@@ -42,6 +42,8 @@ export interface BookRegistration {
   id: string;
   uid: string;
   email: string;
+  name: string;
+  clinic: string;
   code: string;
   phoneNumber: string;
   accessLevel: AccessLevel;
@@ -240,6 +242,7 @@ export interface RecapRegistrant {
   uid: string;
   email: string;
   name: string;
+  clinic: string; // 의료기관명
   batch?: string; // 수료 기수
   status: UserStatus; // 승인 상태 (pending, approved, rejected)
   accessLevel: AccessLevel; // 영상 접근 등급
@@ -257,6 +260,7 @@ export const createRecapRegistrant = async (
   uid: string,
   email: string,
   name: string,
+  clinic: string,
   batch?: string,
   status: UserStatus = 'pending',
   accessLevel: AccessLevel = 'preview',
@@ -271,6 +275,7 @@ export const createRecapRegistrant = async (
     uid,
     email,
     name,
+    clinic,
     ...(batch !== undefined && { batch }), // undefined일 때는 필드 자체를 제거
     status,
     accessLevel,
@@ -282,7 +287,7 @@ export const createRecapRegistrant = async (
   };
 
   await setDoc(doc(db, 'recapRegistrants', uid), registrant);
-  console.log('✅ Recap registrant created:', uid, 'status:', status, 'accessLevel:', accessLevel);
+  console.log('✅ Recap registrant created:', uid, 'clinic:', clinic, 'status:', status, 'accessLevel:', accessLevel);
 };
 
 /**
@@ -696,12 +701,13 @@ export const addRecapServiceToExistingUser = async (
   uid: string,
   email: string,
   name: string,
+  clinic: string = '미입력',
   batch?: string,
   status: UserStatus = 'pending',
   accessLevel: AccessLevel = 'preview'
 ): Promise<void> => {
   // recapRegistrants 컬렉션에 새로운 문서 생성
-  await createRecapRegistrant(uid, email, name, batch, status, accessLevel);
+  await createRecapRegistrant(uid, email, name, clinic, batch, status, accessLevel);
   console.log('✅ Recap service added to existing user:', uid);
 };
 
@@ -772,6 +778,8 @@ export const getBookCodeRegistrationCount = async (code: string): Promise<number
 export const registerBookCode = async (
   uid: string,
   email: string,
+  name: string,
+  clinic: string,
   code: string,
   phoneNumber: string
 ): Promise<{ success: boolean; error?: string }> => {
@@ -808,6 +816,8 @@ export const registerBookCode = async (
     id: newRegistrationRef.id,
     uid,
     email,
+    name,
+    clinic,
     code: normalizedCode,
     phoneNumber: normalizedPhone,
     accessLevel: codeConfig.accessLevel,

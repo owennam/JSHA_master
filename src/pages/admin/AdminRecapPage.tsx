@@ -310,11 +310,15 @@ const AdminRecapPage = () => {
   };
 
   // 등록자 테이블 컴포넌트
-  const RegistrantTable = ({ registrants, isPending, isApproved }: {
+  const RegistrantTable = ({ registrants, isPending, isApproved, bookRegistrations = [] }: {
     registrants: RecapRegistrant[],
     isPending: boolean,
-    isApproved?: boolean
+    isApproved?: boolean,
+    bookRegistrations?: BookRegistration[]
   }) => {
+    // 교과서 구매자 uid Set 생성
+    const bookPurchaserUids = new Set(bookRegistrations.map(b => b.uid));
+
     if (registrants.length === 0) {
       return (
         <div className="flex flex-col items-center justify-center py-12 border rounded-md bg-white">
@@ -338,87 +342,98 @@ const AdminRecapPage = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {registrants.map((registrant) => (
-              <TableRow key={registrant.uid} className="group hover:bg-muted/5">
-                <TableCell className="font-medium">
-                  <span className="text-sm font-bold text-slate-800">{registrant.name}</span>
-                </TableCell>
-                <TableCell className="text-sm text-slate-600 font-mono">{registrant.email}</TableCell>
-                <TableCell>
-                  {registrant.batch ? (
-                    <Badge variant="outline" className="font-normal text-xs text-slate-600">
-                      {registrant.batch}
-                    </Badge>
-                  ) : (
-                    <span className="text-xs text-muted-foreground">-</span>
-                  )}
-                </TableCell>
-                {isApproved && (
-                  <TableCell>
-                    <Select
-                      value={registrant.accessLevel}
-                      onValueChange={(value) => handleUpdateAccessLevel(registrant.uid, value as AccessLevel)}
-                      disabled={updatingUid === registrant.uid}
-                    >
-                      <SelectTrigger className="h-8 w-[110px] text-xs">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="preview" className="text-xs">맛보기</SelectItem>
-                        <SelectItem value="session1" className="text-xs">세션 1</SelectItem>
-                        <SelectItem value="graduate" className="text-xs">수료자</SelectItem>
-                      </SelectContent>
-                    </Select>
+            {registrants.map((registrant) => {
+              const isBookPurchaser = bookPurchaserUids.has(registrant.uid);
+
+              return (
+                <TableRow key={registrant.uid} className="group hover:bg-muted/5">
+                  <TableCell className="font-medium">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-bold text-slate-800">{registrant.name}</span>
+                      {isBookPurchaser && (
+                        <Badge className="bg-purple-100 text-purple-700 hover:bg-purple-100 text-xs px-1.5 py-0">
+                          📚 교과서
+                        </Badge>
+                      )}
+                    </div>
                   </TableCell>
-                )}
-                <TableCell className="text-xs text-muted-foreground">
-                  {new Date(registrant.createdAt).toLocaleDateString('ko-KR')}
-                </TableCell>
-                <TableCell className="text-right">
-                  {isPending ? (
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        size="sm"
-                        className="h-8 px-3 text-xs bg-green-600 hover:bg-green-700"
-                        onClick={() => openApprovalDialog(registrant)}
-                        disabled={updatingUid === registrant.uid}
-                      >
-                        {updatingUid === registrant.uid ? '처리중...' : '승인'}
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="h-8 px-3 text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
-                        onClick={() => handleReject(registrant.uid)}
-                        disabled={updatingUid === registrant.uid}
-                      >
-                        거부
-                      </Button>
-                    </div>
-                  ) : isApproved ? (
-                    <div className="flex justify-end gap-2">
-                      <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100 shadow-none">
-                        승인완료
+                  <TableCell className="text-sm text-slate-600 font-mono">{registrant.email}</TableCell>
+                  <TableCell>
+                    {registrant.batch ? (
+                      <Badge variant="outline" className="font-normal text-xs text-slate-600">
+                        {registrant.batch}
                       </Badge>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="h-8 px-2 text-xs text-orange-600 hover:text-orange-700 hover:bg-orange-50"
-                        onClick={() => handleRevokeApproval(registrant.uid)}
+                    ) : (
+                      <span className="text-xs text-muted-foreground">-</span>
+                    )}
+                  </TableCell>
+                  {isApproved && (
+                    <TableCell>
+                      <Select
+                        value={registrant.accessLevel}
+                        onValueChange={(value) => handleUpdateAccessLevel(registrant.uid, value as AccessLevel)}
                         disabled={updatingUid === registrant.uid}
-                        title="승인 취소"
                       >
-                        <RotateCcw className="w-3.5 h-3.5" />
-                      </Button>
-                    </div>
-                  ) : (
-                    <Badge className="bg-red-100 text-red-700 hover:bg-red-100 shadow-none">
-                      거부됨
-                    </Badge>
+                        <SelectTrigger className="h-8 w-[110px] text-xs">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="preview" className="text-xs">맛보기</SelectItem>
+                          <SelectItem value="session1" className="text-xs">세션 1</SelectItem>
+                          <SelectItem value="graduate" className="text-xs">수료자</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </TableCell>
                   )}
-                </TableCell>
-              </TableRow>
-            ))}
+                  <TableCell className="text-xs text-muted-foreground">
+                    {new Date(registrant.createdAt).toLocaleDateString('ko-KR')}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {isPending ? (
+                      <div className="flex justify-end gap-2">
+                        <Button
+                          size="sm"
+                          className="h-8 px-3 text-xs bg-green-600 hover:bg-green-700"
+                          onClick={() => openApprovalDialog(registrant)}
+                          disabled={updatingUid === registrant.uid}
+                        >
+                          {updatingUid === registrant.uid ? '처리중...' : '승인'}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-8 px-3 text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
+                          onClick={() => handleReject(registrant.uid)}
+                          disabled={updatingUid === registrant.uid}
+                        >
+                          거부
+                        </Button>
+                      </div>
+                    ) : isApproved ? (
+                      <div className="flex justify-end gap-2">
+                        <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100 shadow-none">
+                          승인완료
+                        </Badge>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-8 px-2 text-xs text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+                          onClick={() => handleRevokeApproval(registrant.uid)}
+                          disabled={updatingUid === registrant.uid}
+                          title="승인 취소"
+                        >
+                          <RotateCcw className="w-3.5 h-3.5" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <Badge className="bg-red-100 text-red-700 hover:bg-red-100 shadow-none">
+                        거부됨
+                      </Badge>
+                    )}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </div>
@@ -503,15 +518,15 @@ const AdminRecapPage = () => {
         </TabsList>
 
         <TabsContent value="pending" className="mt-0">
-          <RegistrantTable registrants={pendingRegistrants} isPending={true} isApproved={false} />
+          <RegistrantTable registrants={pendingRegistrants} isPending={true} isApproved={false} bookRegistrations={bookRegistrants} />
         </TabsContent>
 
         <TabsContent value="approved" className="mt-0">
-          <RegistrantTable registrants={approvedRegistrants} isPending={false} isApproved={true} />
+          <RegistrantTable registrants={approvedRegistrants} isPending={false} isApproved={true} bookRegistrations={bookRegistrants} />
         </TabsContent>
 
         <TabsContent value="rejected" className="mt-0">
-          <RegistrantTable registrants={rejectedRegistrants} isPending={false} isApproved={false} />
+          <RegistrantTable registrants={rejectedRegistrants} isPending={false} isApproved={false} bookRegistrations={bookRegistrants} />
         </TabsContent>
 
         <TabsContent value="books" className="mt-0">
@@ -519,27 +534,29 @@ const AdminRecapPage = () => {
             <Table>
               <TableHeader className="bg-muted/50">
                 <TableRow>
-                  <TableHead className="w-[180px]">사용자 (UID)</TableHead>
+                  <TableHead className="w-[120px]">이름</TableHead>
+                  <TableHead>의료기관</TableHead>
                   <TableHead>이메일</TableHead>
-                  <TableHead>교과서 코드</TableHead>
-                  <TableHead>휴대폰 번호</TableHead>
-                  <TableHead className="w-[150px]">등록일</TableHead>
+                  <TableHead className="w-[180px]">교과서 코드</TableHead>
+                  <TableHead className="w-[120px]">휴대폰 번호</TableHead>
+                  <TableHead className="w-[140px]">등록일</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {bookRegistrants.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                    <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
                       등록된 교과서 내역이 없습니다.
                     </TableCell>
                   </TableRow>
                 ) : (
                   bookRegistrants.map((book) => (
                     <TableRow key={book.id} className="hover:bg-muted/5">
-                      <TableCell className="font-mono text-xs">{book.uid.slice(0, 8)}...</TableCell>
-                      <TableCell className="text-sm">{book.email}</TableCell>
+                      <TableCell className="font-bold text-slate-800">{book.name || '-'}</TableCell>
+                      <TableCell className="text-sm text-slate-600">{book.clinic || '-'}</TableCell>
+                      <TableCell className="text-sm font-mono">{book.email}</TableCell>
                       <TableCell className="font-mono font-bold text-purple-700">{book.code}</TableCell>
-                      <TableCell className="font-mono">{book.phoneNumber}</TableCell>
+                      <TableCell className="font-mono text-sm">{book.phoneNumber}</TableCell>
                       <TableCell className="text-xs text-muted-foreground">
                         {new Date(book.registeredAt).toLocaleDateString('ko-KR')} {new Date(book.registeredAt).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
                       </TableCell>

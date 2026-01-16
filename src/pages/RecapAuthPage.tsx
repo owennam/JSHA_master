@@ -56,6 +56,7 @@ const RecapAuthPage = () => {
     const [signupPassword, setSignupPassword] = useState("");
     const [signupPasswordConfirm, setSignupPasswordConfirm] = useState("");
     const [signupName, setSignupName] = useState("");
+    const [signupClinic, setSignupClinic] = useState("");
     const [signupBatch, setSignupBatch] = useState("");
     const [signupError, setSignupError] = useState("");
     const [signupLoading, setSignupLoading] = useState(false);
@@ -115,8 +116,9 @@ const RecapAuthPage = () => {
                 await createRecapRegistrant(
                     loggedInUser.uid,
                     loggedInUser.email || loginEmail,
-                    loggedInUser.email?.split('@')[0] || '이름미입력' // 이름이 없으면 이메일 앞부분 사용
-                    // batch는 전달하지 않음 (기본값 undefined가 처리됨)
+                    loggedInUser.email?.split('@')[0] || '이름미입력', // 이름이 없으면 이메일 앞부분 사용
+                    '미입력' // 기존 로그인 사용자는 의료기관 정보 없음
+                    // 나머지 파라미터는 기본값 사용
                 );
                 console.log('✅ Auto-created recapRegistrant for existing Auth user');
             }
@@ -173,8 +175,8 @@ const RecapAuthPage = () => {
         setSignupLoading(true);
 
         // 입력 검증
-        if (!signupEmail || !signupPassword || !signupPasswordConfirm || !signupName) {
-            setSignupError("이름, 이메일, 비밀번호는 필수입니다.");
+        if (!signupEmail || !signupPassword || !signupPasswordConfirm || !signupName || !signupClinic) {
+            setSignupError("이름, 의료기관, 이메일, 비밀번호는 필수입니다.");
             setSignupLoading(false);
             return;
         }
@@ -217,25 +219,33 @@ const RecapAuthPage = () => {
             const userCredential = await createUserWithEmailAndPassword(auth!, signupEmail, signupPassword);
             const newUser = userCredential.user;
 
-            // 2. Firestore에 다시보기 등록자 저장 (pending 상태)
+            // 2. Firestore에 다시보기 등록자 저장
+            // 교과서 코드가 유효하면 바로 approved + book 등급으로 가입
+            const hasValidBookCode = bookCode && validateBookCode(bookCode);
+            const initialStatus = hasValidBookCode ? 'approved' : 'pending';
+            const initialAccessLevel = hasValidBookCode ? 'book' : 'preview';
+
             try {
                 await createRecapRegistrant(
                     newUser.uid,
                     signupEmail,
                     signupName,
+                    signupClinic,
                     signupBatch || undefined, // 빈 문자열일 경우 undefined로 처리
-                    'pending',
-                    'preview',
+                    initialStatus,
+                    initialAccessLevel,
                     privacyAgreed,
                     marketingAgreed
                 );
-                console.log('✅ Firestore registration successful for:', newUser.uid);
+                console.log('✅ Firestore registration successful for:', newUser.uid, 'clinic:', signupClinic, 'status:', initialStatus);
 
                 // 3. 교과서 코드 등록 (입력된 경우)
                 if (bookCode && phoneNumber) {
                     const bookResult = await registerBookCode(
                         newUser.uid,
                         signupEmail,
+                        signupName,
+                        signupClinic,
                         bookCode,
                         phoneNumber
                     );
@@ -462,6 +472,21 @@ const RecapAuthPage = () => {
                                                     onChange={(e) => setSignupName(e.target.value)}
                                                     disabled={signupLoading}
                                                 />
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <Label htmlFor="signupClinic">소속 의료기관 *</Label>
+                                                <Input
+                                                    id="signupClinic"
+                                                    type="text"
+                                                    placeholder="예: 서울대학교병원"
+                                                    value={signupClinic}
+                                                    onChange={(e) => setSignupClinic(e.target.value)}
+                                                    disabled={signupLoading}
+                                                />
+                                                <p className="text-xs text-muted-foreground">
+                                                    🏥 본 서비스는 의료인 전용입니다
+                                                </p>
                                             </div>
 
                                             <div className="space-y-2">
