@@ -28,7 +28,7 @@ import {
 } from "firebase/auth";
 import { AlertCircle, Loader2, Video, Info } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { createRecapRegistrant, checkExistingServices, addRecapServiceToExistingUser, getRecapRegistrant, registerBookCode, validateBookCode } from "@/lib/firestore";
+import { createRecapRegistrant, checkExistingServices, addRecapServiceToExistingUser, getRecapRegistrant, registerBookCode, validateBookCode, isPhoneNumberRegistered } from "@/lib/firestore";
 import { Checkbox } from "@/components/ui/checkbox";
 import { PrivacyPolicyModal } from "@/components/common/PrivacyPolicyModal";
 
@@ -209,6 +209,13 @@ const RecapAuthPage = () => {
             }
             if (!phoneNumber || phoneNumber.replace(/-/g, '').length < 10) {
                 setSignupError("교과서 코드 등록 시 휴대폰 번호를 정확히 입력해주세요.");
+                setSignupLoading(false);
+                return;
+            }
+            // 휴대폰 번호 중복 체크 (Firebase Auth 계정 생성 전에 검증)
+            const isPhoneUsed = await isPhoneNumberRegistered(phoneNumber);
+            if (isPhoneUsed) {
+                setSignupError("이미 등록된 휴대폰 번호입니다. 휴대폰 번호당 1회만 등록 가능합니다.");
                 setSignupLoading(false);
                 return;
             }
