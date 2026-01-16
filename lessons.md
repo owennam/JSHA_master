@@ -1,6 +1,6 @@
 # JSHA 프로젝트 개발 회고
 
-> 📅 최종 업데이트: 2026-01-13
+> 📅 최종 업데이트: 2026-01-16
 
 ---
 
@@ -214,7 +214,69 @@ UI/UX 개선 작업 시 `website-builder-extracted` 폴더의 스킬을 활용�
 - [ ] 재생 진행률 표시 (Vimeo API 연동 필요 - 연기)
 - [ ] 마지막 시청 위치 기억 (연기)
 
-### Phase 3: 성능 최적화 (예정)
+### Phase 3: 레이아웃 리디자인 ✅ (2026-01-16 완료)
+- [x] **사이드바 + 인라인 플레이어** 레이아웃 (카드 그리드 → 2컬럼)
+- [x] **아코디언 강의 목록** (모듈별 그룹화)
+- [x] **시청 완료 체크** (체크박스 UI + Firestore 저장)
+- [x] **필터 기능** (전체 / 시청 가능 / 시청 완료)
+- [x] **Vimeo Player API** 연동 - 영상 끝까지 시청 시 자동 완료 체크
+- [x] Admin 비디오 관리 페이지: 교과서(book) 접근 등급 추가
+- [x] 모듈 Input → Select 드롭다운 변경
+
+### Phase 4: 성능 최적화 (예정)
 - [ ] 비디오 목록 페이지네이션 (50개 이상 시)
 - [ ] 이미지 WebP 변환 (커스텀 이미지에만 필요)
+
+---
+
+## 🚨 트러블슈팅 추가 (2026-01-16)
+
+### 7. Firestore 서브컬렉션 권한 오류
+
+| 오류 | 원인 | 해결 |
+|------|------|------|
+| `PERMISSION_DENIED` (시청 체크) | `watchedVideos` 서브컬렉션 규칙 누락 | `firestore.rules`에 규칙 추가 |
+| `PERMISSION_DENIED` (교과서 등록) | `bookRegistrations` 컬렉션 규칙 누락 | `firestore.rules`에 규칙 추가 |
+
+**교훈**: 새 컬렉션/서브컬렉션 추가 시 **반드시 Firestore 규칙 추가 + 배포** 필요!
+
+```javascript
+// watchedVideos 서브컬렉션
+match /recapRegistrants/{userId}/watchedVideos/{videoId} {
+  allow read, write: if isOwner(userId);
+}
+
+// bookRegistrations 컬렉션
+match /bookRegistrations/{registrationId} {
+  allow create: if isSignedIn();
+  allow read: if isSignedIn();
+}
+```
+
+### 8. 백엔드 서버 미실행
+
+| 증상 | 원인 | 해결 |
+|------|------|------|
+| Admin 로그인 `Failed to fetch` | 포트 3001 서버 미실행 | `cd server && npm run dev` |
+
+### 9. Vimeo Player API 연동
+
+| 패키지 | 용도 |
+|--------|------|
+| `@vimeo/player` | iframe 영상 이벤트 감지 (ended, progress 등) |
+
+```typescript
+const player = new Player(iframeRef.current);
+player.on('ended', () => { /* 시청 완료 처리 */ });
+```
+
+---
+
+## 🔑 교과서 인증 코드
+
+```
+JSHA-MASTER-2026-7K3M
+```
+- 등급: book (교과서 구매자)
+- 최대 등록: 500명
 

@@ -68,6 +68,16 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // ============================================
+    // 교과서 등록 컬렉션 (bookRegistrations)
+    // ============================================
+    match /bookRegistrations/{registrationId} {
+      // 로그인된 사용자는 생성 가능
+      allow create: if isSignedIn();
+      // 읽기는 로그인된 사용자만 가능
+      allow read: if isSignedIn();
+    }
+
     // 기타 모든 문서는 기본적으로 접근 불가
     match /{document=**} {
       allow read, write: if false;
