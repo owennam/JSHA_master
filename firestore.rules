@@ -74,8 +74,8 @@ service cloud.firestore {
     match /bookRegistrations/{registrationId} {
       // 로그인된 사용자는 생성 가능
       allow create: if isSignedIn();
-      // 읽기는 로그인된 사용자만 가능
-      allow read: if isSignedIn();
+      // 읽기는 누구나 가능 (회원가입 시 휴대폰 중복 체크용)
+      allow read: if true;
     }
 
     // 기타 모든 문서는 기본적으로 접근 불가
