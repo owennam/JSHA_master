@@ -779,7 +779,7 @@ const RecapPage = () => {
               <p className="text-sm text-muted-foreground mt-2">영상이 추가되면 이메일로 알려드리겠습니다.</p>
             </div>
           ) : (
-            <div className="flex gap-6">
+            <div className="flex flex-col lg:flex-row gap-6">
               {/* 사이드바 - 데스크톱 (강의 목록) */}
               <aside className="hidden lg:block w-72 flex-shrink-0">
                 <div className="sticky top-32 bg-white rounded-xl border shadow-sm overflow-hidden max-h-[calc(100vh-160px)] flex flex-col">
@@ -1011,11 +1011,11 @@ const RecapPage = () => {
                     {/* 비디오 정보 */}
                     <Card>
                       <CardContent className="p-4">
-                        <div className="flex items-start justify-between gap-4">
+                        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                           <div className="flex-1">
                             <h2 className="text-xl font-bold mb-2">{selectedVideo.title}</h2>
                             <p className="text-muted-foreground">{selectedVideo.description}</p>
-                            <div className="flex items-center gap-2 mt-3">
+                            <div className="flex items-center gap-2 mt-3 flex-wrap">
                               <Badge variant="outline">{selectedVideo.module}</Badge>
                               <Badge className={`${getAccessLevelColor(selectedVideo.accessLevel)}`}>
                                 {getAccessLevelLabel(selectedVideo.accessLevel)}
