@@ -931,4 +931,81 @@ router.delete('/recap-videos/:id', authMiddleware, async (req, res) => {
     }
 });
 
+// 사용자 영구 삭제 (Auth + Firestore)
+router.delete('/users/:uid', authMiddleware, async (req, res) => {
+    if (!db) {
+        return res.status(503).json({
+            success: false,
+            message: 'Firebase Admin is not initialized'
+        });
+    }
+
+    const { uid } = req.params;
+
+    try {
+        const { admin } = await import('../firebaseAdmin.js');
+        const results = {
+            auth: false,
+            recapRegistrant: false,
+            user: false,
+            bookRegistrations: 0
+        };
+
+        // 1. Firebase Auth 삭제
+        try {
+            await admin.auth().deleteUser(uid);
+            results.auth = true;
+        } catch (authError) {
+            console.warn(`Failed to delete user from Auth (${uid}):`, authError.message);
+            // Auth에 없어도 Firestore에는 있을 수 있으므로 계속 진행
+            if (authError.code === 'auth/user-not-found') {
+                results.auth = true;
+            }
+        }
+
+        // 2. Firestore recapRegistrants 삭제
+        try {
+            await db.collection('recapRegistrants').doc(uid).delete();
+            results.recapRegistrant = true;
+        } catch (dbError) {
+            console.error(`Failed to delete recapRegistrant (${uid}):`, dbError);
+        }
+
+        // 3. Firestore users 컬렉션 삭제 (구버전 호환)
+        try {
+            await db.collection('users').doc(uid).delete();
+            results.user = true;
+        } catch (dbError) {
+            console.error(`Failed to delete user doc (${uid}):`, dbError);
+        }
+
+        // 4. Firestore bookRegistrations 삭제 (해당 UID로 등록된 모든 문서)
+        try {
+            const bookSnapshot = await db.collection('bookRegistrations').where('uid', '==', uid).get();
+            const batch = db.batch();
+            bookSnapshot.forEach(doc => {
+                batch.delete(doc.ref);
+            });
+            await batch.commit();
+            results.bookRegistrations = bookSnapshot.size;
+        } catch (dbError) {
+            console.error(`Failed to delete bookRegistrations (${uid}):`, dbError);
+        }
+
+        res.json({
+            success: true,
+            message: `User ${uid} permanently deleted`,
+            details: results
+        });
+
+    } catch (error) {
+        console.error('Failed to eliminate user:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to eliminate user',
+            error: error.message
+        });
+    }
+});
+
 export default router;

@@ -271,11 +271,18 @@ const AdminRecapPage = () => {
 
     setUpdatingUid(uid);
     try {
-      await deleteRecapRegistrant(uid);
+      // 서버 API를 호출하여 Auth 계정과 Firestore 데이터 모두 삭제
+      const response = await fetch(`${getApiUrl()}/api/admin/users/${uid}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders()
+      });
+
+      const result = await response.json();
+      if (!result.success) throw new Error(result.message || 'Failed to delete user');
 
       toast({
-        title: "삭제 완료",
-        description: "사용자 등록 정보가 영구 삭제되었습니다.",
+        title: "영구 삭제 완료",
+        description: "사용자 계정과 등록 정보가 모두 삭제되었습니다.",
       });
 
       await loadRegistrants();
