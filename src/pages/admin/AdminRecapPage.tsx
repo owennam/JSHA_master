@@ -379,6 +379,7 @@ const AdminRecapPage = () => {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="preview" className="text-xs">맛보기</SelectItem>
+                          <SelectItem value="book" className="text-xs">교과서</SelectItem>
                           <SelectItem value="session1" className="text-xs">세션 1</SelectItem>
                           <SelectItem value="graduate" className="text-xs">수료자</SelectItem>
                         </SelectContent>
